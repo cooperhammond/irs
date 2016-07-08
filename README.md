@@ -4,10 +4,11 @@ Downloads or streams media from the name of the song / album / movie / tv-show t
 
 ### Dependencies
 
-First, acutally install python and pip:
+First, actually install python and pip:
  - To install python3 and `pip` for Ubuntu run this command:
+
  ```bash
-$ sudo apt-get install python3 python3-pip
+ $ sudo apt-get install python3 python3-pip
  ```
  - For Windows follow [this](http://www.howtogeek.com/197947/how-to-install-python-on-windows/) guide to install python (remember to install ~v3.4), and [this](https://pip.pypa.io/en/latest/installing/) guide to install `pip`.
  - For OSX follow [this](http://docs.python-guide.org/en/latest/starting/install/osx/) guide that goes through python and `pip`. Also, remember to install ~v3.4.
@@ -47,3 +48,22 @@ When downloading music, the system will fill out the specific meta-data so that 
  - Tracknumber.*
 
 <sup>\* Album art is slightly buggy, and tracknumber only works when downloading complete album.<sup>
+
+### Usage
+```bash
+$ IRS (stream | download) movie <movie-name>
+$ IRS (stream | download) tv <tv-show> <episode>
+$ IRS (stream | download) song <song-name> by <artist>
+$ IRS (stream | download) album <album-name> by <artist>
+```
+
+##### Examples
+```bash
+$ IRS stream movie Fight Club
+$ IRS download album A Night At The Opera by Queen
+$ IRS stream song Where Is My Mind by The Pixies
+$ IRS download tv mr.robot s01e01
+$ IRS stream album A Day At The Races by Queen
+```
+### Disclaimer
+Copyrighted content may be illegal to stream and/or download in your country.

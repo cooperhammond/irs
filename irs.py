@@ -9,24 +9,6 @@ from mutagen.mp3 import MP3
 from bs4 import BeautifulSoup
 import youtube_dl, mutagen
 
-"""def test_system():
-    try:
-            # Put import stuff here
-    except Exception as e:
-        e = str(e).split(" ")[-1]
-        print ("Please install the module %s with:\npip3 install %s")
-        exit(0)
-    if subprocess.check_output("mpv --version", shell=True) != 0:
-        print ("mpv is not installed, please install it with:\nsudo apt-get install mpv")
-    if subprocess.check_output("peerflix --version", shell=True) != 0:
-        print ("peerflix is not installed, install it with:\nsudo apt-get install peerflix")
-    if "Rakshasa" in subprocess.check_output("rtorrent -h", shell=True):
-        print ("rtorrent is not installed, install it with:\nsudo apt-get install rtorrent")
-
-def quiet_output(string):
-    output = subprocess.check_output(string, shell=True)
-"""
-
 def download_album_art(album, band):
     search = "%s %s" % (album, band)
     url = "http://www.seekacover.com/cd/" + urllib.parse.quote_plus(search)
@@ -210,56 +192,57 @@ def get_torrent_url(search_url):
     return torrent_url
 
 def main():
-    #test_system()
-    #try:
-    i = 0
-    args = sys.argv
-    del args[i]
-    what_to_do = args[i]
-    del args[i]
+    try:
+        i = 0
+        args = sys.argv
+        del args[i]
+        what_to_do = args[i]
+        del args[i]
 
-    if what_to_do not in ("download", "stream"): raise Exception
+        if what_to_do not in ("download", "stream"): raise Exception
 
-    media = args[i]
-    del args[i]
+        media = args[i]
+        del args[i]
 
-    if media == "song":
-        song = (" ".join(args)).split(" by ")
-        if what_to_do == "stream":
-            command = 'mpv "%s" --no-video' % find_mp3(song[0], song[1])
-            os.system(command)
-        elif what_to_do == "download":
-            rip_mp3(song[0], song[1], "", "")
+        if media == "song":
+            song = (" ".join(args)).split(" by ")
+            if what_to_do == "stream":
+                command = 'mpv "%s" --no-video' % find_mp3(song[0], song[1])
+                os.system(command)
+            elif what_to_do == "download":
+                rip_mp3(song[0], song[1], "", "")
 
-    elif media == "album":
-        album_name = (" ".join(args)).split(" by ")
-        get_album(album_name[0], album_name[1], what_to_do)
+        elif media == "album":
+            album_name = (" ".join(args)).split(" by ")
+            get_album(album_name[0], album_name[1], what_to_do)
 
-    elif media == "movie":
-        query = 'https://kat.cr/usearch/' + urllib.parse.quote_plus((" ".join(args) + " category:movies"))
-        if what_to_do == "stream":
-            torrent_url = get_torrent_url(query)
-            os.system('peerflix "%s" -a --vlc' % torrent_url)
-            exit(0)
-        elif what_to_do == "download":
-            os.system("rtorrent '%s'" % get_torrent_url(query))
-            exit(0)
+        elif media == "movie":
+            query = 'https://kat.cr/usearch/' + urllib.parse.quote_plus((" ".join(args) + " category:movies"))
+            if what_to_do == "stream":
+                torrent_url = get_torrent_url(query)
+                os.system('peerflix "%s" -a --mpv' % torrent_url)
+                exit(0)
+            elif what_to_do == "download":
+                os.system("rtorrent '%s'" % get_torrent_url(query))
+                exit(0)
 
-    elif media == "tv":
-        query = 'https://kat.cr/usearch/' + urllib.parse.quote_plus((" ".join(args) + " category:tv"))
-        if what_to_do == "stream":
-            torrent_url = get_torrent_url(query)
-            os.system('peerflix "%s" -a --vlc' % torrent_url)
-            exit(0)
-        elif what_to_do == "download":
-            os.system("rtorrent '%s'" % get_torrent_url(query))
-            exit(0)
-    else:
-        raise Exception
-
-    """except Exception as e:
-        print (e)
-        invalid_format()"""
+        elif media == "tv":
+            query = 'https://kat.cr/usearch/' + urllib.parse.quote_plus((" ".join(args) + " category:tv"))
+            if what_to_do == "stream":
+                torrent_url = get_torrent_url(query)
+                os.system('peerflix "%s" -a --vlc' % torrent_url)
+                exit(0)
+            elif what_to_do == "download":
+                os.system("rtorrent '%s'" % get_torrent_url(query))
+                exit(0)
+        else:
+            raise Exception
+    except Exception as e:
+        if str(e) == "list index out of range":
+            print ("%s Invalid format\n" % output("e"))
+            invalid_format()
+        else:
+            print ("%s Something went wrong:\n" % output("e") + e + "\n")
 
 def columns(columns):
     for row in columns:
@@ -267,30 +250,16 @@ def columns(columns):
 def invalid_format():
     # I feel like there should be an easier way to write out help for command-line interfaces ...
     print ("Usage:")
-    print ("  UPS [what-to-do] [type-of-media] <movie-name>")
-    print ("  UPS [what-to-do] [type-of-media] <tv-show> [episode]")
-    print ("  UPS [what-to-do] [type-of-media] <album> by <artist>")
-    print ("  UPS [what-to-do] [type-of-media] <song> by <artist>\n")
-    print ("what-to-do:")
-    d_or_s = [["download", "will download the specified media"],
-    ["stream", "will stream the specified media"]]
-    columns(d_or_s)
-    print ("type-of-media:")
-    media = [["song", "finds a song, needs the artist as well"],
-    ["album", "finds all songs on the album, needs the artist as well"],
-    ["movie", "will find a movie"],
-    ["tv", "will find a tv show, needs to have the episode specified"]]
-    columns(media)
-    print ("tv show episode should be formatted as:")
-    episode = [["s01e01", "s12e01"], ["s03e05", "s05e17"], ["... ", "... "]]
-    columns(episode)
-    print ("examples:")
-    examples = [["$ UPS stream movie Fight Club"],
-    ["$ UPS download album Jazz by Queen"],
-    ["$ UPS stream song Where Is My Mind by The Pixies"],
-    ["$ UPS download tv mr robot s01e01"]]
-    for row in examples:
-        print("\t {: >15}".format(*row))
+    print ("""    IRS (stream | download) movie <movie-name>
+    IRS (stream | download) tv <tv-show> <episode>
+    IRS (stream | download) song <song-name> by <artist>
+    IRS (stream | download) album <album-name> by <artist>""")
+    print ("Examples:")
+    print ("""    IRS stream movie Fight Club
+    IRS download album A Night At The Opera by Queen
+    IRS stream song Where Is My Mind by The Pixies
+    IRS download tv mr.robot s01e01
+    IRS stream album A Day At The Races by Queen""")
 
 if __name__ == '__main__':
     main()
