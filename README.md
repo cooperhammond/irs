@@ -21,14 +21,14 @@ There are some more external command-line programs that are essential to movies,
  - rTorrent: [Windows](https://rtwi.jmk.hu/wiki/rTorrentOnWindows), [OSX](http://macappstore.org/rtorrent/), Ubuntu: `sudo apt-get install rtorrent`
  - mpv: https://mpv.io/installation/
  - Peerflix:
-   - Windows: follow [this](http://blog.teamtreehouse.com/install-node-js-npm-windows) guide to install npm:
+   - Windows: follow [this](http://blog.teamtreehouse.com/install-node-js-npm-windows) guide to install npm and then run this command:
    ```bash
    $ npm install -g peerflix
    ```
    - OSX: Same as Windows, except follow [this](http://blog.teamtreehouse.com/install-node-js-npm-mac) guide.
    - Ubuntu: Again, the same, only follow [this](http://blog.teamtreehouse.com/install-node-js-npm-linux) guide instead.
 
-And that should be it!
+And that should be it! Eventually it'll be put up on pip, to make it much easier to install.
 
 ### Overview
 
