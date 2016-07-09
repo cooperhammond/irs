@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import os, sys, time, re, select, requests, subprocess
 import urllib.request, urllib.parse
 from termcolor import colored
@@ -42,7 +43,7 @@ def embed_mp3(art_location, song_path):
 
 def find_mp3(song, author):
     print ("'%s' by '%s'\n" % (song, author))
-    query_string = urllib.parse.quote_plus({"search_query" : ("%s %s lyrics" % (song, author))})
+    query_string = urllib.parse.urlencode({"search_query" : ("%s %s lyrics" % (song, author))})
     html_content = urllib.request.urlopen("http://www.youtube.com/results?" + query_string)
     search_results = re.findall(r'href=\"\/watch\?v=(.{11})', html_content.read().decode())
     audio_url = ("http://www.youtube.com/watch?v=" + search_results[0])
@@ -125,7 +126,7 @@ def output(string):
     elif string == "g":
         return colored("[+]", "green")
     elif string == "s":
-        return colored("[*]", "yellow")
+        return colored("[*]", "blue")
 
 def visible(element):
     if element.parent.name in ['style', 'script', '[document]', 'head', 'title']:
@@ -199,7 +200,7 @@ def main():
         what_to_do = args[i]
         del args[i]
 
-        if what_to_do not in ("download", "stream"): raise Exception
+        if what_to_do not in ("download", "stream"): raise Exception("no what-to-do")
 
         media = args[i]
         del args[i]
@@ -220,7 +221,7 @@ def main():
             query = 'https://kat.cr/usearch/' + urllib.parse.quote_plus((" ".join(args) + " category:movies"))
             if what_to_do == "stream":
                 torrent_url = get_torrent_url(query)
-                os.system('peerflix "%s" -a --mpv' % torrent_url)
+                os.system('peerflix "%s" -a -d --vlc' % torrent_url)
                 exit(0)
             elif what_to_do == "download":
                 os.system("rtorrent '%s'" % get_torrent_url(query))
@@ -230,19 +231,19 @@ def main():
             query = 'https://kat.cr/usearch/' + urllib.parse.quote_plus((" ".join(args) + " category:tv"))
             if what_to_do == "stream":
                 torrent_url = get_torrent_url(query)
-                os.system('peerflix "%s" -a --vlc' % torrent_url)
+                os.system('peerflix "%s" -a -d --vlc' % torrent_url)
                 exit(0)
             elif what_to_do == "download":
                 os.system("rtorrent '%s'" % get_torrent_url(query))
                 exit(0)
         else:
-            raise Exception
+            raise Exception("no media")
     except Exception as e:
-        if str(e) == "list index out of range":
-            print ("%s Invalid format\n" % output("e"))
+        if str(e) in ("list index out of range", "no what-to-do", "no media"):
+            print ("%s Either you used an invalid format, or a special character.\n" % output("e"))
             invalid_format()
         else:
-            print ("%s Something went wrong:\n" % output("e") + e + "\n")
+            print ("%s Something went wrong:\n" % output("e") + repr(e) + "\n")
 
 def columns(columns):
     for row in columns:
@@ -250,16 +251,16 @@ def columns(columns):
 def invalid_format():
     # I feel like there should be an easier way to write out help for command-line interfaces ...
     print ("Usage:")
-    print ("""    IRS (stream | download) movie <movie-name>
-    IRS (stream | download) tv <tv-show> <episode>
-    IRS (stream | download) song <song-name> by <artist>
-    IRS (stream | download) album <album-name> by <artist>""")
+    print ("""    irs (stream | download) movie <movie-name>
+    irs (stream | download) tv <tv-show> <episode>
+    irs (stream | download) song <song-name> by <artist>
+    irs (stream | download) album <album-name> by <artist>""")
     print ("Examples:")
-    print ("""    IRS stream movie Fight Club
-    IRS download album A Night At The Opera by Queen
-    IRS stream song Where Is My Mind by The Pixies
-    IRS download tv mr.robot s01e01
-    IRS stream album A Day At The Races by Queen""")
+    print ("""    irs stream movie Fight Club
+    irs download album A Night At The Opera by Queen
+    irs stream song Where Is My Mind by The Pixies
+    irs download tv mr.robot s01e01
+    irs stream album A Day At The Races by Queen""")
 
 if __name__ == '__main__':
     main()

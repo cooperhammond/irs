@@ -15,11 +15,14 @@ First, actually install python and pip:
 
 Then install `requirements.txt` from the repository:
 ```bash
-python install -r requirements.txt
+$ python install -r requirements.txt
 ```
 
 There are some more external command-line programs that are essential to movies, tv-shows, and streaming:
- - rTorrent: [Windows](https://rtwi.jmk.hu/wiki/rTorrentOnWindows), [OSX](http://macappstore.org/rtorrent/), Ubuntu: `sudo apt-get install rtorrent`
+ - rTorrent: [Windows](https://rtwi.jmk.hu/wiki/rTorrentOnWindows), [OSX](http://macappstore.org/rtorrent/), Ubuntu:
+ ```bash
+ $ sudo apt-get install rtorrent
+ ```
  - mpv: https://mpv.io/installation/
  - Peerflix:
    - Windows: follow [this](http://blog.teamtreehouse.com/install-node-js-npm-windows) guide to install npm and then run this command:
@@ -28,8 +31,14 @@ There are some more external command-line programs that are essential to movies,
    ```
    - OSX: Same as Windows, except follow [this](http://blog.teamtreehouse.com/install-node-js-npm-mac) guide.
    - Ubuntu: Again, the same, only follow [this](http://blog.teamtreehouse.com/install-node-js-npm-linux) guide instead.
+ - VLC: Just download and install it [here](http://www.videolan.org/vlc/index.html).
 
-And that should be it! Eventually it'll be put up on pip, to make it much easier to install.
+### Install
+
+```bash
+$ git clone https://github.com/kepoorhampond/IngeniousRedistributionSystem.git
+```
+And that should be it! Eventually it'll be put up on pip, to make it much, much easier to install.
 
 ### Overview
 
@@ -48,6 +57,8 @@ When downloading music, the system will fill out the specific meta-data so that 
  - Tracknumber.*
 
 <sup>\* Album art is slightly buggy, and tracknumber only works when downloading complete album.<sup>
+
+On a personal judgement, we would judge that the complete meta-data parsing works ~90% of the time.
 
 ### Usage
 ```bash
