@@ -38,7 +38,7 @@ There are some more external command-line programs that are essential to movies,
 ```bash
 $ git clone https://github.com/kepoorhampond/IngeniousRedistributionSystem.git
 ```
-And that should be it! Eventually it'll be put up on pip, to make it much, much easier to install.
+And that should be it! Eventually it'll be put up on `pip`, to make it much, much easier to install.
 
 ### Overview
 
