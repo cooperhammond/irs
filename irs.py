@@ -182,14 +182,26 @@ def get_album(album_name, artist, what_to_do):
             os.system(command)
 
 
-def get_torrent_url(search_url):
-    search_request_response = requests.get(search_url, verify=False)
+def get_torrent_url(args, category):
+    search_url = 'https://kat.cr/usearch/' + urllib.parse.quote_plus((" ".join(args) + " category:" + category))
+    print (search_url)
+    #time.sleep(5)
+    search_request_response = requests.get(search_url, verify=True)
     soup = BeautifulSoup(search_request_response.text, 'html.parser')
-    movie_page = 'https://kat.cr' + (soup.find_all("a", class_="cellMainLink")[0].get('href'))
 
-    search_url = requests.get(movie_page, verify=False)
-    soup = BeautifulSoup(search_url.text, 'html.parser')
-    torrent_url = 'https:' + soup.find_all('a', class_='siteButton')[0].get('href')
+    choice = False
+    i = 0
+    while choice == False:
+        movie_page = soup.find_all("a", class_="cellMainLink")[i]
+        print (movie_page.string)
+        a = input("%s Is this torrent what you want? Y/n " % output("q"))
+        if a.lower() == 'y':
+            search_url = requests.get('https://kat.cr' + movie_page.get('href'), verify=True)
+            soup = BeautifulSoup(search_url.text, 'html.parser')
+            torrent_url = 'https:' + soup.find_all('a', class_='siteButton')[0].get('href')
+            choice = True
+        elif a == 'n':
+            i += 1
     return torrent_url
 
 def main():
@@ -218,23 +230,19 @@ def main():
             get_album(album_name[0], album_name[1], what_to_do)
 
         elif media == "movie":
-            query = 'https://kat.cr/usearch/' + urllib.parse.quote_plus((" ".join(args) + " category:movies"))
             if what_to_do == "stream":
-                torrent_url = get_torrent_url(query)
-                os.system('peerflix "%s" -a -d --vlc' % torrent_url)
+                os.system('peerflix "%s" -a -d --vlc' % get_torrent_url(args, 'movie'))
                 exit(0)
             elif what_to_do == "download":
-                os.system("rtorrent '%s'" % get_torrent_url(query))
+                os.system("rtorrent '%s'" % get_torrent_url(args, 'movie'))
                 exit(0)
 
         elif media == "tv":
-            query = 'https://kat.cr/usearch/' + urllib.parse.quote_plus((" ".join(args) + " category:tv"))
             if what_to_do == "stream":
-                torrent_url = get_torrent_url(query)
-                os.system('peerflix "%s" -a -d --vlc' % torrent_url)
+                os.system('peerflix "%s" -a -d --vlc' % get_torrent_url(args, 'tv'))
                 exit(0)
             elif what_to_do == "download":
-                os.system("rtorrent '%s'" % get_torrent_url(query))
+                os.system("rtorrent '%s'" % get_torrent_url(args, 'tv'))
                 exit(0)
         else:
             raise Exception("no media")
