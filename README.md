@@ -20,6 +20,7 @@ $ python install -r requirements.txt
 
 There are some more external command-line programs that are essential to movies, tv-shows, and streaming:
  - rTorrent: [Windows](https://rtwi.jmk.hu/wiki/rTorrentOnWindows), [OSX](http://macappstore.org/rtorrent/), Ubuntu:
+ 
  ```bash
  $ sudo apt-get install rtorrent
  ```
