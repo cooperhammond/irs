@@ -184,24 +184,21 @@ def get_album(album_name, artist, what_to_do):
 
 def get_torrent_url(args, category):
     search_url = 'https://kat.cr/usearch/' + urllib.parse.quote_plus((" ".join(args) + " category:" + category))
-    print (search_url)
-    #time.sleep(5)
     search_request_response = requests.get(search_url, verify=True)
     soup = BeautifulSoup(search_request_response.text, 'html.parser')
-
     choice = False
     i = 0
+    print ("")
     while choice == False:
-        movie_page = soup.find_all("a", class_="cellMainLink")[i]
-        print (movie_page.string)
-        a = input("%s Is this torrent what you want? Y/n " % output("q"))
-        if a.lower() == 'y':
-            search_url = requests.get('https://kat.cr' + movie_page.get('href'), verify=True)
+        movie_page = soup.find_all("a", class_="cellMainLink")
+        for number in range(0,5):
+            print ("%s. " % (number + 1) + movie_page[number].string)
+        a = int(str(input("\n%s What torrent would you like? " % output("q")))) - 1
+        if a in (0, 1, 2, 3, 4):
+            search_url = requests.get('https://kat.cr' + movie_page[a].get('href'), verify=True)
             soup = BeautifulSoup(search_url.text, 'html.parser')
             torrent_url = 'https:' + soup.find_all('a', class_='siteButton')[0].get('href')
             choice = True
-        elif a == 'n':
-            i += 1
     return torrent_url
 
 def main():

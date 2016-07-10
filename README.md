@@ -20,7 +20,7 @@ $ python install -r requirements.txt
 
 There are some more external command-line programs that are essential to movies, tv-shows, and streaming:
  - rTorrent: [Windows](https://rtwi.jmk.hu/wiki/rTorrentOnWindows), [OSX](http://macappstore.org/rtorrent/), Ubuntu:
- 
+
  ```bash
  $ sudo apt-get install rtorrent
  ```
@@ -63,19 +63,19 @@ On a personal judgement, we would judge that the complete meta-data parsing work
 
 ### Usage
 ```bash
-$ IRS (stream | download) movie <movie-name>
-$ IRS (stream | download) tv <tv-show> <episode>
-$ IRS (stream | download) song <song-name> by <artist>
-$ IRS (stream | download) album <album-name> by <artist>
+$ irs (stream | download) movie <movie-name>
+$ irs (stream | download) tv <tv-show> <episode>
+$ irs (stream | download) song <song-name> by <artist>
+$ irs (stream | download) album <album-name> by <artist>
 ```
 
 ##### Examples
 ```bash
-$ IRS stream movie Fight Club
-$ IRS download album A Night At The Opera by Queen
-$ IRS stream song Where Is My Mind by The Pixies
-$ IRS download tv mr.robot s01e01
-$ IRS stream album A Day At The Races by Queen
+$ irs stream movie Fight Club
+$ irs download album A Night At The Opera by Queen
+$ irs stream song Where Is My Mind by The Pixies
+$ irs download tv mr.robot s01e01
+$ irs stream album A Day At The Races by Queen
 ```
 ### Disclaimer
 Copyrighted content may be illegal to stream and/or download in your country.
