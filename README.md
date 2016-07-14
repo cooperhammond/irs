@@ -67,15 +67,32 @@ $ irs (stream | download) movie <movie-name>
 $ irs (stream | download) tv <tv-show> <episode>
 $ irs (stream | download) song <song-name> by <artist>
 $ irs (stream | download) album <album-name> by <artist>
+$ irs (stream | download) playlist <txt-file-name>
 ```
 
-##### Examples
+The text file should be formatted like so: `<song>: <artist>`
+```
+Unforgettable: Nat King Cole
+99 Luftballons: Nena
+Ride Of The Valkyries: Budapest Symphony Orchestra
+MTV Theme "Man On The Moon": Jonathan Elias & John Peterson
+The Times They Are A-Changin': Bob Dylan
+Everybody Wants To Rule The World: Studio Group
+Protest: Philip Glass
+The Sound Of Silence: Simon & Garfunkel
+All Along The Watchtower: Jimi Hendrix
+Desolation Row: My Chemical Romance
+First We Take Manhattan: Dominic Frontiere
+```
+
+#### Examples
 ```bash
 $ irs stream movie Fight Club
 $ irs download album A Night At The Opera by Queen
 $ irs stream song Where Is My Mind by The Pixies
 $ irs download tv mr.robot s01e01
 $ irs stream album A Day At The Races by Queen
+$ irs download playlist "Raid The Arcade.txt"
 ```
 ### Disclaimer
 Copyrighted content may be illegal to stream and/or download in your country.

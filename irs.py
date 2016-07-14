@@ -120,13 +120,13 @@ def rip_mp3(song, author, album, tracknum):
 
 def output(string):
     if string == "q":
-        return colored("[?]", "magenta")
+        return colored("[?]", "cyan", attrs=['bold'])
     elif string == "e":
-        return colored("[-]", "red")
+        return colored("[-]", "red", attrs=['bold'])
     elif string == "g":
-        return colored("[+]", "green")
+        return colored("[+]", "green", attrs=['bold'])
     elif string == "s":
-        return colored("[*]", "blue")
+        return colored("[*]", "blue", attrs=['bold'])
 
 def visible(element):
     if element.parent.name in ['style', 'script', '[document]', 'head', 'title']:
@@ -187,19 +187,46 @@ def get_torrent_url(args, category):
     search_request_response = requests.get(search_url, verify=True)
     soup = BeautifulSoup(search_request_response.text, 'html.parser')
     choice = False
+    results = True
     i = 0
     print ("")
     while choice == False:
         movie_page = soup.find_all("a", class_="cellMainLink")
-        for number in range(0,5):
-            print ("%s. " % (number + 1) + movie_page[number].string)
+        for number in range(0,10):
+            try:
+                print ("%s. " % (number + 1) + movie_page[number].string)
+            except Exception:
+                print (output('e') + " End of results.")
+                # Errors should never pass silently.
+                pass        # - Zen of Python
         a = int(str(input("\n%s What torrent would you like? " % output("q")))) - 1
-        if a in (0, 1, 2, 3, 4):
+        if a in tuple(range(0, 10)):
             search_url = requests.get('https://kat.cr' + movie_page[a].get('href'), verify=True)
             soup = BeautifulSoup(search_url.text, 'html.parser')
             torrent_url = 'https:' + soup.find_all('a', class_='siteButton')[0].get('href')
             choice = True
     return torrent_url
+
+def rip_playlist(file_name, what_to_do):
+    txt_file = open(file_name, 'r')
+    things_that_went_wrong = []
+    something_went_wrong = False
+    for line in txt_file:
+        try:
+            arr = line.split(": ")
+            song = arr[0]
+            artist = arr[1]
+            if what_to_do == "download":
+                rip_mp3(song, artist, "", "")
+            elif what_to_do == "stream":
+                os.system("mpv '%s' --no-video" % find_mp3(song, artist))
+        except Exception as e:
+            something_went_wrong = True
+            things_that_went_wrong.append(line)
+            pass
+    if something_went_wrong == True:
+        print ("%s Something was wrong with the formatting of the following lines:" % output("e"))
+        for i in things_that_went_wrong: print ("\t%s" % i)
 
 def main():
     try:
@@ -226,6 +253,9 @@ def main():
             album_name = (" ".join(args)).split(" by ")
             get_album(album_name[0], album_name[1], what_to_do)
 
+        elif media == "playlist":
+            rip_playlist(args[-1], what_to_do)
+
         elif media == "movie":
             if what_to_do == "stream":
                 os.system('peerflix "%s" -a -d --vlc' % get_torrent_url(args, 'movie'))
@@ -250,22 +280,22 @@ def main():
         else:
             print ("%s Something went wrong:\n" % output("e") + repr(e) + "\n")
 
-def columns(columns):
-    for row in columns:
-        print("{: >15}    {: >15}".format(*row))
 def invalid_format():
     # I feel like there should be an easier way to write out help for command-line interfaces ...
     print ("Usage:")
     print ("""    irs (stream | download) movie <movie-name>
     irs (stream | download) tv <tv-show> <episode>
     irs (stream | download) song <song-name> by <artist>
-    irs (stream | download) album <album-name> by <artist>""")
+    irs (stream | download) album <album-name> by <artist>
+    irs (stream | download) playlist <txt-file-name>""")
     print ("Examples:")
     print ("""    irs stream movie Fight Club
     irs download album A Night At The Opera by Queen
     irs stream song Where Is My Mind by The Pixies
     irs download tv mr.robot s01e01
-    irs stream album A Day At The Races by Queen""")
+    irs stream album A Day At The Races by Queen
+    irs download playlist "Rock Save The Queen.txt" """)
+    print ("\nFor more info see: https://github.com/kepoorhampond/IngeniousRedistributionSystem")
 
 if __name__ == '__main__':
     main()
