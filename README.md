@@ -49,7 +49,7 @@ Currently the system can stream or download the following:
  - Movies.
  - TV shows.
  - Playlists.
- - Comics.*
+ - Comics and books.*
 
 <sup>\* Limited only to downloading.<sup>
 
@@ -69,19 +69,19 @@ On a personal judgement, we would say that the complete meta-data parsing works 
 ```bash
 $ irs (stream | download) movie <movie-name>
 $ irs (stream | download) tv <tv-show> <episode>
-$ irs (stream | download) song <song-name> by <artist>
-$ irs (stream | download) album <album-name> by <artist>
+$ irs (stream | download) (song | album) <title> by <artist>
 $ irs (stream | download) playlist <txt-file-name>
-$ irs download comic <comic-name> <run>
+$ irs download (comic <title> <run> | book <title> by <author>)
 ```
 
 #### Examples
 ```bash
-$ irs stream movie Fight Club
-$ irs download album A Night At The Opera by Queen
+$ irs download book I, Robot by Isaac Asimov
 $ irs stream song Where Is My Mind by The Pixies
+$ irs download album A Night At The Opera by Queen
+$ irs stream movie Fight Club
 $ irs download tv mr.robot s01e01
-$ irs stream playlist "Raid The Arcade.txt"
+$ irs stream playlist "Rock Save The Queen.txt"
 $ irs download comic Paper Girls 001
 ```
 

@@ -153,13 +153,12 @@ def visible(element):
     return True
 
 def search_google(song_name, band):
-    # takes 2 strings, one as the song_name and the other as the band's name, with the keyword as what prefaces the info you want.
     try:
         string = "%s %s" % (song_name, band)
         filename = 'http://www.google.com/search?q=' + urllib.parse.quote_plus(string)
         hdr = {
-        'User-Agent':'Mozilla/5.0', # Honestly, this is just so that google doesn't prevent your from looking at them.
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', # creds are here.
+        'User-Agent':'Mozilla/5.0',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         }
         texts = BeautifulSoup(urlopen(Request(filename, headers=hdr)).read(), 'html.parser').findAll(text=True)
 
@@ -201,6 +200,7 @@ def get_album(album_name, artist, what_to_do):
 
 def get_torrent_url(args, category):
     search_url = 'https://kat.cr/usearch/' + urllib.parse.quote_plus((" ".join(args) + " category:" + category))
+    print (search_url)
     search_request_response = requests.get(search_url, verify=True)
     soup = BeautifulSoup(search_request_response.text, 'html.parser')
     choice, results, ran_out = False, True, False
@@ -273,12 +273,12 @@ def main():
         elif media == "playlist":
             rip_playlist(args[-1], what_to_do)
 
-        elif media == "comic":
+        elif media in ("comic", "book"):
             if what_to_do == "download":
-                os.system("rtorrent '%s'" % get_torrent_url(args, 'comics'))
+                os.system("rtorrent '%s'" % get_torrent_url(args, media + "s"))
                 exit(0)
             elif what_to_do == "stream":
-                print ("%s Streaming is unavailable for comics." % output("e"))
+                print ("\n%s Streaming is unavailable for comics and books.\n" % output("e"))
                 exit(0)
 
         elif media == "movie":
@@ -310,17 +310,17 @@ def invalid_format():
     print ("Usage:")
     print ("""    irs (stream | download) movie <movie-name>
     irs (stream | download) tv <tv-show> <episode>
-    irs (stream | download) song <song-name> by <artist>
-    irs (stream | download) album <album-name> by <artist>
+    irs (stream | download) (song | album) <title> by <artist>
     irs (stream | download) playlist <txt-file-name>
-    irs download comic <comic-name> <run>""")
+    irs download (comic <title> <run> | book <title> by <author>) """)
     print ("Examples:")
-    print ("""    irs stream movie Fight Club
-    irs download album A Night At The Opera by Queen
+    print ("""    irs download book I, Robot by Isaac Asimov
     irs stream song Where Is My Mind by The Pixies
+    irs download album A Night At The Opera by Queen
+    irs stream movie Fight Club
     irs download tv mr.robot s01e01
     irs stream playlist "Rock Save The Queen.txt"
-    irs download comic Paper Girls 001""")
+    irs download comic Paper Girls 001 """)
     print ("\nFor more info see: https://github.com/kepoorhampond/IngeniousRedistributionSystem")
 
 if __name__ == '__main__':
