@@ -200,29 +200,37 @@ def get_album(album_name, artist, what_to_do):
 
 def get_torrent_url(args, category):
     search_url = 'https://kat.cr/usearch/' + urllib.parse.quote_plus((" ".join(args) + " category:" + category))
-    print (search_url)
     search_request_response = requests.get(search_url, verify=True)
     soup = BeautifulSoup(search_request_response.text, 'html.parser')
-    choice, results, ran_out = False, True, False
+    results, ran_out = 0, False
     i = 0
     print ("")
-    while choice == False:
+    while True:
         movie_page = soup.find_all("a", class_="cellMainLink")
         for number in range(0,10):
             try:
                 print ("%s. " % (number + 1) + movie_page[number].string)
+                results += 1
             except Exception:
-                if ran_out == False:
-                    print (output('e') + " End of results.")
-                    ran_out = True
+                ran_out = True
                 pass
-        a = int(str(input("\n%s What torrent would you like? " % output("q")))) - 1
-        if a in tuple(range(0, 10)):
-            search_url = requests.get('https://kat.cr' + movie_page[a].get('href'), verify=True)
-            soup = BeautifulSoup(search_url.text, 'html.parser')
-            torrent_url = 'https:' + soup.find_all('a', class_='siteButton')[0].get('href')
-            choice = True
-    return torrent_url
+        if ran_out == True:
+            if results == 0:
+                print (output('e') + " No results.\n")
+                exit(0)
+            else:
+                print (output('e') + " End of results.")
+        if results != 0:
+
+            try: a = int(str(input("\n%s What torrent would you like? " % output("q")))) - 1
+            except Exception: a = 100; pass
+            # This code is either hyper-efficient, or completely against every ettiquite.
+
+            if a in tuple(range(0, 10)):
+                search_url = requests.get('https://kat.cr' + movie_page[a].get('href'), verify=True)
+                soup = BeautifulSoup(search_url.text, 'html.parser')
+                torrent_url = 'https:' + soup.find_all('a', class_='siteButton')[0].get('href')
+                return torrent_url
 
 def rip_playlist(file_name, what_to_do):
     txt_file = open(file_name, 'r')
