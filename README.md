@@ -48,6 +48,10 @@ Currently the system can stream or download the following:
  - Complete albums.
  - Movies.
  - TV shows.
+ - Playlists.
+ - Comics.*
+
+<sup>\* Limited only to downloading.<sup>
 
 When downloading music, the system will fill out the specific meta-data so that it will appear organized in your player of choice. It parses the following pieces of meta-data:
  - Title.
@@ -59,7 +63,7 @@ When downloading music, the system will fill out the specific meta-data so that 
 
 <sup>\* Album art is slightly buggy, and tracknumber only works when downloading complete album.<sup>
 
-On a personal judgement, we would judge that the complete meta-data parsing works ~90% of the time.
+On a personal judgement, we would say that the complete meta-data parsing works ~80% of the time.
 
 ### Usage
 ```bash
@@ -68,21 +72,7 @@ $ irs (stream | download) tv <tv-show> <episode>
 $ irs (stream | download) song <song-name> by <artist>
 $ irs (stream | download) album <album-name> by <artist>
 $ irs (stream | download) playlist <txt-file-name>
-```
-
-The text file should be formatted like so: `<song>: <artist>`
-```
-Unforgettable: Nat King Cole
-99 Luftballons: Nena
-Ride Of The Valkyries: Budapest Symphony Orchestra
-MTV Theme "Man On The Moon": Jonathan Elias & John Peterson
-The Times They Are A-Changin': Bob Dylan
-Everybody Wants To Rule The World: Studio Group
-Protest: Philip Glass
-The Sound Of Silence: Simon & Garfunkel
-All Along The Watchtower: Jimi Hendrix
-Desolation Row: My Chemical Romance
-First We Take Manhattan: Dominic Frontiere
+$ irs download comic <comic-name> <run>
 ```
 
 #### Examples
@@ -91,8 +81,16 @@ $ irs stream movie Fight Club
 $ irs download album A Night At The Opera by Queen
 $ irs stream song Where Is My Mind by The Pixies
 $ irs download tv mr.robot s01e01
-$ irs stream album A Day At The Races by Queen
-$ irs download playlist "Raid The Arcade.txt"
+$ irs stream playlist "Raid The Arcade.txt"
+$ irs download comic Paper Girls 001
 ```
+
+The text file should be formatted like so: `<song>: <artist>`
+```
+Good Times Bad Times: Led Zeppelin
+I Want To Break Free: Queen
+The Man Who Sold The World: David Bowie
+```
+
 ### Disclaimer
 Copyrighted content may be illegal to stream and/or download in your country.

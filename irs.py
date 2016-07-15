@@ -1,4 +1,21 @@
 #!/usr/bin/python3
+
+#    Ingenious Redistribution System, A system built to redistribute media to the consumer.
+#    Copyright (C) 2016  Cooper Hammond
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import os, sys, time, re, select, requests, subprocess
 import urllib.request, urllib.parse
 from termcolor import colored
@@ -186,8 +203,7 @@ def get_torrent_url(args, category):
     search_url = 'https://kat.cr/usearch/' + urllib.parse.quote_plus((" ".join(args) + " category:" + category))
     search_request_response = requests.get(search_url, verify=True)
     soup = BeautifulSoup(search_request_response.text, 'html.parser')
-    choice = False
-    results = True
+    choice, results, ran_out = False, True, False
     i = 0
     print ("")
     while choice == False:
@@ -196,9 +212,10 @@ def get_torrent_url(args, category):
             try:
                 print ("%s. " % (number + 1) + movie_page[number].string)
             except Exception:
-                print (output('e') + " End of results.")
-                # Errors should never pass silently.
-                pass        # - Zen of Python
+                if ran_out == False:
+                    print (output('e') + " End of results.")
+                    ran_out = True
+                pass
         a = int(str(input("\n%s What torrent would you like? " % output("q")))) - 1
         if a in tuple(range(0, 10)):
             search_url = requests.get('https://kat.cr' + movie_page[a].get('href'), verify=True)
@@ -256,6 +273,14 @@ def main():
         elif media == "playlist":
             rip_playlist(args[-1], what_to_do)
 
+        elif media == "comic":
+            if what_to_do == "download":
+                os.system("rtorrent '%s'" % get_torrent_url(args, 'comics'))
+                exit(0)
+            elif what_to_do == "stream":
+                print ("%s Streaming is unavailable for comics." % output("e"))
+                exit(0)
+
         elif media == "movie":
             if what_to_do == "stream":
                 os.system('peerflix "%s" -a -d --vlc' % get_torrent_url(args, 'movie'))
@@ -287,14 +312,15 @@ def invalid_format():
     irs (stream | download) tv <tv-show> <episode>
     irs (stream | download) song <song-name> by <artist>
     irs (stream | download) album <album-name> by <artist>
-    irs (stream | download) playlist <txt-file-name>""")
+    irs (stream | download) playlist <txt-file-name>
+    irs download comic <comic-name> <run>""")
     print ("Examples:")
     print ("""    irs stream movie Fight Club
     irs download album A Night At The Opera by Queen
     irs stream song Where Is My Mind by The Pixies
     irs download tv mr.robot s01e01
-    irs stream album A Day At The Races by Queen
-    irs download playlist "Rock Save The Queen.txt" """)
+    irs stream playlist "Rock Save The Queen.txt"
+    irs download comic Paper Girls 001""")
     print ("\nFor more info see: https://github.com/kepoorhampond/IngeniousRedistributionSystem")
 
 if __name__ == '__main__':
