@@ -290,7 +290,7 @@ def main():
 
         elif media == "movie":
             if what_to_do == "stream":
-                os.system('peerflix "%s" -a -d --vlc' % get_torrent_url(args, 'movie'))
+                os.system('peerflix "%s" -a -d --mpv' % get_torrent_url(args, 'movie'))
                 exit(0)
             elif what_to_do == "download":
                 os.system("rtorrent '%s'" % get_torrent_url(args, 'movie'))
@@ -298,7 +298,7 @@ def main():
 
         elif media == "tv":
             if what_to_do == "stream":
-                os.system('peerflix "%s" -a -d --vlc' % get_torrent_url(args, 'tv'))
+                os.system('peerflix "%s" -a -d --mpv' % get_torrent_url(args, 'tv'))
                 exit(0)
             elif what_to_do == "download":
                 os.system("rtorrent '%s'" % get_torrent_url(args, 'tv'))

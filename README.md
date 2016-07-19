@@ -32,7 +32,6 @@ There are some more external command-line programs that are essential to movies,
    ```
    - OSX: Same as Windows, except follow [this](http://blog.teamtreehouse.com/install-node-js-npm-mac) guide.
    - Ubuntu: Again, the same, only follow [this](http://blog.teamtreehouse.com/install-node-js-npm-linux) guide instead.
- - VLC: Just download and install it [here](http://www.videolan.org/vlc/index.html).
 
 ### Install
 
