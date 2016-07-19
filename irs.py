@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-
 #    Ingenious Redistribution System, A system built to redistribute media to the consumer.
 #    Copyright (C) 2016  Cooper Hammond
 #
