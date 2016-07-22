@@ -15,7 +15,7 @@ First, actually install python and pip:
 
 Then install `requirements.txt` from the repository:
 ```bash
-$ python install -r requirements.txt
+$ pip install -r requirements.txt
 ```
 
 There are some more external command-line programs that are essential to movies, tv-shows, and streaming:

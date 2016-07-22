@@ -57,12 +57,24 @@ def embed_mp3(art_location, song_path):
     )
     music.save()
 
-def find_mp3(song, author):
-    print ("'%s' by '%s'\n" % (song, author))
+def find_mp3(song, author): #
+    print ("\n'%s' by '%s'" % (song, author))
     query_string = urllib.parse.urlencode({"search_query" : ("%s %s lyrics" % (song, author))})
     html_content = urllib.request.urlopen("http://www.youtube.com/results?" + query_string)
     search_results = re.findall(r'href=\"\/watch\?v=(.{11})', html_content.read().decode())
-    audio_url = ("http://www.youtube.com/watch?v=" + search_results[0])
+    in_song = False
+    i = -1
+    given_up_score = 0
+    while in_song == False:
+        if given_up_score >= 10:
+            in_song = True
+        i += 1
+        audio_url = ("http://www.youtube.com/watch?v=" + search_results[i])
+        title = (BeautifulSoup(urlopen(audio_url), 'html.parser')).title.string.lower()
+        if song.lower() in title:
+            in_song = True
+        else:
+            given_up_score += 1
     return audio_url
 
 def rip_mp3(song, author, album, tracknum):
