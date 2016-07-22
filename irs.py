@@ -57,8 +57,8 @@ def embed_mp3(art_location, song_path):
     )
     music.save()
 
-def find_mp3(song, author): #
-    print ("\n'%s' by '%s'" % (song, author))
+def find_mp3(song, author):
+    print ("'%s' by '%s'\n" % (song, author))
     query_string = urllib.parse.urlencode({"search_query" : ("%s %s lyrics" % (song, author))})
     html_content = urllib.request.urlopen("http://www.youtube.com/results?" + query_string)
     search_results = re.findall(r'href=\"\/watch\?v=(.{11})', html_content.read().decode())
@@ -71,14 +71,17 @@ def find_mp3(song, author): #
         i += 1
         audio_url = ("http://www.youtube.com/watch?v=" + search_results[i])
         title = (BeautifulSoup(urlopen(audio_url), 'html.parser')).title.string.lower()
-        if song.lower() in title:
-            in_song = True
-        else:
+        song_title = (song.lower()).split("/")
+        for song in song_title:
+            if song in title:
+                in_song = True
+        if in_song == False:
             given_up_score += 1
     return audio_url
 
 def rip_mp3(song, author, album, tracknum):
     audio_url = find_mp3(song, author)
+    song = song.replace("/", "\\")
     command = 'youtube-dl --metadata-from-title "%(title)s" --extract-audio --audio-format mp3 --add-metadata ' + audio_url
     os.system(command)
     for filename in os.listdir("."):
@@ -90,7 +93,7 @@ def rip_mp3(song, author, album, tracknum):
         mp3file = MP3(song + ".mp3", ID3=EasyID3)
         print ("\n%s Metadata parsing:" % output("s"))
         try:
-            mp3file['title'] = song
+            mp3file['title'] = song.replace("\\", "/")
         except Exception:
             mp3file['title'] = ""
         mp3file.save()
