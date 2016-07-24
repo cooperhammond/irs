@@ -27,20 +27,23 @@ from bs4 import BeautifulSoup
 import youtube_dl, mutagen
 
 def download_album_art(album, band):
-    search = "%s %s" % (album, band)
-    url = "http://www.seekacover.com/cd/" + urllib.parse.quote_plus(search)
-    page = requests.get(url).text
-    soup = BeautifulSoup(page)
-    done = False
-    for img in soup.findAll('img'):
-        if done == False:
-            try:
-                if search.lower() in img['title'].lower():
-                    url = img['src']
-                    urllib.request.urlretrieve(url, "cover.jpg")
-                    done = True
-            except Exception:
-                pass
+    try:
+        search = "%s %s" % (album, band)
+        url = "http://www.seekacover.com/cd/" + urllib.parse.quote_plus(search)
+        page = requests.get(url).text
+        soup = BeautifulSoup(page, 'html.parser')
+        done = False
+        for img in soup.findAll('img'):
+            if done == False:
+                try:
+                    if search.lower() in img['title'].lower():
+                        url = img['src']
+                        urllib.request.urlretrieve(url, "%s/cover.jpg" % album)
+                        done = True
+                except Exception:
+                    pass
+    except Exception:
+        print ("%s There was an error parsing the album art of '%s'" % (output("e"), album) )
 
 def embed_mp3(art_location, song_path):
     music = mutagen.id3.ID3(song_path)
@@ -58,26 +61,29 @@ def embed_mp3(art_location, song_path):
     music.save()
 
 def find_mp3(song, author):
-    print ("'%s' by '%s'\n" % (song, author))
-    query_string = urllib.parse.urlencode({"search_query" : ("%s %s lyrics" % (song, author))})
-    html_content = urllib.request.urlopen("http://www.youtube.com/results?" + query_string)
-    search_results = re.findall(r'href=\"\/watch\?v=(.{11})', html_content.read().decode())
-    in_song = False
-    i = -1
-    given_up_score = 0
-    while in_song == False:
-        if given_up_score >= 10:
-            in_song = True
-        i += 1
-        audio_url = ("http://www.youtube.com/watch?v=" + search_results[i])
-        title = (BeautifulSoup(urlopen(audio_url), 'html.parser')).title.string.lower()
-        song_title = (song.lower()).split("/")
-        for song in song_title:
-            if song in title:
+    try:
+        print ("'%s' by '%s'\n" % (song, author))
+        query_string = urllib.parse.urlencode({"search_query" : ("%s %s lyrics" % (song, author))})
+        html_content = urllib.request.urlopen("http://www.youtube.com/results?" + query_string)
+        search_results = re.findall(r'href=\"\/watch\?v=(.{11})', html_content.read().decode())
+        in_song = False
+        i = -1
+        given_up_score = 0
+        while in_song == False:
+            if given_up_score >= 10:
                 in_song = True
-        if in_song == False:
-            given_up_score += 1
-    return audio_url
+            i += 1
+            audio_url = ("http://www.youtube.com/watch?v=" + search_results[i])
+            title = (BeautifulSoup(urlopen(audio_url), 'html.parser')).title.string.lower()
+            song_title = (song.lower()).split("/")
+            for song in song_title:
+                if song in title:
+                    in_song = True
+            if in_song == False:
+                given_up_score += 1
+        return audio_url
+    except Exception as e:
+        print ("%s There was an error finding the url of '%s'" % (output("e"), song) )
 
 def rip_mp3(song, author, album, tracknum):
     audio_url = find_mp3(song, author)
@@ -166,9 +172,9 @@ def visible(element):
         return False
     return True
 
-def search_google(song_name, band):
+def search_google(song_name, band, search_terms):
     try:
-        string = "%s %s" % (song_name, band)
+        string = "%s %s %s" % (song_name, band, search_terms)
         filename = 'http://www.google.com/search?q=' + urllib.parse.quote_plus(string)
         hdr = {
         'User-Agent':'Mozilla/5.0',
@@ -180,71 +186,81 @@ def search_google(song_name, band):
         return visible_texts
     except Exception as e:
         print ("%s There was an error with Auto-parsing." % output("e"))
-        return ""
+        return
 
-def get_album(album_name, artist, what_to_do):
-    visible_texts = search_google(album_name, artist)
-    songs = []
-    num = True
-    for i, j in enumerate(visible_texts):
-        if 'Songs' in j:
-            if visible_texts[i + 1] == "1":
-                indexed = i
-    while num == True:
-        try:
-            if type(int(visible_texts[indexed])) is int:
-                a = visible_texts[indexed + 1]
-                songs.append(a)
+def get_album(album_name, artist, what_to_do, search):
+    visible_texts = search_google(album_name, artist, search)
+    try:
+        songs = []
+        num = True
+        for i, j in enumerate(visible_texts):
+            if 'Songs' in j:
+                if visible_texts[i + 1] == "1":
+                    indexed = i
+        while num == True:
+            try:
+                if type(int(visible_texts[indexed])) is int:
+                    a = visible_texts[indexed + 1]
+                    songs.append(a)
+                    indexed += 1
+            except:
                 indexed += 1
-        except:
-            indexed += 1
-            if indexed >= 1000:
-                num = False
-            else:
-                pass
-    if what_to_do == "download":
-        for i, j in enumerate(songs):
-            rip_mp3(j, artist, album_name, i + 1)
-    elif what_to_do == "stream":
-        for i in songs:
-            a = find_mp3(i, artist)
-            command = 'mpv "%s" --no-video' % a
-            os.system(command)
+                if indexed >= 1000:
+                    num = False
+                else:
+                    pass
+        if what_to_do == "download":
+            for i, j in enumerate(songs):
+                rip_mp3(j, artist, album_name, i + 1, True)
+        elif what_to_do == "stream":
+            for i in songs:
+                a = find_mp3(i, artist)
+                command = 'mpv "%s" --no-video' % a
+                os.system(command)
+    except Exception as e:
+        if str(e) == "local variable 'indexed' referenced before assignment":
+            get_album(album_name, artist, what_to_do, "")
+        else:
+            print ("%s There was an error with getting the contents \
+            of the album '%s':\n%s" % (output("e"), album_name, e) )
 
 
 def get_torrent_url(args, category):
-    search_url = 'https://kat.cr/usearch/' + urllib.parse.quote_plus((" ".join(args) + " category:" + category))
-    search_request_response = requests.get(search_url, verify=True)
-    soup = BeautifulSoup(search_request_response.text, 'html.parser')
-    results, ran_out = 0, False
-    i = 0
-    print ("")
-    while True:
-        movie_page = soup.find_all("a", class_="cellMainLink")
-        for number in range(0,10):
-            try:
-                print ("%s. " % (number + 1) + movie_page[number].string)
-                results += 1
-            except Exception:
-                ran_out = True
-                pass
-        if ran_out == True:
-            if results == 0:
-                print (output('e') + " No results.\n")
-                exit(0)
-            else:
-                print (output('e') + " End of results.")
-        if results != 0:
+    try:
+        search_url = 'https://kat.cr/usearch/' + urllib.parse.quote_plus((" ".join(args) + " category:" + category))
+        search_request_response = requests.get(search_url, verify=True)
+        soup = BeautifulSoup(search_request_response.text, 'html.parser')
+        results, ran_out = 0, False
+        i = 0
+        print ("")
+        while True:
+            movie_page = soup.find_all("a", class_="cellMainLink")
+            for number in range(0,10):
+                try:
+                    print ("%s. " % (number + 1) + movie_page[number].string)
+                    results += 1
+                except Exception:
+                    ran_out = True
+                    pass
+            if ran_out == True:
+                if results == 0:
+                    print (output('e') + " No results.\n")
+                    exit(0)
+                else:
+                    print (output('e') + " End of results.")
+            if results != 0:
 
-            try: a = int(str(input("\n%s What torrent would you like? " % output("q")))) - 1
-            except Exception: a = 100; pass
-            # This code is either hyper-efficient, or completely against every ettiquite.
+                try: a = int(str(input("\n%s What torrent would you like? " % output("q")))) - 1
+                except Exception: a = 100; pass
+                # This code is either hyper-efficient, or completely against every ettiquite.
 
-            if a in tuple(range(0, 10)):
-                search_url = requests.get('https://kat.cr' + movie_page[a].get('href'), verify=True)
-                soup = BeautifulSoup(search_url.text, 'html.parser')
-                torrent_url = 'https:' + soup.find_all('a', class_='siteButton')[0].get('href')
-                return torrent_url
+                if a in tuple(range(0, 10)):
+                    search_url = requests.get('https://kat.cr' + movie_page[a].get('href'), verify=True)
+                    soup = BeautifulSoup(search_url.text, 'html.parser')
+                    torrent_url = 'https:' + soup.find_all('a', class_='siteButton')[0].get('href')
+                    return torrent_url
+    except Exception as e:
+        print ("%s There was an error getting the torrent url with '%s'" % (output("e"), args))
 
 def rip_playlist(file_name, what_to_do):
     txt_file = open(file_name, 'r')
@@ -290,7 +306,7 @@ def main():
 
         elif media == "album":
             album_name = (" ".join(args)).split(" by ")
-            get_album(album_name[0], album_name[1], what_to_do)
+            get_album(album_name[0], album_name[1], what_to_do, "album")
 
         elif media == "playlist":
             rip_playlist(args[-1], what_to_do)
