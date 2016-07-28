@@ -38,7 +38,7 @@ def download_album_art(album, band):
                 try:
                     if search.lower() in img['title'].lower():
                         url = img['src']
-                        urllib.request.urlretrieve(url, "%s/cover.jpg" % album)
+                        urllib.request.urlretrieve(url, "cover.jpg" % album) # &PATH;
                         done = True
                 except Exception:
                     pass
@@ -88,11 +88,12 @@ def find_mp3(song, author):
 def rip_mp3(song, author, album, tracknum):
     audio_url = find_mp3(song, author)
     song = song.replace("/", "\\")
-    command = 'youtube-dl --metadata-from-title "%(title)s" --extract-audio --audio-format mp3 --add-metadata ' + audio_url
+    command = 'youtube-dl --metadata-from-title "%(title)s" --extract-audio \
+--audio-format mp3 --add-metadata ' + audio_url
     os.system(command)
     for filename in os.listdir("."):
         if str(audio_url).strip("http://www.youtube.com/watch?v=") in filename:
-            os.rename(filename, song + ".mp3")
+            os.rename(filename, song + ".mp3") # &PATH;
 
     try:
         googled = search_google(song, author)
@@ -131,10 +132,11 @@ def rip_mp3(song, author, album, tracknum):
         if mp3file['album'][0] != "":
             try:
                 download_album_art(mp3file['album'][0], author)
-                embed_mp3("cover.jpg", song + ".mp3")
+                embed_mp3("cover.jpg", song + ".mp3") # &PATH;
                 print ("\t%s Album art Auto-parsed!" % output("g"))
             except Exception as e:
-                print ("%s There was a problem with Auto-parsing the album art of: '%s'" % (output("e"), song))
+                print ("%s There was a problem with Auto-parsing the album art of: '%s'"\
+ % (output("e"), song))
                 print (e)
 
         for i, j in enumerate(googled):
@@ -180,7 +182,8 @@ def search_google(song_name, band, search_terms):
         'User-Agent':'Mozilla/5.0',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         }
-        texts = BeautifulSoup(urlopen(Request(filename, headers=hdr)).read(), 'html.parser').findAll(text=True)
+        texts = BeautifulSoup(urlopen(Request(filename, headers=hdr)).read(), 'html.parser')\
+.findAll(text=True)
 
         visible_texts = list(filter(visible, texts))
         return visible_texts
@@ -203,7 +206,7 @@ def get_album(album_name, artist, what_to_do, search):
                     a = visible_texts[indexed + 1]
                     songs.append(a)
                     indexed += 1
-            except:
+            except Exception:
                 indexed += 1
                 if indexed >= 1000:
                     num = False
@@ -227,7 +230,8 @@ def get_album(album_name, artist, what_to_do, search):
 
 def get_torrent_url(args, category):
     try:
-        search_url = 'https://kat.cr/usearch/' + urllib.parse.quote_plus((" ".join(args) + " category:" + category))
+        search_url = 'https://kat.cr/usearch/' + urllib.parse.quote_plus((" ".join(args) + \
+" category:" + category))
         search_request_response = requests.get(search_url, verify=True)
         soup = BeautifulSoup(search_request_response.text, 'html.parser')
         results, ran_out = 0, False
@@ -268,7 +272,7 @@ def rip_playlist(file_name, what_to_do):
     something_went_wrong = False
     for line in txt_file:
         try:
-            arr = line.split(": ")
+            arr = line.strip("\n").split(": ")
             song = arr[0]
             artist = arr[1]
             if what_to_do == "download":
