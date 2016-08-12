@@ -191,7 +191,7 @@ def search_google(song_name, band, search_terms):
         print ("%s There was an error with Auto-parsing." % output("e"))
         return
 
-def get_album(album_name, artist, what_to_do, search):
+def get_album(album_name, artist, what_to_do, search, tried=False):
     visible_texts = search_google(album_name, artist, search)
     try:
         songs = []
@@ -206,7 +206,7 @@ def get_album(album_name, artist, what_to_do, search):
                     a = visible_texts[indexed + 1]
                     songs.append(a)
                     indexed += 1
-            except Exception:
+            except:
                 indexed += 1
                 if indexed >= 1000:
                     num = False
@@ -221,16 +221,21 @@ def get_album(album_name, artist, what_to_do, search):
                 command = 'mpv "%s" --no-video' % a
                 os.system(command)
     except Exception as e:
-        if str(e) == "local variable 'indexed' referenced before assignment":
-            get_album(album_name, artist, what_to_do, "")
+        if str(e) == "local variable 'indexed' referenced before assignment" or str(e) == 'list index out of range':
+            if tried != True:
+                print ("%s Trying to find album ..." % output("s"))
+                get_album(album_name, artist, what_to_do, "", True)
+            else:
+                print ("%s Could not find album '%s'" % (output("e"), album_))
+                exit(0)
         else:
             print ("%s There was an error with getting the contents \
-            of the album '%s':\n%s" % (output("e"), album_name, e) )
+of the album '%s':\n%s" % (output("e"), album_name, e) )
 
 
 def get_torrent_url(args, category):
     try:
-        search_url = 'https://kat.cr/usearch/' + urllib.parse.quote_plus((" ".join(args) + \
+        search_url = 'http://kickass.mx/search.php?q=' + urllib.parse.quote_plus((" ".join(args) + \
 " category:" + category))
         search_request_response = requests.get(search_url, verify=True)
         soup = BeautifulSoup(search_request_response.text, 'html.parser')
