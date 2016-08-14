@@ -48,6 +48,7 @@ Currently the system can stream or download the following:
  - Movies.
  - TV shows.
  - Playlists.
+ - Links
  - Comics and books.*
 
 <sup>\* Limited only to downloading.<sup>
@@ -70,6 +71,7 @@ $ irs (stream | download) movie <movie-name>
 $ irs (stream | download) tv <tv-show> <episode>
 $ irs (stream | download) (song | album) <title> by <artist>
 $ irs (stream | download) playlist <txt-file-name>
+irs (stream | download) '<link>' <title> <author>
 $ irs download (comic <title> <run> | book <title> by <author>)
 ```
 
@@ -82,6 +84,7 @@ $ irs stream movie Fight Club
 $ irs download tv mr.robot s01e01
 $ irs stream playlist "Rock Save The Queen.txt"
 $ irs download comic Paper Girls 001
+$ irs download link 'https://www.youtube.com/watch?v=5sy2qLtrQQQ' "Stranger Things OST" "Kyle Dixon and Michael Stein"
 ```
 
 The text file should be formatted like so: `<song>: <artist>`

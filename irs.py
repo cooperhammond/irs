@@ -96,7 +96,7 @@ def rip_mp3(song, author, album, tracknum):
             os.rename(filename, song + ".mp3") # &PATH;
 
     try:
-        googled = search_google(song, author)
+        googled = search_google(song, author, "")
         mp3file = MP3(song + ".mp3", ID3=EasyID3)
         print ("\n%s Metadata parsing:" % output("s"))
         try:
@@ -214,7 +214,7 @@ def get_album(album_name, artist, what_to_do, search, tried=False):
                     pass
         if what_to_do == "download":
             for i, j in enumerate(songs):
-                rip_mp3(j, artist, album_name, i + 1, True)
+                rip_mp3(j, artist, album_name, i + 1)
         elif what_to_do == "stream":
             for i in songs:
                 a = find_mp3(i, artist)
@@ -269,7 +269,7 @@ def get_torrent_url(args, category):
                     torrent_url = 'https:' + soup.find_all('a', class_='siteButton')[0].get('href')
                     return torrent_url
     except Exception as e:
-        print ("%s There was an error getting the torrent url with '%s'" % (output("e"), args))
+        print ("%s There was an error getting the torrent url with '%s'" % (output("e"), " ".join(args)))
 
 def rip_playlist(file_name, what_to_do):
     txt_file = open(file_name, 'r')
@@ -291,6 +291,38 @@ def rip_playlist(file_name, what_to_do):
     if something_went_wrong == True:
         print ("%s Something was wrong with the formatting of the following lines:" % output("e"))
         for i in things_that_went_wrong: print ("\t%s" % i)
+
+def download_link(link, title, artist):
+    print ("'%s' by '%s' from '%s'\n" % (title, artist, link))
+    try:
+        os.system('youtube-dl --metadata-from-title "%(title)s" --extract-audio \
+--audio-format mp3 --add-metadata ' + link)
+    except Exception as e:
+        print ('%s Error with given link:\n' % output("e") + e)
+        exit(0)
+    mp3file = MP3(title + '.mp3', ID3=EasyID3)
+    googled = search_google(title, artist, "")
+    try:
+        mp3file['title'] = title.replace("\\", "/")
+        print ("\n%s Metadata parsing:")
+        print ('\t%s Title parsed: %s' % (output("g"), mp3file['title']))
+        mp3file['artist'] = artist
+        print ('\t%s Author parsed: %s' % (output("g"), mp3file['artist']))
+        mp3file.save()
+    except Exception as e:
+        print ("%s Error with parsing title/author for '%s'" % (output('e'), title))
+    try:
+        for i, j in enumerate(googled):
+            if "Album:" in j:
+                album = (googled[i + 1])
+        try:
+            mp3file['album'] = album
+            mp3file.save()
+        except Exception:
+            mp3file['album'] = ""
+            mp3file.save()
+    except Exception as e:
+        print ("%s Error with Auto-parsing '%s'" % (output('e'), title))
 
 def main():
     try:
@@ -343,6 +375,12 @@ def main():
             elif what_to_do == "download":
                 os.system("rtorrent '%s'" % get_torrent_url(args, 'tv'))
                 exit(0)
+        elif media == 'link':
+            if what_to_do == 'stream':
+                os.system('mpv "%s" --no-video' % args[0])
+                exit(0)
+            elif what_to_do == 'download':
+                download_link(args[0], args[1], args[2])
         else:
             raise Exception("no media")
     except Exception as e:
@@ -359,7 +397,9 @@ def invalid_format():
     irs (stream | download) tv <tv-show> <episode>
     irs (stream | download) (song | album) <title> by <artist>
     irs (stream | download) playlist <txt-file-name>
-    irs download (comic <title> <run> | book <title> by <author>) """)
+    irs (stream | download) '<link>' <title> <author>
+    irs download (comic <title> <run> | book <title> by <author>)
+    """)
     print ("Examples:")
     print ("""    irs download book I, Robot by Isaac Asimov
     irs stream song Where Is My Mind by The Pixies
@@ -367,7 +407,9 @@ def invalid_format():
     irs stream movie Fight Club
     irs download tv mr.robot s01e01
     irs stream playlist "Rock Save The Queen.txt"
-    irs download comic Paper Girls 001 """)
+    irs download comic Paper Girls 001
+    irs download link 'https://www.youtube.com/watch?v=5sy2qLtrQQQ' "Stranger Things OST" "Kyle Dixon and Michael Stein"
+    """)
     print ("\nFor more info see: https://github.com/kepoorhampond/IngeniousRedistributionSystem")
 
 if __name__ == '__main__':
