@@ -45,13 +45,15 @@ And that should be it! Eventually it'll be put up on `pip`, to make it much, muc
 Currently the system can stream or download the following:
  - Specific songs.
  - Complete albums.
- - Movies.
- - TV shows.
+ - Movies. **
+ - TV shows. **
  - Playlists.
- - Links
- - Comics and books.*
+ - Links.
+ - Soundtracks.
+ - Comics and books.* **
 
 <sup>\* Limited only to downloading.<sup>
+<sup>\*\* Does not currently work, because kat.cr was taken down.<sup>
 
 When downloading music, the system will fill out the specific meta-data so that it will appear organized in your player of choice. It parses the following pieces of meta-data:
  - Title.
@@ -71,7 +73,8 @@ $ irs (stream | download) movie <movie-name>
 $ irs (stream | download) tv <tv-show> <episode>
 $ irs (stream | download) (song | album) <title> by <artist>
 $ irs (stream | download) playlist <txt-file-name>
-irs (stream | download) '<link>' <title> <author>
+$ irs (stream | download) '<link>' <title> <author>
+$ irs (stream | download) soundtrack <movie>
 $ irs download (comic <title> <run> | book <title> by <author>)
 ```
 
@@ -84,6 +87,7 @@ $ irs stream movie Fight Club
 $ irs download tv mr.robot s01e01
 $ irs stream playlist "Rock Save The Queen.txt"
 $ irs download comic Paper Girls 001
+$ irs download soundtrack Super 8
 $ irs download link 'https://www.youtube.com/watch?v=5sy2qLtrQQQ' "Stranger Things OST" "Kyle Dixon and Michael Stein"
 ```
 
