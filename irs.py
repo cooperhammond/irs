@@ -15,7 +15,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, sys, time, re, select, requests, subprocess
+import os, sys, time, re, select, requests
 import urllib.request, urllib.parse
 from termcolor import colored
 from urllib.request import Request, urlopen
@@ -62,12 +62,13 @@ def embed_mp3(art_location, song_path):
 
 def find_mp3(song, author, soundtrack=False):
     try:
+        special_chars = "\ / : * ? \" < > | - ( )".split(" ")
         operator = 'by'
         searching = "%s %s lyrics" % (song, author)
         if soundtrack == True:
             operator = "from"
             searching = "%s soundtrack %s" % (author, song)
-        print ("'%s' %s '%s'\n" % (song, operator, author))
+        print ("%s %s %s\n" % (song, operator, author))
         query_string = urllib.parse.urlencode({"search_query" : (searching)})
         html_content = urllib.request.urlopen("http://www.youtube.com/results?" + query_string)
         search_results = re.findall(r'href=\"\/watch\?v=(.{11})', html_content.read().decode())
@@ -80,9 +81,13 @@ def find_mp3(song, author, soundtrack=False):
             i += 1
             audio_url = ("http://www.youtube.com/watch?v=" + search_results[i])
             title = (BeautifulSoup(urlopen(audio_url), 'html.parser')).title.string.lower()
+            for char in special_chars:
+                title = title.replace(char, "")
             song_title = (song.lower()).split("/")
             for song in song_title:
-                if song in title:
+                for char in special_chars:
+                    song = song.replace(char, "")
+                if song in title and "full album" not in title:
                     in_song = True
             if in_song == False:
                 given_up_score += 1
@@ -92,20 +97,23 @@ def find_mp3(song, author, soundtrack=False):
 
 def rip_mp3(song, author, album, tracknum, soundtrack=False):
     audio_url = find_mp3(song, author, soundtrack=soundtrack)
-    song = song.replace("/", "\\")
+    special_chars = "\ / : * ? \" < > | ".split(" ")
+    filename = song
+    for char in special_chars:
+        filename = filename.replace(char, "")
     command = 'youtube-dl --metadata-from-title "%(title)s" --extract-audio \
 --audio-format mp3 --add-metadata ' + audio_url
     os.system(command)
-    for filename in os.listdir("."):
-        if str(audio_url).strip("http://www.youtube.com/watch?v=") in filename:
-            os.rename(filename, song + ".mp3") # &PATH;
+    for file in os.listdir("."):
+        if str(audio_url).strip("http://www.youtube.com/watch?v=") in file:
+            os.rename(file, filename + ".mp3") # &PATH;
 
     try:
         googled = search_google(song, author, "")
-        mp3file = MP3(song + ".mp3", ID3=EasyID3)
+        mp3file = MP3(filename + ".mp3", ID3=EasyID3)
         print ("\n%s Metadata parsing:" % output("s"))
         try:
-            mp3file['title'] = song.replace("\\", "/")
+            mp3file['title'] = song
         except Exception:
             mp3file['title'] = ""
         mp3file.save()
@@ -231,11 +239,11 @@ def get_album(album_name, artist, what_to_do, search, tried=False):
                 print ("%s Trying to find album ..." % output("s"))
                 get_album(album_name, artist, what_to_do, "", True)
             else:
-                print ("%s Could not find album '%s'" % (output("e"), album_))
+                print ("%s Could not find album %s" % (output("e"), album_))
                 exit(0)
         else:
             print ("%s There was an error with getting the contents \
-of the album '%s':\n%s" % (output("e"), album_name, e) )
+of the album %s:\n%s" % (output("e"), album_name, e) )
 
 
 def get_torrent_url(args, category):
@@ -308,7 +316,7 @@ def download_link(link, title, artist):
     mp3file = MP3(title + '.mp3', ID3=EasyID3)
     googled = search_google(title, artist, "")
     try:
-        mp3file['title'] = title.replace("\\", "/")
+        mp3file['title'] = title
         print ("\n%s Metadata parsing:")
         print ('\t%s Title parsed: %s' % (output("g"), mp3file['title']))
         mp3file['artist'] = artist
@@ -349,65 +357,69 @@ def rip_soundtrack(movie, what_to_do):
         print ("%s There was an error finding the soundtrack for '%s':\n%s" % (output('e'), movie, e))
 
 def main():
-    i = 0
-    args = sys.argv
-    del args[i]
-    what_to_do = args[i]
-    del args[i]
+    try:
+        i = 0
+        args = sys.argv
+        del args[i]
+        what_to_do = args[i]
+        del args[i]
 
-    if what_to_do not in ("download", "stream"): raise Exception("no what-to-do")
+        if what_to_do not in ("download", "stream"): raise Exception("no what-to-do")
 
-    media = args[i]
-    del args[i]
+        media = args[i]
+        del args[i]
 
-    if media == "song":
-        song = (" ".join(args)).split(" by ")
-        if what_to_do == "stream":
-            command = 'mpv "%s" --no-video' % find_mp3(song[0], song[1])
-            os.system(command)
-        elif what_to_do == "download":
-            rip_mp3(song[0], song[1], "", "")
+        if media == "song":
+            song = (" ".join(args)).split(" by ")
+            if what_to_do == "stream":
+                command = 'mpv "%s" --no-video' % find_mp3(song[0], song[1])
+                os.system(command)
+            elif what_to_do == "download":
+                rip_mp3(song[0], song[1], "", "")
 
-    elif media == "album":
-        album_name = (" ".join(args)).split(" by ")
-        get_album(album_name[0], album_name[1], what_to_do, "album")
+        elif media == "album":
+            album_name = (" ".join(args)).split(" by ")
+            get_album(album_name[0], album_name[1], what_to_do, "album")
 
-    elif media == "playlist":
-        rip_playlist(args[-1], what_to_do)
+        elif media == "playlist":
+            rip_playlist(args[-1], what_to_do)
 
-    elif media in ("comic", "book"):
-        if what_to_do == "download":
-            os.system("rtorrent '%s'" % get_torrent_url(args, media + "s"))
-            exit(0)
-        elif what_to_do == "stream":
-            print ("\n%s Streaming is unavailable for comics and books.\n" % output("e"))
-            exit(0)
+        elif media in ("comic", "book"):
+            if what_to_do == "download":
+                os.system("rtorrent '%s'" % get_torrent_url(args, media + "s"))
+                exit(0)
+            elif what_to_do == "stream":
+                print ("\n%s Streaming is unavailable for comics and books.\n" % output("e"))
+                exit(0)
 
-    elif media == "movie":
-        if what_to_do == "stream":
-            os.system('peerflix "%s" -a -d --mpv' % get_torrent_url(args, 'movie'))
-            exit(0)
-        elif what_to_do == "download":
-            os.system("rtorrent '%s'" % get_torrent_url(args, 'movie'))
-            exit(0)
+        elif media == "movie":
+            if what_to_do == "stream":
+                os.system('peerflix "%s" -a -d --mpv' % get_torrent_url(args, 'movie'))
+                exit(0)
+            elif what_to_do == "download":
+                os.system("rtorrent '%s'" % get_torrent_url(args, 'movie'))
+                exit(0)
 
-    elif media == "tv":
-        if what_to_do == "stream":
-            os.system('peerflix "%s" -a -d --mpv' % get_torrent_url(args, 'tv'))
-            exit(0)
-        elif what_to_do == "download":
-            os.system("rtorrent '%s'" % get_torrent_url(args, 'tv'))
-            exit(0)
-    elif media == 'link':
-        if what_to_do == 'stream':
-            os.system('mpv "%s" --no-video' % args[0])
-            exit(0)
-        elif what_to_do == 'download':
-            download_link(args[0], args[1], args[2])
-    elif media == 'soundtrack':
-        rip_soundtrack(" ".join(args[0:]), what_to_do)
-    else:
-        raise Exception("no media")
+        elif media == "tv":
+            if what_to_do == "stream":
+                os.system('peerflix "%s" -a -d --mpv' % get_torrent_url(args, 'tv'))
+                exit(0)
+            elif what_to_do == "download":
+                os.system("rtorrent '%s'" % get_torrent_url(args, 'tv'))
+                exit(0)
+        elif media == 'link':
+            if what_to_do == 'stream':
+                os.system('mpv "%s" --no-video' % args[0])
+                exit(0)
+            elif what_to_do == 'download':
+                download_link(args[0], args[1], args[2])
+        elif media == 'soundtrack':
+            rip_soundtrack(" ".join(args[0:]), what_to_do)
+        else:
+            raise Exception("no media")
+    except Exception as e:
+        invalid_format()
+
 
 def invalid_format():
     # I feel like there should be an easier way to write out help for command-line interfaces ...

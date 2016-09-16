@@ -2,6 +2,8 @@
 
 Downloads or streams media from the name of the song / album / movie / tv-show that you requested.
 
+# CURRENTLY BEING REMADE BECAUSE kat.cr WAS TAKEN DOWN.
+
 ### Dependencies
 
 First, actually install python and pip:
