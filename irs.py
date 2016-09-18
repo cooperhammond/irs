@@ -1,211 +1,139 @@
-#!/usr/bin/python3
-#    Ingenious Redistribution System, A system built to redistribute media to the consumer.
-#    Copyright (C) 2016  Cooper Hammond
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-import os, sys, time, re, select, requests
-import urllib.request, urllib.parse
-from termcolor import colored
-from urllib.request import Request, urlopen
-
-from mutagen.id3 import APIC
-from mutagen.easyid3 import EasyID3
-from mutagen.mp3 import MP3
+import mutagen.id3, mutagen.easyid3, mutagen.mp3, youtube_dl
+import urllib.request, urllib.parse, re, sys, os, requests
 from bs4 import BeautifulSoup
-import youtube_dl, mutagen
 
-def download_album_art(album, band):
+def search_google(song, artist, search_terms=""):
+    def visible(element):
+        if element.parent.name in ['style', 'script', '[document]', 'head', 'title']:
+            return False
+        elif re.match('<!--.*-->', str(element)):
+            return False
+        return True
+    string = "%s %s %s" % (song, artist, search_terms)
+    filename = 'http://www.google.com/search?q=' + urllib.parse.quote_plus(string)
+    hdr = {
+    'User-Agent':'Mozilla/5.0',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    }
+    texts = BeautifulSoup(urllib.request.urlopen(urllib.request.Request(filename, \
+    headers=hdr)).read(), 'html.parser').findAll(text=True)
+    return list(filter(visible, texts))
+
+def parse_metadata(song, artist, location, filename, tracknum="", album=""):
+    googled = search_google(song, artist)
+    mp3file = mutagen.mp3.MP3("%s/%s" % (location, filename), ID3=mutagen.easyid3.EasyID3)
+    print ("%s Metadata parsing:" % color('[+]','OKBLUE'))
+
+    # Song title
+    mp3file['title'] = song
+    mp3file.save()
+    print ("\t%s Title parsed: " % color('[+]','OKGREEN') + mp3file['title'][0])
+
+    # Artist
+    mp3file['artist'] = artist
+    mp3file.save()
+    print ("\t%s Artist parsed: " % color('[+]','OKGREEN') + mp3file['artist'][0])
+
+    # Album
+    if album == "":
+        for i, j in enumerate(googled):
+            if "Album:" in j:
+                album = (googled[i + 1])
     try:
-        search = "%s %s" % (album, band)
+        mp3file['album'] = album
+        print ("\t%s Album parsed: " % color('[+]','OKGREEN') + mp3file['album'][0])
+    except Exception:
+        mp3file['album'] = album
+        print ("\t%s Album not parsed" % color('[-]','FAIL'))
+    mp3file.save()
+
+    # Album art
+    if mp3file['album'][0] != "":
+        try:
+            download_album_art(mp3file['album'][0], artist, location=location)
+            embed_mp3("%s/cover.jpg" % location, "%s/%s" % (location, filename))
+            print ("\t%s Album art parsed" % color('[+]','OKGREEN'))
+        except Exception as e:
+            print ("\t%s Album art not parsed" % color('[-]','FAIL'))
+
+    # Release date
+    for i, j in enumerate(googled):
+        if "Released:" in j:
+            date = (googled[i + 1])
+    try:
+        mp3file['date'] = date
+        print ("\t%s Release date parsed" % color('[+]','OKGREEN'))
+    except Exception:
+        mp3file['date'] = ""
+    mp3file.save()
+
+    # Track number
+    if tracknum != "":
+        mp3file['tracknumber'] = str(tracknum)
+        mp3file.save()
+
+    print ("\n%s \"%s\" downloaded successfully!\n" % (color('[+]','OKGREEN'), song))
+
+def embed_mp3(art_location, song_location):
+    music = mutagen.id3.ID3(song_location)
+    music.delall("APIC")
+    music.add(mutagen.id3.APIC(encoding=0, mime="image/jpg", type=3, desc='', \
+    data=open(art_location, 'rb').read()))
+    music.save()
+
+def download_album_art(album, artist, location=""):
+    try:
+        search = "%s %s" % (album, artist)
         url = "http://www.seekacover.com/cd/" + urllib.parse.quote_plus(search)
-        page = requests.get(url).text
-        soup = BeautifulSoup(page, 'html.parser')
+        soup = BeautifulSoup(requests.get(url).text, 'html.parser')
         done = False
         for img in soup.findAll('img'):
             if done == False:
                 try:
                     if search.lower() in img['title'].lower():
-                        url = img['src']
-                        urllib.request.urlretrieve(url, "cover.jpg" % album) # &PATH;
+                        urllib.request.urlretrieve(img['src'], "%s/cover.jpg" % location)
                         done = True
                 except Exception:
                     pass
     except Exception:
-        print ("%s There was an error parsing the album art of '%s'" % (output("e"), album) )
+        pass
 
-def embed_mp3(art_location, song_path):
-    music = mutagen.id3.ID3(song_path)
-
-    music.delall('APIC')
-
-    music.add(APIC(
-        encoding=0,
-        mime="image/jpg",
-        type=3,
-        desc='',
-        data=open(art_location, "rb").read()
-        )
-    )
-    music.save()
-
-def find_mp3(song, author, soundtrack=False):
-    try:
-        special_chars = "\ / : * ? \" < > | - ( )".split(" ")
-        operator = 'by'
-        searching = "%s %s lyrics" % (song, author)
-        if soundtrack == True:
-            operator = "from"
-            searching = "%s soundtrack %s" % (author, song)
-        print ("%s %s %s\n" % (song, operator, author))
-        query_string = urllib.parse.urlencode({"search_query" : (searching)})
-        html_content = urllib.request.urlopen("http://www.youtube.com/results?" + query_string)
-        search_results = re.findall(r'href=\"\/watch\?v=(.{11})', html_content.read().decode())
-        in_song = False
-        i = -1
-        given_up_score = 0
-        while in_song == False:
-            if given_up_score >= 10:
-                in_song = True
-            i += 1
-            audio_url = ("http://www.youtube.com/watch?v=" + search_results[i])
-            title = (BeautifulSoup(urlopen(audio_url), 'html.parser')).title.string.lower()
-            for char in special_chars:
-                title = title.replace(char, "")
-            song_title = (song.lower()).split("/")
-            for song in song_title:
-                for char in special_chars:
-                    song = song.replace(char, "")
-                if song in title and "full album" not in title:
-                    in_song = True
-            if in_song == False:
-                given_up_score += 1
-        return audio_url
-    except Exception as e:
-        print ("%s There was an error finding the url of '%s'" % (output("e"), song) )
-
-def rip_mp3(song, author, album, tracknum, soundtrack=False):
-    audio_url = find_mp3(song, author, soundtrack=soundtrack)
-    special_chars = "\ / : * ? \" < > | ".split(" ")
-    filename = song
+def strip_special_chars(string):
+    special_chars = "\ / : * ? \" < > | - ( )".split(" ")
     for char in special_chars:
-        filename = filename.replace(char, "")
-    command = 'youtube-dl --metadata-from-title "%(title)s" --extract-audio \
---audio-format mp3 --add-metadata ' + audio_url
-    os.system(command)
-    for file in os.listdir("."):
-        if str(audio_url).strip("http://www.youtube.com/watch?v=") in file:
-            os.rename(file, filename + ".mp3") # &PATH;
+        string.replace(char, "")
+    return string
 
-    try:
-        googled = search_google(song, author, "")
-        mp3file = MP3(filename + ".mp3", ID3=EasyID3)
-        print ("\n%s Metadata parsing:" % output("s"))
-        try:
-            mp3file['title'] = song
-        except Exception:
-            mp3file['title'] = ""
-        mp3file.save()
-        print ('\t%s Title parsed: %s' % (output("g"), mp3file['title']))
+def color(text, type):
+    types = {'HEADER': '\033[95m', 'OKBLUE': '\033[94m', 'OKGREEN': '\033[92m',
+    'WARNING': '\033[93m','FAIL': '\033[91m','ENDC': '\033[0m','BOLD': '\033[1m'
+    ,'UNDERLINE': '\033[4m'}
+    return types[type] + text + types['ENDC']
 
-        mp3file['artist'] = author
-        mp3file.save()
-        print ('\t%s Author parsed: %s' % (output("g"), mp3file['artist']))
-        if album == "":
-            for i, j in enumerate(googled):
-                if "Album:" in j:
-                    album = (googled[i + 1])
-            try:
-                mp3file['album'] = album
-                mp3file.save()
-            except Exception:
-                mp3file['album'] = ""
-                mp3file.save()
-            print ('\t%s Album Auto-parsed: %s' % (output("g"), mp3file['album']))
-        else:
-            try:
-                mp3file['album'] = album
-                mp3file.save()
-            except Exception:
-                mp3file['album'] = ""
-                mp3file.save()
-            print ('\t%s Album parsed: %s' % (output("g"), mp3file['album']))
+def find_mp3(song, artist):
+    search_terms = song + " " + artist
+    print ("\"%s\" by %s" % (song, artist))
+    query_string = urllib.parse.urlencode({"search_query" : (search_terms)})
+    html_content = urllib.request.urlopen("http://www.youtube.com/results?" + query_string)
+    search_results = re.findall(r'href=\"\/watch\?v=(.{11})', html_content.read().decode())
+    in_title = False
+    i = -1
+    given_up_score = 0
+    while in_title == False:
+        i += 1
+        given_up_score += 1
+        if given_up_score >= 10:
+            in_title = True
+        audio_url = ("http://www.youtube.com/watch?v=" + search_results[i])
+        title = strip_special_chars((BeautifulSoup(urllib.request.urlopen(audio_url), 'html.parser')).title.string.lower())
+        song_title = song.lower().split("/")
+        for song in song_title:
+            if strip_special_chars(song) in strip_special_chars(title):
+                in_title = True
+    return search_results[i]
 
-        if mp3file['album'][0] != "":
-            try:
-                download_album_art(mp3file['album'][0], author)
-                embed_mp3("cover.jpg", song + ".mp3") # &PATH;
-                print ("\t%s Album art Auto-parsed!" % output("g"))
-            except Exception as e:
-                print ("%s There was a problem with Auto-parsing the album art of: '%s'"\
- % (output("e"), song))
-                print (e)
-
-        for i, j in enumerate(googled):
-            if "Released:" in j:
-                date = (googled[i + 1])
-        try:
-            mp3file['date'] = date
-        except Exception:
-            mp3file['date'] = ""
-        mp3file.save()
-        print ('\t%s Release date Auto-parsed: "%s"' % (output("g"), mp3file['date'][0]))
-
-        if tracknum != "":
-            mp3file['tracknumber'] = str(tracknum)
-            mp3file.save()
-
-        print ('\n%s "' % output("g") + song + '" by ' + author + ' downloaded successfully\n')
-    except Exception as e:
-        print (e)
-
-def output(string):
-    if string == "q":
-        return colored("[?]", "cyan", attrs=['bold'])
-    elif string == "e":
-        return colored("[-]", "red", attrs=['bold'])
-    elif string == "g":
-        return colored("[+]", "green", attrs=['bold'])
-    elif string == "s":
-        return colored("[*]", "blue", attrs=['bold'])
-
-def visible(element):
-    if element.parent.name in ['style', 'script', '[document]', 'head', 'title']:
-        return False
-    elif re.match('<!--.*-->', str(element)):
-        return False
-    return True
-
-def search_google(song_name, band, search_terms):
-    try:
-        string = "%s %s %s" % (song_name, band, search_terms)
-        filename = 'http://www.google.com/search?q=' + urllib.parse.quote_plus(string)
-        hdr = {
-        'User-Agent':'Mozilla/5.0',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        }
-        texts = BeautifulSoup(urlopen(Request(filename, headers=hdr)).read(), 'html.parser')\
-.findAll(text=True)
-
-        visible_texts = list(filter(visible, texts))
-        return visible_texts
-    except Exception as e:
-        print ("%s There was an error with Auto-parsing." % output("e"))
-        return
-
-def get_album(album_name, artist, what_to_do, search, tried=False):
-    visible_texts = search_google(album_name, artist, search)
+def rip_album(album, artist, tried=False, search="album"):
+    visible_texts = search_google(album, artist, search)
     try:
         songs = []
         num = True
@@ -225,225 +153,60 @@ def get_album(album_name, artist, what_to_do, search, tried=False):
                     num = False
                 else:
                     pass
-        if what_to_do == "download":
-            for i, j in enumerate(songs):
-                rip_mp3(j, artist, album_name, i + 1)
-        elif what_to_do == "stream":
-            for i in songs:
-                a = find_mp3(i, artist)
-                command = 'mpv "%s" --no-video' % a
-                os.system(command)
+
+        for i, j in enumerate(songs):
+            rip_mp3(j, artist, part_of_album=True, album=album, tracknum=i + 1)
+
     except Exception as e:
         if str(e) == "local variable 'indexed' referenced before assignment" or str(e) == 'list index out of range':
             if tried != True:
-                print ("%s Trying to find album ..." % output("s"))
-                get_album(album_name, artist, what_to_do, "", True)
+                print ("%s Trying to find album ..." % color('[*]','OKBLUE'))
+                rip_album(album, artist, tried=True, search="")
             else:
-                print ("%s Could not find album %s" % (output("e"), album_))
-                exit(0)
+                print ("%s Could not find album '%s'" % (color('[-]','FAIL'), album))
         else:
             print ("%s There was an error with getting the contents \
-of the album %s:\n%s" % (output("e"), album_name, e) )
+of the album '%s'" % (color('[-]','FAIL'), album))
 
+def rip_mp3(song, artist, part_of_album=False, album="", tracknum=""):
+    audio_code = find_mp3(song, artist)
+    filename = strip_special_chars(song) + ".mp3"
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        #'quiet': True,
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+        }],
+    }
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        ydl.download(["http://www.youtube.com/watch?v=" + audio_code])
 
-def get_torrent_url(args, category):
-    try:
-        search_url = 'http://kickass.mx/search.php?q=' + urllib.parse.quote_plus((" ".join(args) + \
-" category:" + category))
-        search_request_response = requests.get(search_url, verify=True)
-        soup = BeautifulSoup(search_request_response.text, 'html.parser')
-        results, ran_out = 0, False
-        i = 0
-        print ("")
-        while True:
-            movie_page = soup.find_all("a", class_="cellMainLink")
-            for number in range(0,10):
-                try:
-                    print ("%s. " % (number + 1) + movie_page[number].string)
-                    results += 1
-                except Exception:
-                    ran_out = True
-                    pass
-            if ran_out == True:
-                if results == 0:
-                    print (output('e') + " No results.\n")
-                    exit(0)
-                else:
-                    print (output('e') + " End of results.")
-            if results != 0:
+    artist_folder = artist
+    if not os.path.isdir(artist_folder):
+        os.makedirs(artist_folder)
+    if not part_of_album:
+        location = artist_folder
 
-                try: a = int(str(input("\n%s What torrent would you like? " % output("q")))) - 1
-                except Exception: a = 100; pass
-                # This code is either hyper-efficient, or completely against every ettiquite.
+    if album != "" and part_of_album:
+        album_folder = artist + "/" + album
+        if not os.path.isdir(album_folder):
+            os.makedirs(album_folder)
+        location = album_folder
 
-                if a in tuple(range(0, 10)):
-                    search_url = requests.get('https://kat.cr' + movie_page[a].get('href'), verify=True)
-                    soup = BeautifulSoup(search_url.text, 'html.parser')
-                    torrent_url = 'https:' + soup.find_all('a', class_='siteButton')[0].get('href')
-                    return torrent_url
-    except Exception as e:
-        print ("%s There was an error getting the torrent url with '%s'" % (output("e"), " ".join(args)))
+    for file in os.listdir("."):
+        if audio_code in file:
+            os.rename(file, location + "/" + filename)
 
-def rip_playlist(file_name, what_to_do):
-    txt_file = open(file_name, 'r')
-    things_that_went_wrong = []
-    something_went_wrong = False
-    for line in txt_file:
-        try:
-            arr = line.strip("\n").split(": ")
-            song = arr[0]
-            artist = arr[1]
-            if what_to_do == "download":
-                rip_mp3(song, artist, "", "")
-            elif what_to_do == "stream":
-                os.system("mpv '%s' --no-video" % find_mp3(song, artist))
-        except Exception as e:
-            something_went_wrong = True
-            things_that_went_wrong.append(line)
-            pass
-    if something_went_wrong == True:
-        print ("%s Something was wrong with the formatting of the following lines:" % output("e"))
-        for i in things_that_went_wrong: print ("\t%s" % i)
-
-def download_link(link, title, artist):
-    print ("'%s' by '%s' from '%s'\n" % (title, artist, link))
-    try:
-        os.system('youtube-dl --metadata-from-title "%(title)s" --extract-audio \
---audio-format mp3 --add-metadata ' + link)
-    except Exception as e:
-        print ('%s Error with given link:\n' % output("e") + e)
-        exit(0)
-    mp3file = MP3(title + '.mp3', ID3=EasyID3)
-    googled = search_google(title, artist, "")
-    try:
-        mp3file['title'] = title
-        print ("\n%s Metadata parsing:")
-        print ('\t%s Title parsed: %s' % (output("g"), mp3file['title']))
-        mp3file['artist'] = artist
-        print ('\t%s Author parsed: %s' % (output("g"), mp3file['artist']))
-        mp3file.save()
-    except Exception as e:
-        print ("%s Error with parsing title/author for '%s'" % (output('e'), title))
-    try:
-        for i, j in enumerate(googled):
-            if "Album:" in j:
-                album = (googled[i + 1])
-        try:
-            mp3file['album'] = album
-            mp3file.save()
-        except Exception:
-            mp3file['album'] = ""
-            mp3file.save()
-    except Exception as e:
-        print ("%s Error with Auto-parsing '%s'" % (output('e'), title))
-
-def rip_soundtrack(movie, what_to_do):
-    try:
-        search = search_google("", "", movie + " soundtrack")
-        songs = []
-
-        for i, j in enumerate(search):
-            if j.replace("\n", "") == ',':
-                songs.append(search[i - 1])
-
-        if what_to_do == 'download':
-            for i in songs:
-                rip_mp3(i, movie, "", "", soundtrack=True)
-        elif what_to_do == 'stream':
-            for i in songs:
-                command = "mpv '%s' --no-video" % find_mp3(i, movie, soundtrack=True)
-                os.system(command)
-    except Exception as e:
-        print ("%s There was an error finding the soundtrack for '%s':\n%s" % (output('e'), movie, e))
+    parse_metadata(song, artist, location, filename, tracknum=tracknum, album=album)
 
 def main():
-    try:
-        i = 0
-        args = sys.argv
-        del args[i]
-        what_to_do = args[i]
-        del args[i]
-
-        if what_to_do not in ("download", "stream"): raise Exception("no what-to-do")
-
-        media = args[i]
-        del args[i]
-
-        if media == "song":
-            song = (" ".join(args)).split(" by ")
-            if what_to_do == "stream":
-                command = 'mpv "%s" --no-video' % find_mp3(song[0], song[1])
-                os.system(command)
-            elif what_to_do == "download":
-                rip_mp3(song[0], song[1], "", "")
-
-        elif media == "album":
-            album_name = (" ".join(args)).split(" by ")
-            get_album(album_name[0], album_name[1], what_to_do, "album")
-
-        elif media == "playlist":
-            rip_playlist(args[-1], what_to_do)
-
-        elif media in ("comic", "book"):
-            if what_to_do == "download":
-                os.system("rtorrent '%s'" % get_torrent_url(args, media + "s"))
-                exit(0)
-            elif what_to_do == "stream":
-                print ("\n%s Streaming is unavailable for comics and books.\n" % output("e"))
-                exit(0)
-
-        elif media == "movie":
-            if what_to_do == "stream":
-                os.system('peerflix "%s" -a -d --mpv' % get_torrent_url(args, 'movie'))
-                exit(0)
-            elif what_to_do == "download":
-                os.system("rtorrent '%s'" % get_torrent_url(args, 'movie'))
-                exit(0)
-
-        elif media == "tv":
-            if what_to_do == "stream":
-                os.system('peerflix "%s" -a -d --mpv' % get_torrent_url(args, 'tv'))
-                exit(0)
-            elif what_to_do == "download":
-                os.system("rtorrent '%s'" % get_torrent_url(args, 'tv'))
-                exit(0)
-        elif media == 'link':
-            if what_to_do == 'stream':
-                os.system('mpv "%s" --no-video' % args[0])
-                exit(0)
-            elif what_to_do == 'download':
-                download_link(args[0], args[1], args[2])
-        elif media == 'soundtrack':
-            rip_soundtrack(" ".join(args[0:]), what_to_do)
-        else:
-            raise Exception("no media")
-    except Exception as e:
-        invalid_format()
-
-
-def invalid_format():
-    # I feel like there should be an easier way to write out help for command-line interfaces ...
-    print ("Usage:")
-    print ("""    irs (stream | download) movie <movie-name>
-    irs (stream | download) tv <tv-show> <episode>
-    irs (stream | download) (song | album) <title> by <artist>
-    irs (stream | download) playlist <txt-file-name>
-    irs (stream | download) '<link>' <title> <author>
-    irs (stream | download) soundtrack <movie-name>
-    irs download (comic <title> <run> | book <title> by <author>)
-    """)
-    print ("Examples:")
-    print ("""    irs download book I, Robot by Isaac Asimov
-    irs stream song Where Is My Mind by The Pixies
-    irs download album A Night At The Opera by Queen
-    irs stream movie Fight Club
-    irs download tv mr.robot s01e01
-    irs stream playlist "Rock Save The Queen.txt"
-    irs download comic Paper Girls 001
-    irs stream soundtrack Super 8
-    irs download link 'https://www.youtube.com/watch?v=5sy2qLtrQQQ' "Stranger Things OST" "Kyle Dixon and Michael Stein"
-    """)
-    print ("\nFor more info see: https://github.com/kepoorhampond/IngeniousRedistributionSystem")
+    media = sys.argv[1]
+    args = " ".join(sys.argv[2:]).split(" by ")
+    if media == "song":
+        rip_mp3(args[0], args[1])
+    elif media == "album":
+        rip_album(args[0], args[1])
 
 if __name__ == '__main__':
     main()
