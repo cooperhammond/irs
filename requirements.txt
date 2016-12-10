@@ -1,4 +1,0 @@
-mutagen==1.31
-requests==2.11.1
-youtube_dl==2016.7.7
-beautifulsoup4==4.5.1
