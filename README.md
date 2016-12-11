@@ -24,3 +24,16 @@ ___
 ```
 $ pip install irs
 ```
+Almost all dependencies are automatically installed by pip, but youtube_dl still needs ffmpeg to convert video to audio, so for Windows, you can install [`Scoop`](http://scoop.sh/) and then just do:
+```
+$ scoop install ffmpeg
+```
+For OSX, you can use [`Brew`](http://brew.sh/) and do:
+```
+$ brew install ffmpeg
+```
+For Ubuntu:
+```
+$ sudo apt-get install ffmpeg
+```
+<sub><sup>Most other linux distros have `ffmpeg` or `libav-tools` in their package manager repos, so you can install one or the other for other distros.<sup><sub>
