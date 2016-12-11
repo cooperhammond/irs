@@ -2,7 +2,7 @@
 [![License: GNU](https://img.shields.io/badge/License-GNU-yellow.svg)](http://www.gnu.org/licenses/gpl.html)
 [![PyPI](https://img.shields.io/badge/Python-3.5-blue.svg)](https://pypi.python.org/pypi/irs)
 
-<em>Now with working album art!<em>
+<em>Now with working album art!</em>
 
 An ingenious program to download audio from youtube and then parse metadata for the downloaded file.
 ___
