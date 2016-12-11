@@ -2,22 +2,20 @@ from setuptools import setup
 
 setup(
     name='irs',
-    version='0.1',
+    version='1.0.2',
     description='A music downloader that just gets metadata.',
-    url='http://github.com/kepoorhampond/irs',
+    url='https://github.com/kepoorhampond/irs',
     author='Kepoor Hampond',
     author_email='kepoorh@gmail.com',
     license='GNU',
-    packages=['irs'],
+    packages =['irs'],
     install_requires=[
-        'youtube-dl',
-        'bs4',
-        'mutagen',
-        'requests',
+      'bs4',
+      'mutagen',
+      'youtube-dl',
+      'requests',
     ],
-    entry_points={
-        'console_scripts': [
-            'irs = irs.__main__:main'
-        ]
+    entry_points = {
+      'console_scripts': ['irs = irs.__main__:main'],
     },
 )
