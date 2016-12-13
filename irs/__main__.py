@@ -32,12 +32,24 @@ def console():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-a', '--artist', dest="artist", help="Specify the artist name")
+    parser.add_argument('-v', '--version', dest="version", action='store_true', help="Display the version and exit.")
 
     media = parser.add_mutually_exclusive_group()
     media.add_argument('-A', '--album', dest="album", help="Specify album name of the artist")
     media.add_argument('-s', '--song', dest="song", help="Specify song name of the artist")
 
     args = parser.parse_args()
+
+
+    if args.version:
+        import pkg_resources
+        print ("\n\n" + color("Ingenious Redistribution System", ["HEADER", "BOLD"]))
+        print ("Homepage: " + color("https://github.com/kepoorhampond/irs", ["OKGREEN"]))
+        print ("License: " + color("The GNU", ["YELLOW"]) + " (http://www.gnu.org/licenses/gpl.html)")
+        print ("Version: " + pkg_resources.get_distribution("irs").version)
+
+        print ("\n")
+        exit(0)
 
     if args.artist and not (args.album or args.song):
         print ("usage: __init__.py [-h] [-a ARTIST] [-A ALBUM | -s SONG] \n\
