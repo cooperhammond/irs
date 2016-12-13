@@ -36,9 +36,8 @@ def search_google(song, artist, search_terms=""):
 
     return list(filter(visible, texts))
 
-def parse_metadata(song, artist, location, filename, tracknum="", album="", album_url=None):
+def parse_metadata(song, artist, location, filename, tracknum="", album="", album_art_url=""):
     googled = search_google(song, artist)
-
     mp3file = MP3("%s/%s" % (location, filename), ID3=EasyID3)
 
     # Song title
@@ -54,8 +53,9 @@ def parse_metadata(song, artist, location, filename, tracknum="", album="", albu
 
     print (bc.OKGREEN + "Artist parsed: " + bc.ENDC + mp3file['artist'][0])
 
+
     # Album
-    if album == "":
+    if not album:
         for i, j in enumerate(googled):
             if "Album:" in j:
                 album = (googled[i + 1])
@@ -66,6 +66,7 @@ def parse_metadata(song, artist, location, filename, tracknum="", album="", albu
         print (bc.FAIL + "Album not parsed.")
 
     mp3file.save()
+
 
     # Release date
     for i, j in enumerate(googled):
@@ -81,24 +82,25 @@ def parse_metadata(song, artist, location, filename, tracknum="", album="", albu
 
     mp3file.save()
 
+
     # Track number
-    if tracknum != "":
+    if tracknum:
         mp3file['tracknumber'] = str(tracknum)
         mp3file.save()
 
+
     # Album art
     try:
-        if album_url == None:
-            album_url = get_albumart_url(album, artist)
-            embed_mp3(album_url, location + "/" + filename)
-        else:
-            embed_mp3(album_url, location + "/" + filename)
+        if not album_art_url:
+            album_art_url = get_albumart_url(album, artist)
+            embed_mp3(album_art_url, location + "/" + filename)
+        else: # If part of an album, it should do this.
+            embed_mp3(album_art_url, location + "/" + filename)
 
-        print (bc.OKGREEN + "Album art parsed: " + bc.ENDC + album_url)
+        print (bc.OKGREEN + "Album art parsed: " + bc.ENDC + album_art_url)
 
     except Exception as e:
-        print (e)
-        print (bc.FAIL + "Album art not parsed." + bc.ENDC)
+        print (bc.FAIL + "Album art not parsed: " + bc.ENDC + e)
 
 def embed_mp3(albumart_url, song_location):
     image = urlopen(albumart_url)

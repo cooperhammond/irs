@@ -19,6 +19,9 @@ optional arguments:
   -s SONG, --song SONG  Specify song name of the artist
 ```
 [![asciicast](https://asciinema.org/a/bcs7i0sjmka052wsdyxg5xrug.png)](https://asciinema.org/a/bcs7i0sjmka052wsdyxg5xrug?speed=3&autoplay=true)
+
+[![asciicast](https://asciinema.org/a/8kb9882j4cbtd4hwbsbb7h0ia.png)](https://asciinema.org/a/8kb9882j4cbtd4hwbsbb7h0ia?speed=3&autoplay=true)
+
 ___
 ### Installation
 ```
@@ -36,4 +39,4 @@ For Ubuntu:
 ```
 $ sudo apt-get install ffmpeg
 ```
-<sub><sup>Most other linux distros have `ffmpeg` or `libav-tools` in their package manager repos, so you can install one or the other for other distros.<sup><sub>
+Most other linux distros have `ffmpeg` or `libav-tools` in their package manager repos, so you can install one or the other for other distros.

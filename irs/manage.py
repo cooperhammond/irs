@@ -44,8 +44,12 @@ def find_mp3(song, artist):
 
     return search_results[i]
 
-def rip_album(album, artist, tried=False, search="album", album_url=None):
+def rip_album(album, artist,
+    tried=False, # for if it can't find the album the first time
+    search="album", # ditto
+        ):
     visible_texts = search_google(album, artist, search)
+    errors = []
     try:
         songs = []
         num = True
@@ -70,11 +74,19 @@ def rip_album(album, artist, tried=False, search="album", album_url=None):
                 else:
                     pass
 
-        if album_url != None:
-            album_url = get_albumart_url(album, artist)
+        print ("")
+        print (bc.HEADER + "Album Contents:" + bc.ENDC)
+        for i, j in enumerate(songs):
+            print (bc.OKBLUE + "  - " + j + bc.ENDC)
+
+        album_art_url = get_albumart_url(album, artist)
 
         for i, j in enumerate(songs):
-            rip_mp3(j, artist, part_of_album=True, album=album, tracknum=i + 1, album_url=album_url)
+            song = j
+            rip_mp3(j, artist, part_of_album=True, album=album, tracknum=i + 1, album_art_url=album_art_url)
+
+        if errors.size > 0:
+            for error in errors: print (error)
 
     except Exception as e:
         if str(e) == "local variable 'indexed' referenced before assignment" or str(e) == 'list index out of range':
@@ -84,13 +96,22 @@ def rip_album(album, artist, tried=False, search="album", album_url=None):
             else:
                 print (bc.FAIL + 'Could not find album "%s"' % album + bc.ENDC)
         else:
-            print (bc.FAIL + 'There was an error getting the contents of "%s":' % album + bc.ENDC)
-            print (e)
+            errors.append(bc.FAIL + "There was a problem with downloading: " + bc.ENDC + song)
+            print (bc.FAIL + "Something major went wrong: " + str(e) + bc.ENDC)
+            pass
 
 
-def rip_mp3(song, artist, part_of_album=False, album="", tracknum="", album_url=None):
+def rip_mp3(song, artist,
+    part_of_album=False, # neccessary for creating folders
+    album=None, # if you want to specify an album and save a bit of time
+    tracknum=None, # to specify the tracknumber in the album
+    album_art_url=None # if you want to save a lot of time trying to find album cover.
+        ):
+
     audio_code = find_mp3(song, artist)
+
     filename = strip_special_chars(song) + ".mp3"
+
     ydl_opts = {
         'format': 'bestaudio/best',
         #'quiet': True,
@@ -99,8 +120,10 @@ def rip_mp3(song, artist, part_of_album=False, album="", tracknum="", album_url=
             'preferredcodec': 'mp3',
         }],
     }
+
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         ydl.download(["http://www.youtube.com/watch?v=" + audio_code])
+
 
     artist_folder = artist
     if not os.path.isdir(artist_folder):
@@ -108,17 +131,21 @@ def rip_mp3(song, artist, part_of_album=False, album="", tracknum="", album_url=
     if not part_of_album:
         location = artist_folder
 
-    if album != "" and part_of_album:
+
+    if album and part_of_album:
         album_folder = artist + "/" + album
         if not os.path.isdir(album_folder):
             os.makedirs(album_folder)
         location = album_folder
 
+
     for file in os.listdir("."):
         if audio_code in file:
             os.rename(file, location + "/" + filename)
 
-    parse_metadata(song, artist, location, filename, tracknum=tracknum, album=album, album_url=album_url)
 
-    print (color(song, ["BOLD", "UNDERLINE"]) + bc.OKGREEN + '" downloaded successfully!'+ bc.ENDC)
+    parse_metadata(song, artist, location, filename, tracknum=tracknum, album=album, album_art_url=album_art_url)
+
+
+    print (color(song, ["BOLD", "UNDERLINE"]) + bc.OKGREEN + ' downloaded successfully!'+ bc.ENDC)
     print ("")
