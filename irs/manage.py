@@ -88,7 +88,7 @@ def rip_album(album, artist,
             print (color("\n%s/%s - " % (i + 1, len(songs)), ["UNDERLINE"]), end="")
             rip_mp3(j, artist, part_of_album=True, album=album, tracknum=i + 1, album_art_url=album_art_url)
 
-        if errors.size > 0:
+        if len(errors) > 0:
             for error in errors: print (error)
 
     except Exception as e:
