@@ -36,7 +36,11 @@ def search_google(song, artist, search_terms=""):
 
     return list(filter(visible, texts))
 
-def parse_metadata(song, artist, location, filename, tracknum="", album="", album_art_url=""):
+def parse_metadata(song, artist, location, filename,
+    tracknum="",
+    album="",
+    album_art_url=""
+        ):
     googled = search_google(song, artist)
     mp3file = MP3("%s/%s" % (location, filename), ID3=EasyID3)
 
@@ -97,7 +101,10 @@ def parse_metadata(song, artist, location, filename, tracknum="", album="", albu
         else: # If part of an album, it should do this.
             embed_mp3(album_art_url, location + "/" + filename)
 
-        print (bc.OKGREEN + "Album art parsed: " + bc.ENDC + album_art_url)
+        if album_art_url:
+            print (bc.OKGREEN + "Album art parsed!" + bc.ENDC)
+        else:
+            print (bc.OKGREEN + "Album art parsed: " + bc.ENDC + album_art_url)
 
     except Exception as e:
         print (bc.FAIL + "Album art not parsed: " + bc.ENDC + e)

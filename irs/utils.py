@@ -1,3 +1,5 @@
+import sys
+
 def strip_special_chars(string):
     special_chars = "\ / : * ? \" < > | - ( )".split(" ")
     for char in special_chars:
@@ -44,6 +46,8 @@ else:
         YELLOW = ''
 
 def color(text, colors=[]):
+    if colors == []:
+        raise "Must have definitions when calling color(text, colors=[])"
     color_string = ""
     for color in colors:
         color_string += "bc.%s + " % color

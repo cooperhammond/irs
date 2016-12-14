@@ -15,7 +15,7 @@ from .utils import *
 from .metadata import *
 
 def find_mp3(song, artist):
-    print ('\n' + color(song, ["BOLD", "UNDERLINE"]) + ' by ' + color(artist, ["BOLD", "UNDERLINE"]) + '\n')
+    print (color(song, ["BOLD", "UNDERLINE"]) + ' by ' + color(artist, ["BOLD", "UNDERLINE"]) + '\n')
 
     search_terms = song + " " + artist
     query_string = urlencode({"search_query" : (search_terms)})
@@ -79,10 +79,13 @@ def rip_album(album, artist,
         for i, j in enumerate(songs):
             print (bc.OKBLUE + "  - " + j + bc.ENDC)
 
+        print (bc.YELLOW + "\nFinding album cover ... " + bc.ENDC, end="")
         album_art_url = get_albumart_url(album, artist)
+        print (bc.OKGREEN + "\rAlbum cover found: " + bc.ENDC + album_art_url)
 
         for i, j in enumerate(songs):
             song = j
+            print (color("\n%s/%s - " % (i + 1, len(songs)), ["UNDERLINE"]), end="")
             rip_mp3(j, artist, part_of_album=True, album=album, tracknum=i + 1, album_art_url=album_art_url)
 
         if errors.size > 0:
