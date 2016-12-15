@@ -8,16 +8,17 @@ An ingenious program to download audio from youtube and then parse metadata for 
 ___
 ### Usage and Examples
 ```
-usage: irs [-h] [-a ARTIST] [-A ALBUM | -s SONG]
+usage: irs [-h] [-v] [-a ARTIST] [-A ALBUM | -s SONG]
 
 optional arguments:
   -h, --help            show this help message and exit
+  -v, --version         Display the version and exit.
   -a ARTIST, --artist ARTIST
                         Specify the artist name
   -A ALBUM, --album ALBUM
                         Specify album name of the artist
   -s SONG, --song SONG  Specify song name of the artist
-```
+ ```
 [![asciicast](https://asciinema.org/a/bcs7i0sjmka052wsdyxg5xrug.png)](https://asciinema.org/a/bcs7i0sjmka052wsdyxg5xrug?speed=3&autoplay=true)
 
 [![asciicast](https://asciinema.org/a/8kb9882j4cbtd4hwbsbb7h0ia.png)](https://asciinema.org/a/8kb9882j4cbtd4hwbsbb7h0ia?speed=3)
