@@ -8,17 +8,30 @@ An ingenious program to download audio from youtube and then parse metadata for 
 ___
 ### Usage and Examples
 ```
-usage: irs [-h] [-v] [-a ARTIST] [-A ALBUM | -s SONG]
+usage:
+    irs
+    irs (-h | -v)
+    irs -p PLAYLIST [-c COMMAND]
+    irs -a ARTIST (-s SONG | -A ALBUM [-st SEARCH_TERMS]) [-c COMMAND]
 
-optional arguments:
+Options:
   -h, --help            show this help message and exit
   -v, --version         Display the version and exit.
+  -c COMMAND, --command COMMAND
+                        Run a background command with each song's location.
+                        Example: `-c "rhythmbox %(loc)s"`
   -a ARTIST, --artist ARTIST
-                        Specify the artist name
+                        Specify the artist name.
+  -p PLAYLIST, --playlist PLAYLIST
+                        Specify playlist filename. Each line in the file
+                        should be formatted like so: `SONGNAME - ARTIST`
+  -s SONG, --song SONG  Specify song name of the artist.
   -A ALBUM, --album ALBUM
-                        Specify album name of the artist
-  -s SONG, --song SONG  Specify song name of the artist
- ```
+                        Specify album name of the artist.
+  -st SEARCH_TERMS, --search-terms SEARCH_TERMS
+                        Only use if calling -A/--album. Acts as extra search
+                        terms when looking for the album.
+```
 [![asciicast](https://asciinema.org/a/bcs7i0sjmka052wsdyxg5xrug.png)](https://asciinema.org/a/bcs7i0sjmka052wsdyxg5xrug?speed=3&autoplay=true)
 
 [![asciicast](https://asciinema.org/a/8kb9882j4cbtd4hwbsbb7h0ia.png)](https://asciinema.org/a/8kb9882j4cbtd4hwbsbb7h0ia?speed=3)

@@ -30,18 +30,56 @@ def console():
         rip_album(album, artist)
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-a', '--artist', dest="artist", help="Specify the artist name")
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument('-h', '--help', action='store_true', dest='help')
     parser.add_argument('-v', '--version', dest="version", action='store_true', help="Display the version and exit.")
+    parser.add_argument('-c', '--command', dest="command", help="Run a background command with each song's location.")
+    parser.add_argument('-a', '--artist', dest="artist", help="Specify the artist name.")
+
+    parser.add_argument('-p', '--playlist', dest="playlist", \
+    help="Specify playlist filename. Each line should be formatted like so: SONGNAME - ARTIST")
+
 
     media = parser.add_mutually_exclusive_group()
-    media.add_argument('-A', '--album', dest="album", help="Specify album name of the artist")
-    media.add_argument('-s', '--song', dest="song", help="Specify song name of the artist")
+    media.add_argument('-s', '--song', dest="song", help="Specify song name of the artist.")
+
+    media.add_argument('-A', '--album', dest="album", help="Specify album name of the artist.")
+    parser.add_argument('-st', '--search-terms', dest="search_terms", \
+        help="Only use if calling -A/--album. Acts as extra search terms for the album.")
+
 
     args = parser.parse_args()
 
+    if args.help:
+        help = \
+"""
+usage:
+    irs
+    irs (-h | -v)
+    irs -p PLAYLIST [-c COMMAND]
+    irs -a ARTIST (-s SONG | -A ALBUM [-st SEARCH_TERMS]) [-c COMMAND]
 
-    if args.version:
+Options:
+  -h, --help            show this help message and exit
+  -v, --version         Display the version and exit.
+  -c COMMAND, --command COMMAND
+                        Run a background command with each song's location.
+                        Example: `-c "rhythmbox %(loc)s"`
+  -a ARTIST, --artist ARTIST
+                        Specify the artist name.
+  -p PLAYLIST, --playlist PLAYLIST
+                        Specify playlist filename. Each line in the file
+                        should be formatted like so: `SONGNAME - ARTIST`
+  -s SONG, --song SONG  Specify song name of the artist.
+  -A ALBUM, --album ALBUM
+                        Specify album name of the artist.
+  -st SEARCH_TERMS, --search-terms SEARCH_TERMS
+                        Only use if calling -A/--album. Acts as extra search
+                        terms when looking for the album.
+"""
+        print (help)
+
+    elif args.version:
         import pkg_resources
         print ("\n\n" + color("Ingenious Redistribution System", ["HEADER", "BOLD"]))
         print ("Homepage: " + color("https://github.com/kepoorhampond/irs", ["OKGREEN"]))
@@ -51,19 +89,31 @@ def main():
         print ("\n")
         exit(0)
 
-    if args.artist and not (args.album or args.song):
-        print ("usage: __init__.py [-h] [-a ARTIST] [-A ALBUM | -s SONG] \n\
-    error: must specify -A/--album or -s/--song if specifying -a/--artist")
+    elif not args.album and args.search_terms:
+        parser.error("error: must supply -A/--album if you are going to supply -st/--search-terms")
         exit(1)
 
-    elif not args.artist:
+    elif args.artist and not (args.album or args.song):
+        print ("error: must specify -A/--album or -s/--song if specifying -a/--artist")
+        exit(1)
+
+    elif not args.artist and not args.playlist:
         console()
+
+    elif args.playlist:
+        rip_playlist(args.playlist, args.command)
 
     elif args.artist:
         if args.album:
-            rip_album(args.album, args.artist)
+            if args.search_terms:
+                rip_album(args.album, args.artist, command=args.command, search=args.search_terms)
+            else:
+                rip_album(args.album, args.artist, command=args.command)
+
         elif args.song:
-            rip_mp3(args.song, args.artist)
+            rip_mp3(args.song, args.artist, command=args.command)
+
+
 
 if __name__ == "__main__":
     main()

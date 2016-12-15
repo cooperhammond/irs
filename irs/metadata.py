@@ -96,18 +96,17 @@ def parse_metadata(song, artist, location, filename,
     # Album art
     try:
         if not album_art_url:
-            album_art_url = get_albumart_url(album, artist)
-            embed_mp3(album_art_url, location + "/" + filename)
+            temp_url = get_albumart_url(album, artist)
+            embed_mp3(temp_url, location + "/" + filename)
+            print (bc.OKGREEN + "Album art parsed: " + bc.ENDC + temp_url)
+
         else: # If part of an album, it should do this.
             embed_mp3(album_art_url, location + "/" + filename)
+            print (bc.OKGREEN + "Album art parsed." + bc.ENDC)
 
-        if album_art_url:
-            print (bc.OKGREEN + "Album art parsed!" + bc.ENDC)
-        else:
-            print (bc.OKGREEN + "Album art parsed: " + bc.ENDC + album_art_url)
 
     except Exception as e:
-        print (bc.FAIL + "Album art not parsed: " + bc.ENDC + e)
+        print (bc.FAIL + "Album art not parsed: " + bc.ENDC + str(e))
 
 def embed_mp3(albumart_url, song_location):
     image = urlopen(albumart_url)
@@ -130,6 +129,14 @@ def embed_mp3(albumart_url, song_location):
     audio.save()
 
 def get_albumart_url(album, artist):
+    def test_404(url):
+        try:
+            urlopen(albumart).read()
+        except Exception:
+            return False
+        return True
+
+    tries = 0
     album = "%s %s Album Art" % (artist, album)
     url = ("https://www.google.com/search?q=" + quote(album.encode('utf-8')) + "&source=lnms&tbm=isch")
     header = {
@@ -143,7 +150,11 @@ def get_albumart_url(album, artist):
 
     soup = BeautifulSoup(urlopen(Request(url, headers=header)), "html.parser")
 
-    albumart_div = soup.find("div", {"class": "rg_meta"})
-    albumart = json.loads(albumart_div.text)["ou"]
+    albumart_divs = soup.findAll("div", {"class": "rg_meta"})
+    albumart = json.loads(albumart_divs[tries].text)["ou"]
+
+    while not test_404(albumart):
+        tries += 1
+        albumart = json.loads(albumart_divs[tries].text)["ou"]
 
     return albumart

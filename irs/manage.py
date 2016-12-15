@@ -44,9 +44,37 @@ def find_mp3(song, artist):
 
     return search_results[i]
 
+def rip_playlist(file_name, command=None):
+    print (command.inspect)
+    try:
+        file = open(file_name, 'r')
+    except Exception:
+        print (file_name + bc.FAIL + " could not be found." + bc.ENDC)
+        exit(1)
+
+    errors = []
+
+    for line in file:
+        try:
+            arr = line.strip("\n").split(" - ")
+            song = arr[0]
+            artist = arr[1]
+            rip_mp3(song, artist, command=command)
+
+        except Exception as e:
+            errors.append("%s" + color(" : ", ["YELLOw"]) + bc.FAIL + str(e) + bc.ENDC)
+
+    if len(errors) > 0:
+        print (bc.FAIL + "Something was wrong with the formatting of the following lines:" + bc.ENDC)
+
+        for i in errors:
+            print ("\t%s" % i)
+
+
 def rip_album(album, artist,
     tried=False, # for if it can't find the album the first time
     search="album", # ditto
+    command=None # For running a command with the song's location
         ):
     visible_texts = search_google(album, artist, search)
     errors = []
@@ -86,10 +114,12 @@ def rip_album(album, artist,
         for i, j in enumerate(songs):
             song = j
             print (color("\n%s/%s - " % (i + 1, len(songs)), ["UNDERLINE"]), end="")
-            rip_mp3(j, artist, part_of_album=True, album=album, tracknum=i + 1, album_art_url=album_art_url)
+            rip_mp3(j, artist, part_of_album=True, album=album, tracknum=i + 1, album_art_url=album_art_url, command=command)
 
         if len(errors) > 0:
             for error in errors: print (error)
+        else:
+            print (bc.BOLD + bc.UNDERLINE + album + bc.ENDC + bc.OKGREEN + " downloaded successfully!\n")
 
     except Exception as e:
         if str(e) == "local variable 'indexed' referenced before assignment" or str(e) == 'list index out of range':
@@ -108,7 +138,8 @@ def rip_mp3(song, artist,
     part_of_album=False, # neccessary for creating folders
     album=None, # if you want to specify an album and save a bit of time
     tracknum=None, # to specify the tracknumber in the album
-    album_art_url=None # if you want to save a lot of time trying to find album cover.
+    album_art_url=None, # if you want to save a lot of time trying to find album cover.
+    command=None, # For running a command with the song's location
         ):
 
     audio_code = find_mp3(song, artist)
@@ -129,8 +160,10 @@ def rip_mp3(song, artist,
 
 
     artist_folder = artist
+
     if not os.path.isdir(artist_folder):
         os.makedirs(artist_folder)
+
     if not part_of_album:
         location = artist_folder
 
@@ -152,3 +185,7 @@ def rip_mp3(song, artist,
 
     print (color(song, ["BOLD", "UNDERLINE"]) + bc.OKGREEN + ' downloaded successfully!'+ bc.ENDC)
     print ("")
+
+    if command:
+        loc = location + "/" + filename
+        os.system((command.replace("%(loc)s", '"%s"' % loc) + " &"))
