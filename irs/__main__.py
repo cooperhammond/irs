@@ -1,4 +1,35 @@
 #!/usr/bin python
+
+HELP = \
+"""
+usage:
+    irs (-h | -v)
+    irs [-l]
+    irs -p PLAYLIST [-c COMMAND] [-l]
+    irs -a ARTIST (-s SONG | -A ALBUM [-st SEARCH_TERMS]) [-c COMMAND] [-l]
+
+Options:
+  -h, --help            show this help message and exit
+  -v, --version         Display the version and exit.
+  -c COMMAND, --command COMMAND
+                        Run a background command with each song's location.
+                        Example: `-c "rhythmbox %(loc)s"`
+  -a ARTIST, --artist ARTIST
+                        Specify the artist name.
+  -p PLAYLIST, --playlist PLAYLIST
+                        Specify playlist filename. Each line in the file
+                        should be formatted like so: `SONGNAME - ARTIST`
+  -s SONG, --song SONG  Specify song name of the artist.
+  -A ALBUM, --album ALBUM
+                        Specify album name of the artist.
+  -st SEARCH_TERMS, --search-terms SEARCH_TERMS
+                        Only use if calling -A/--album. Acts as extra search
+                        terms when looking for the album.
+
+  -l, --choose-link     If supplied, will bring up a console choice for what
+                        link you want to download based off a list of titles.
+"""
+
 import argparse
 from os import system
 from sys import exit
@@ -36,9 +67,11 @@ def main():
     parser.add_argument('-c', '--command', dest="command", help="Run a background command with each song's location.")
     parser.add_argument('-a', '--artist', dest="artist", help="Specify the artist name.")
 
+    parser.add_argument('-l', '--choose-link', action='store_true', dest="link", \
+        help="Whether or not to choose the link from a list of titles.")
+
     parser.add_argument('-p', '--playlist', dest="playlist", \
     help="Specify playlist filename. Each line should be formatted like so: SONGNAME - ARTIST")
-
 
     media = parser.add_mutually_exclusive_group()
     media.add_argument('-s', '--song', dest="song", help="Specify song name of the artist.")
@@ -51,33 +84,8 @@ def main():
     args = parser.parse_args()
 
     if args.help:
-        help = \
-"""
-usage:
-    irs
-    irs (-h | -v)
-    irs -p PLAYLIST [-c COMMAND]
-    irs -a ARTIST (-s SONG | -A ALBUM [-st SEARCH_TERMS]) [-c COMMAND]
-
-Options:
-  -h, --help            show this help message and exit
-  -v, --version         Display the version and exit.
-  -c COMMAND, --command COMMAND
-                        Run a background command with each song's location.
-                        Example: `-c "rhythmbox %(loc)s"`
-  -a ARTIST, --artist ARTIST
-                        Specify the artist name.
-  -p PLAYLIST, --playlist PLAYLIST
-                        Specify playlist filename. Each line in the file
-                        should be formatted like so: `SONGNAME - ARTIST`
-  -s SONG, --song SONG  Specify song name of the artist.
-  -A ALBUM, --album ALBUM
-                        Specify album name of the artist.
-  -st SEARCH_TERMS, --search-terms SEARCH_TERMS
-                        Only use if calling -A/--album. Acts as extra search
-                        terms when looking for the album.
-"""
-        print (help)
+        global HELP
+        print (HELP)
 
     elif args.version:
         import pkg_resources
@@ -101,17 +109,15 @@ Options:
         console()
 
     elif args.playlist:
-        rip_playlist(args.playlist, args.command)
+        rip_playlist(args.playlist, args.command, choose_link=args.link)
 
     elif args.artist:
         if args.album:
-            if args.search_terms:
-                rip_album(args.album, args.artist, command=args.command, search=args.search_terms)
-            else:
-                rip_album(args.album, args.artist, command=args.command)
+            rip_album(args.album, args.artist, command=args.command, \
+                search=args.search_terms, choose_link=args.link)
 
         elif args.song:
-            rip_mp3(args.song, args.artist, command=args.command)
+            rip_mp3(args.song, args.artist, command=args.command, choose_link=args.link)
 
 
 

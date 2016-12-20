@@ -59,10 +59,14 @@ def parse_metadata(song, artist, location, filename,
 
 
     # Album
-    if not album:
-        for i, j in enumerate(googled):
-            if "Album:" in j:
-                album = (googled[i + 1])
+    try:
+        if not album:
+            for i, j in enumerate(googled):
+                if "Album:" in j:
+                    album = (googled[i + 1])
+    except Exception as e:
+        album = None
+
     if album:
         mp3file['album'] = album
         print (bc.OKGREEN + "Album parsed: " + bc.ENDC + mp3file['album'][0])
@@ -95,14 +99,16 @@ def parse_metadata(song, artist, location, filename,
 
     # Album art
     try:
-        if not album_art_url:
-            temp_url = get_albumart_url(album, artist)
-            embed_mp3(temp_url, location + "/" + filename)
-            print (bc.OKGREEN + "Album art parsed: " + bc.ENDC + temp_url)
+        if album:
+            if not album_art_url:
+                print (bc.YELLOW + "Parsing album art ..." + bc.ENDC, end="\r")
+                temp_url = get_albumart_url(album, artist)
+                embed_mp3(temp_url, location + "/" + filename)
+                print (bc.OKGREEN + "Album art parsed: " + bc.ENDC + temp_url)
 
-        else: # If part of an album, it should do this.
-            embed_mp3(album_art_url, location + "/" + filename)
-            print (bc.OKGREEN + "Album art parsed." + bc.ENDC)
+            else: # If part of an album, it should do this.
+                embed_mp3(album_art_url, location + "/" + filename)
+                print (bc.OKGREEN + "Album art parsed." + bc.ENDC)
 
 
     except Exception as e:

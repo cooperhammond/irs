@@ -14,8 +14,12 @@ from bs4 import BeautifulSoup
 from .utils import *
 from .metadata import *
 
-def find_mp3(song, artist):
-    print (color(song, ["BOLD", "UNDERLINE"]) + ' by ' + color(artist, ["BOLD", "UNDERLINE"]) + '\n')
+def find_mp3(song, artist,
+    choose_link=False, # Whether to allow the user to choose the link.
+        ):
+
+    os.system("clear")
+    print (color(song, ["BOLD", "UNDERLINE"]) + ' by ' + color(artist, ["BOLD", "UNDERLINE"]))
 
     search_terms = song + " " + artist
     query_string = urlencode({"search_query" : (search_terms)})
@@ -23,29 +27,58 @@ def find_mp3(song, artist):
     html_content = urlopen("http://www.youtube.com/results?" + query_string)
     search_results = findall(r'href=\"\/watch\?v=(.{11})', html_content.read().decode())
 
+    no_download_terms = ["full album"]
+
     in_title = False
     i = -1
     given_up_score = 0
 
-    while in_title == False:
-        i += 1
-        given_up_score += 1
+    if not choose_link:
+        print (bc.YELLOW + "Finding youtube link ...", end="\r")
+        while in_title == False:
+            i += 1
+            given_up_score += 1
 
-        if given_up_score >= 10:
-            in_title = True
-
-        audio_url = ("http://www.youtube.com/watch?v=" + search_results[i])
-        title = strip_special_chars((BeautifulSoup(urlopen(audio_url), 'html.parser')).title.string.lower())
-        song_title = song.lower().split("/")
-
-        for song in song_title:
-            if strip_special_chars(song) in strip_special_chars(title):
+            if given_up_score >= 10:
                 in_title = True
+
+            audio_url = ("http://www.youtube.com/watch?v=" + search_results[i])
+            title = strip_special_chars((BeautifulSoup(urlopen(audio_url), 'html.parser')).title.string.lower())
+            song_title = song.lower().split("/")
+
+            for song in song_title:
+                song = strip_special_chars(song)
+                if song in title and any(term in song for term in no_download_terms):
+                    in_title = True
+
+        print (bc.OKGREEN + "Found youtube link!      \n" + bc.ENDC)
+    else:
+        results = []
+
+        print (bc.YELLOW + "Finding links ... " + bc.ENDC, end="\r")
+
+        for key in search_results[:10]:
+            results.append(BeautifulSoup(urlopen(("http://www.youtube.com/watch?v="\
+                + key)), 'html.parser').title.string.replace(" - YouTube" , ""))
+
+        valid_choice = False
+        while valid_choice == False:
+            print (bc.HEADER + "What song would you like to download?")
+            index = 0
+            for result in results:
+                index += 1
+                print ("  %s) %s" % (index, result))
+            i = int(input(bc.YELLOW + bc.BOLD + ":: " + bc.ENDC))
+            if i in tuple(range(1, 11)):
+                i -= 1
+                valid_choice = True
 
     return search_results[i]
 
-def rip_playlist(file_name, command=None):
-    print (command.inspect)
+def rip_playlist(file_name,
+    command=None, # Whether to run a special user-supplied command.
+    choose_link=False, # Whether to allow the user to choose the link.
+        ):
     try:
         file = open(file_name, 'r')
     except Exception:
@@ -62,7 +95,7 @@ def rip_playlist(file_name, command=None):
             rip_mp3(song, artist, command=command)
 
         except Exception as e:
-            errors.append("%s" + color(" : ", ["YELLOw"]) + bc.FAIL + str(e) + bc.ENDC)
+            errors.append(line + color(" : ", ["YELLOW"]) + bc.FAIL + str(e) + bc.ENDC)
 
     if len(errors) > 0:
         print (bc.FAIL + "Something was wrong with the formatting of the following lines:" + bc.ENDC)
@@ -74,8 +107,13 @@ def rip_playlist(file_name, command=None):
 def rip_album(album, artist,
     tried=False, # for if it can't find the album the first time
     search="album", # ditto
-    command=None # For running a command with the song's location
+    command=None, # For running a command with the song's location
+    choose_link=False # Whether to allow the user to choose the link.
         ):
+
+    if search in (None, False):
+        search = "album"
+
     visible_texts = search_google(album, artist, search)
     errors = []
     try:
@@ -107,14 +145,15 @@ def rip_album(album, artist,
         for i, j in enumerate(songs):
             print (bc.OKBLUE + "  - " + j + bc.ENDC)
 
-        print (bc.YELLOW + "\nFinding album cover ... " + bc.ENDC, end="")
+        print (bc.YELLOW + "\nFinding album cover ... " + bc.ENDC, end="\r")
         album_art_url = get_albumart_url(album, artist)
-        print (bc.OKGREEN + "\rAlbum cover found: " + bc.ENDC + album_art_url)
+        print (bc.OKGREEN + "Album cover found: " + bc.ENDC + album_art_url)
 
         for i, j in enumerate(songs):
             song = j
             print (color("\n%s/%s - " % (i + 1, len(songs)), ["UNDERLINE"]), end="")
-            rip_mp3(j, artist, part_of_album=True, album=album, tracknum=i + 1, album_art_url=album_art_url, command=command)
+            rip_mp3(j, artist, part_of_album=True, album=album, tracknum=i + 1, \
+                album_art_url=album_art_url, command=command, choose_link=choose_link)
 
         if len(errors) > 0:
             for error in errors: print (error)
@@ -125,21 +164,21 @@ def rip_album(album, artist,
         if str(e) == "local variable 'indexed' referenced before assignment" or str(e) == 'list index out of range':
             if tried != True:
                 print (bc.OKBLUE + "Trying to find album ..." + bc.ENDC)
-                rip_album(album, artist, tried=True, search="")
+                rip_album(album, artist, tried=True, search="", choose_link=choose_link)
             else:
                 print (bc.FAIL + 'Could not find album "%s"' % album + bc.ENDC)
         else:
-            errors.append(bc.FAIL + "There was a problem with downloading: " + bc.ENDC + song)
-            print (bc.FAIL + "Something major went wrong: " + str(e) + bc.ENDC)
+            errors.append(bc.FAIL + "There was a problem with downloading: " + bc.ENDC + song + "\n" + str(e))
             pass
 
 
 def rip_mp3(song, artist,
-    part_of_album=False, # neccessary for creating folders
-    album=None, # if you want to specify an album and save a bit of time
-    tracknum=None, # to specify the tracknumber in the album
+    part_of_album=False, # neccessary for creating folders.
+    album=None, # if you want to specify an album and save a bit of time.
+    tracknum=None, # to specify the tracknumber in the album.
     album_art_url=None, # if you want to save a lot of time trying to find album cover.
-    command=None, # For running a command with the song's location
+    command=None, # For running a command with the song's location.
+    choose_link=False # Whether to allow the user to choose the link.
         ):
 
     audio_code = find_mp3(song, artist)
