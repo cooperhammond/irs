@@ -1,6 +1,6 @@
 # Ingenious Redistribution System
 [![License: GNU](https://img.shields.io/badge/License-GNU-yellow.svg)](http://www.gnu.org/licenses/gpl.html)
-[![PyPI](https://img.shields.io/badge/PyPi-Python_3.X-blue.svg)](https://pypi.python.org/pypi/irs)
+[![PyPI](https://img.shields.io/badge/PyPi-Python_3.x-blue.svg)](https://pypi.python.org/pypi/irs)
 
 <em>Now with working album art!</em>
 
