@@ -9,10 +9,10 @@ ___
 ### Usage and Examples
 ```
 usage:
-    irs
     irs (-h | -v)
-    irs -p PLAYLIST [-c COMMAND]
-    irs -a ARTIST (-s SONG | -A ALBUM [-st SEARCH_TERMS]) [-c COMMAND]
+    irs [-l]
+    irs -p PLAYLIST [-c COMMAND] [-l]
+    irs -a ARTIST (-s SONG | -A ALBUM [-st SEARCH_TERMS]) [-c COMMAND] [-l]
 
 Options:
   -h, --help            show this help message and exit
@@ -31,6 +31,9 @@ Options:
   -st SEARCH_TERMS, --search-terms SEARCH_TERMS
                         Only use if calling -A/--album. Acts as extra search
                         terms when looking for the album.
+
+  -l, --choose-link     If supplied, will bring up a console choice for what
+                        link you want to download based off a list of titles.
 ```
 [![asciicast](https://asciinema.org/a/bcs7i0sjmka052wsdyxg5xrug.png)](https://asciinema.org/a/bcs7i0sjmka052wsdyxg5xrug?speed=3&autoplay=true)
 
