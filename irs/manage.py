@@ -27,8 +27,6 @@ def find_mp3(song, artist,
     html_content = urlopen("http://www.youtube.com/results?" + query_string)
     search_results = findall(r'href=\"\/watch\?v=(.{11})', html_content.read().decode())
 
-    no_download_terms = ["full album"]
-
     in_title = False
     i = -1
     given_up_score = 0
@@ -48,7 +46,7 @@ def find_mp3(song, artist,
 
             for song in song_title:
                 song = strip_special_chars(song)
-                if song in title and any(term in song for term in no_download_terms):
+                if song in title and "full album" not in title:
                     in_title = True
 
         print (bc.OKGREEN + "Found youtube link!      \n" + bc.ENDC)
