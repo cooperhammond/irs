@@ -1,6 +1,6 @@
 # Ingenious Redistribution System
 [![License: GNU](https://img.shields.io/badge/License-GNU-yellow.svg)](http://www.gnu.org/licenses/gpl.html)
-[![PyPI](https://img.shields.io/badge/PyPi-Python_3.5-blue.svg)](https://pypi.python.org/pypi/irs)
+[![PyPI](https://img.shields.io/badge/PyPi-Python_3.X-blue.svg)](https://pypi.python.org/pypi/irs)
 
 <em>Now with working album art!</em>
 
@@ -41,15 +41,15 @@ Options:
 
 ___
 ### Installation
-Almost all dependencies are automatically installed by pip, but youtube_dl still needs ffmpeg to convert video to audio, so for Windows, you can install [`Scoop`](http://scoop.sh/) and then just do:
+Please note that it currently is only usable in `Python 3.x`. Almost all dependencies are automatically installed by pip, but `youtube_dl` still needs `ffmpeg` to convert video to audio, so for Windows, you can install [`Scoop`](http://scoop.sh/) and then just do:
 ```
 $ scoop install ffmpeg
 ```
-For OSX, you can use [`Brew`](http://brew.sh/) and do:
+For OSX, you can use [`Brew`](http://brew.sh/) to install `ffmpeg`:
 ```
 $ brew install ffmpeg
 ```
-For Ubuntu:
+And then for Ubuntu:
 ```
 $ sudo apt-get install ffmpeg
 ```
