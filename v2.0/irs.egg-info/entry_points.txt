@@ -1,0 +1,3 @@
+[console_scripts]
+irs = irs.__main__:main
+

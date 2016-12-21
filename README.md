@@ -11,7 +11,7 @@ ___
 usage:
     irs (-h | -v)
     irs [-l]
-    irs -p PLAYLIST [-c COMMAND] [-l]
+    irs -p PLAYLIST [-ng] [-c COMMAND] [-l]
     irs -a ARTIST (-s SONG | -A ALBUM [-st SEARCH_TERMS]) [-c COMMAND] [-l]
 
 Options:
@@ -31,9 +31,10 @@ Options:
   -st SEARCH_TERMS, --search-terms SEARCH_TERMS
                         Only use if calling -A/--album. Acts as extra search
                         terms when looking for the album.
-
   -l, --choose-link     If supplied, will bring up a console choice for what
                         link you want to download based off a list of titles.
+  -ng, --no-organize    Only use if calling -p/--playlist. Forces all files
+                        downloaded to be organized normally.
 ```
 [![asciicast](https://asciinema.org/a/bcs7i0sjmka052wsdyxg5xrug.png)](https://asciinema.org/a/bcs7i0sjmka052wsdyxg5xrug?speed=3&autoplay=true)
 
