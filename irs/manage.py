@@ -123,7 +123,7 @@ def rip_playlist(file_name,
                     import shutil # Only import this if I have to.
                     shutil.rmtree(locations[0])
 
-                if os.path.isfile(filename)
+                if os.path.isfile(filename):
                     os.rename(filename, folder_name + "/" + filename)
 
                 os.rename(folder_name, folder_name.replace("playlist"))
