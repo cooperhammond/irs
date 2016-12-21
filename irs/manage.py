@@ -21,7 +21,7 @@ def find_mp3(song, artist,
     os.system("clear")
     print (color(song, ["BOLD", "UNDERLINE"]) + ' by ' + color(artist, ["BOLD", "UNDERLINE"]))
 
-    search_terms = song + " " + artist
+    search_terms = song + " " + artist + " lyrics"
     query_string = urlencode({"search_query" : (search_terms)})
 
     html_content = urlopen("http://www.youtube.com/results?" + query_string)
