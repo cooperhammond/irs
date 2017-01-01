@@ -57,6 +57,7 @@ class Metadata:
             self.mp3['album'] = album
             self.mp3.save()
             return True
+            
         except Exception:
             self.mp3['album'] = self.song
             self.mp3.save()

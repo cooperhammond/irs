@@ -73,7 +73,6 @@ class Manager:
         if not artist:
             artist = self.args.artist
 
-        os.system("clear")
         print (color(song, ["BOLD", "UNDERLINE"]) + ' by ' + color(artist, ["BOLD", "UNDERLINE"]))
 
         search_terms = song + " " + artist + " lyrics"
