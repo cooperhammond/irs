@@ -6,3 +6,7 @@
 
 # For easy updating of stuff.
 update_pypi_and_github.py
+
+# Currently in progress
+/flexx-app/
+/.idea/
