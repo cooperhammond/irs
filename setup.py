@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='irs',
-    version='2.6.13',
+    version='2.6.14',
     description='A music downloader that just gets metadata.',
     url='https://github.com/kepoorhampond/irs',
     author='Kepoor Hampond',
@@ -14,6 +14,7 @@ setup(
       'mutagen',
       'youtube-dl',
       'requests',
+      'spotipy',
     ],
     entry_points = {
       'console_scripts': ['irs = irs.__main__:main'],
