@@ -1,5 +1,4 @@
 #!/usr/bin python
-
 HELP = \
 """
 usage:
@@ -22,66 +21,21 @@ Options:
   -s SONG, --song SONG  Specify song name of the artist.
   -A ALBUM, --album ALBUM
                         Specify album name of the artist.
-  -st SEARCH_TERMS, --search-terms SEARCH_TERMS
-                        Only use if calling -A/--album. Acts as extra search
-                        terms when looking for the album.
   -l, --choose-link     If supplied, will bring up a console choice for what
                         link you want to download based off a list of titles.
   -ng, --no-organize    Only use if calling -p/--playlist. Forces all files
                         downloaded to be organized normally.
 """
 
-import argparse
-from os import system
+# For exiting
 from sys import exit
-from .manage import *
+
+# Parsing args
+import argparse
+
+# Import the manager
+from .manager import Manager
 from .utils import *
-
-def console(args):
-    system("clear")
-    media = None
-    while type(media) is not int:
-        print (bc.HEADER)
-        print ("What type of media would you like to download?")
-        print ("\t1) Song")
-        print ("\t2) Album")
-        print ("\t3) Playlist")
-        try:
-            media = int(input(bc.YELLOW + bc.BOLD + ":: " + bc.ENDC))
-            if media not in (1, 2, 3):
-                raise ValueError
-
-        except ValueError:
-            print (bc.FAIL + "\nPlease enter a valid number." + bc.ENDC)
-
-    if media in (1, 2):
-        print (bc.HEADER + "Artist of song/album ", end="")
-        artist = input(bc.BOLD + bc.YELLOW + ": " + bc.ENDC)
-
-        if media == 1:
-            print (bc.HEADER + "Song you would like to download ", end="")
-            song = input(bc.BOLD + bc.YELLOW + ": " + bc.ENDC)
-            rip_mp3(song, artist, command=args.command, choose_link=args.link)
-
-        elif media == 2:
-            print (bc.HEADER + "Album you would like to download ", end="")
-            album = input(bc.BOLD + bc.YELLOW + ": " + bc.ENDC)
-            rip_album(album, artist, command=args.command, choose_link=args.link)
-
-    elif media == 3:
-        print (bc.HEADER + "Playlist file name ", end="")
-        playlist = input(bc.BOLD + bc.YELLOW + ": " + bc.ENDC)
-
-        organize = ""
-        while organize not in ("y", "n", "yes", "no", ""):
-            print (bc.HEADER + "Would you like to place all songs into a single folder? (Y/n)", end="")
-            organize = input(bc.BOLD + bc.YELLOW + ": " + bc.ENDC).lower()
-
-        if organize in ("y", "yes", ""):
-            rip_playlist(playlist, command=args.command, choose_link=args.link, \
-                no_organize=True)
-        elif organize in ("n", "no"):
-            rip_playlist(playlist, command=args.command, choose_link=args.link)
 
 def main():
     parser = argparse.ArgumentParser(add_help=False)
@@ -95,15 +49,13 @@ def main():
 
     parser.add_argument('-p', '--playlist', dest="playlist", \
     help="Specify playlist filename. Each line should be formatted like so: SONGNAME - ARTIST")
-    parser.add_argument('-ng', '--no-organize', action="store_false", dest="no_organize", \
+    parser.add_argument('-ng', '--no-organize', action="store_false", dest="organize", \
         help="Only use if calling -p/--playlist. Forces all files downloaded to be organizes normally.")
 
     media = parser.add_mutually_exclusive_group()
     media.add_argument('-s', '--song', dest="song", help="Specify song name of the artist.")
 
     media.add_argument('-A', '--album', dest="album", help="Specify album name of the artist.")
-    parser.add_argument('-st', '--search-terms', dest="search_terms", \
-        help="Only use if calling -A/--album. Acts as extra search terms for the album.")
 
     parser.add_argument('-o', '--order-files', action='store_true', dest="order_files",\
         help="Only use if callign with -p/--playlist or -A/--album. Adds a digit to front of each file specifying order.")
@@ -111,9 +63,15 @@ def main():
 
     args = parser.parse_args()
 
+    if args.organize == None:
+        args.organize = True
+
+    manager = Manager(args)
+
     if args.help:
         global HELP
         print (HELP)
+        exit(1)
 
     elif args.version:
         import pkg_resources
@@ -121,32 +79,31 @@ def main():
         print ("Homepage: " + color("https://github.com/kepoorhampond/irs", ["OKGREEN"]))
         print ("License: " + color("The GNU", ["YELLOW"]) + " (http://www.gnu.org/licenses/gpl.html)")
         print ("Version: " + pkg_resources.get_distribution("irs").version)
-
         print ("\n")
         exit(0)
 
-    elif not args.album and args.search_terms:
-        parser.error("error: must supply -A/--album if you are going to supply -st/--search-terms")
+    elif not args.organize and not args.playlist:
+        parser.error("error: must supply -p/--playlist if specifying -ng/--no-organize")
         exit(1)
 
     elif args.artist and not (args.album or args.song):
-        print ("error: must specify -A/--album or -s/--song if specifying -a/--artist")
+        parser.error("error: must supply -A/--album or -s/--song if specifying -a/--artist")
         exit(1)
 
+
+
     elif not args.artist and not args.playlist:
-        console(args)
+        manager.console()
 
     elif args.playlist:
-        rip_playlist(args.playlist, args.command, choose_link=args.link, no_organize=args.no_organize)
+        manager.rip_playlist()
 
     elif args.artist:
         if args.album:
-            rip_album(args.album, args.artist, command=args.command, \
-                search=args.search_terms, choose_link=args.link)
+            manager.rip_album()
 
         elif args.song:
-            rip_mp3(args.song, args.artist, command=args.command, choose_link=args.link)
-
+            manager.rip_mp3()
 
 
 if __name__ == "__main__":

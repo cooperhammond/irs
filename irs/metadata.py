@@ -3,7 +3,7 @@ from mutagen.mp3 import MP3, EasyMP3
 from mutagen.easyid3 import EasyID3
 from mutagen.id3 import ID3, APIC
 
-# Info getting
+# Info finding
 from urllib.parse import quote_plus, quote
 from urllib.request import urlopen, Request
 
@@ -15,152 +15,115 @@ from bs4 import BeautifulSoup
 # Local utils
 from .utils import *
 
-def search_google(song, artist, search_terms=""):
+# Powered by...
+import spotipy
 
-    def visible(element):
-        if element.parent.name in ['style', 'script', '[document]', 'head', 'title']:
-            return False
-        elif match('<!--.*-->', str(element)):
-            return False
-        return True
+class Metadata:
+    def __init__(self, location, song, artist):
+        self.spotify = spotipy.Spotify()
 
-    string = "%s %s %s" % (song, artist, search_terms)
-    filename = 'http://www.google.com/search?q=' + quote_plus(string)
-    hdr = {
-        'User-Agent':'Mozilla/5.0',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    }
+        self.song = song
+        self.artist = artist
+        self.location = location
 
-    texts = BeautifulSoup(urlopen(Request(filename, \
-        headers=hdr)).read(), 'html.parser').findAll(text=True)
+        self.info = self.search_google()
+        self.mp3 = MP3(self.location, ID3=EasyID3)
 
-    return list(filter(visible, texts))
-
-def parse_metadata(song, artist, location, filename,
-    tracknum="",
-    album="",
-    album_art_url=""
-        ):
-    googled = search_google(song, artist)
-    mp3file = MP3("%s/%s" % (location, filename), ID3=EasyID3)
-
-    # Song title
-    mp3file['title'] = song
-    mp3file.save()
-
-    print("")
-    print (bc.OKGREEN + "Title parsed: " + bc.ENDC + mp3file['title'][0])
-
-    # Artist
-    mp3file['artist'] = artist
-    mp3file.save()
-
-    print (bc.OKGREEN + "Artist parsed: " + bc.ENDC + mp3file['artist'][0])
-
-
-    # Album
-    try:
-        if not album:
-            for i, j in enumerate(googled):
-                if "Album:" in j:
-                    album = (googled[i + 1])
-    except Exception as e:
-        album = None
-
-    if album:
-        mp3file['album'] = album
-        print (bc.OKGREEN + "Album parsed: " + bc.ENDC + mp3file['album'][0])
-    else:
-        print (bc.FAIL + "Album not parsed.")
-
-    mp3file.save()
-
-
-    # Release date
-    for i, j in enumerate(googled):
-        if "Released:" in j:
-            date = (googled[i + 1])
-
-    try:
-        mp3file['date'] = date
-        print (bc.OKGREEN + "Release date parsed: " + bc.ENDC + mp3file['date'][0])
-    except Exception:
-        mp3file['date'] = ""
-        pass
-
-    mp3file.save()
-
-
-    # Track number
-    if tracknum:
-        mp3file['tracknumber'] = str(tracknum)
-        mp3file.save()
-
-
-    # Album art
-    try:
-        if album:
-            if not album_art_url:
-                print (bc.YELLOW + "Parsing album art ..." + bc.ENDC, end="\r")
-                temp_url = get_albumart_url(album, artist)
-                embed_mp3(temp_url, location + "/" + filename)
-                print (bc.OKGREEN + "Album art parsed: " + bc.ENDC + temp_url)
-
-            else: # If part of an album, it should do this.
-                embed_mp3(album_art_url, location + "/" + filename)
-                print (bc.OKGREEN + "Album art parsed." + bc.ENDC)
-
-
-    except Exception as e:
-        print (bc.FAIL + "Album art not parsed: " + bc.ENDC + str(e))
-
-def embed_mp3(albumart_url, song_location):
-    image = urlopen(albumart_url)
-    audio = EasyMP3(song_location, ID3=ID3)
-
-    try:
-        audio.add_tags()
-    except Exception as e:
-        pass
-
-    audio.tags.add(
-        APIC(
-            encoding = 3,
-            mime = 'image/png',
-            type = 3,
-            desc = 'Cover',
-            data = image.read()
-        )
-    )
-    audio.save()
-
-def get_albumart_url(album, artist):
-    def test_404(url):
+    def get_attr(self, attr):
         try:
-            urlopen(albumart).read()
+            return self.mp3[attr][0]
         except Exception:
             return False
+
+    def add_title(self):
+        self.mp3['title'] = self.song
+        self.mp3.save()
         return True
 
-    tries = 0
-    album = "%s %s Album Art" % (artist, album)
-    url = ("https://www.google.com/search?q=" + quote(album.encode('utf-8')) + "&source=lnms&tbm=isch")
-    header = {
-        'User-Agent':
-            '''
-                Mozilla/5.0 (Windows NT 6.1; WOW64)
-                AppleWebKit/537.36 (KHTML,like Gecko)
-                Chrome/43.0.2357.134 Safari/537.36
-            '''
-    }
 
-    soup = BeautifulSoup(urlopen(Request(url, headers=header)), "html.parser")
+    def add_artist(self):
+        self.mp3['artist'] = self.artist
+        self.mp3.save()
+        return True
 
-    albumart_divs = soup.findAll("div", {"class": "rg_meta"})
-    albumart = json.loads(albumart_divs[tries].text)["ou"]
 
-    while not test_404(albumart):
-        tries += 1
-        albumart = json.loads(albumart_divs[tries].text)["ou"]
+    def add_album(self, album=None):
+        try:
+            if not album:
+                for i, j in enumerate(self.info):
+                    if "Album:" in j:
+                        album = (self.info[i + 1])
 
-    return albumart
+            self.mp3['album'] = album
+            self.mp3.save()
+            return True
+        except Exception:
+            self.mp3['album'] = self.song
+            self.mp3.save()
+            return False
+
+
+    def add_release_date(self, release_date=None):
+        try:
+            if not release_date:
+                for i, j in enumerate(self.info):
+                    if "Released:" in j:
+                        date = (self.info[i + 1])
+
+            self.mp3['date'] = date
+            self.mp3.save()
+            return release_date
+        except UnboundLocalError:
+            return False
+
+
+    def add_track_number(self, track_number):
+        self.mp3['tracknumber'] = str(track_number)
+        self.mp3.save()
+        return True
+
+
+    def add_album_art(self, image_url):
+        mp3 = EasyMP3(self.location, ID3=ID3)
+
+        try:
+            mp3.add_tags()
+        except Exception as e:
+            pass
+
+        if not image_url:
+            image_url = self.get_albumart_url(album)
+
+        mp3.tags.add(
+            APIC(
+                encoding = 3,
+                mime = 'image/png',
+                type = 3,
+                desc = 'cover',
+                data = urlopen(image_url).read()
+            )
+        )
+        mp3.save()
+        return image_url
+
+
+    def search_google(self, search_terms=""):
+        def visible(element):
+            if element.parent.name in ['style', 'script', '[document]', 'head', 'title']:
+                return False
+            elif match('<!--.*-->', str(element)):
+                return False
+            return True
+
+        search_terms = "%s %s %s" % (self.song, self.artist, search_terms)
+        url = 'http://www.google.com/search?q=' + quote_plus(search_terms)
+
+        hdr = {
+            'User-Agent':'Mozilla/5.0',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        }
+
+        texts = BeautifulSoup(urlopen(Request(url, \
+            headers=hdr)).read(), 'html.parser').findAll(text=True)
+
+        return list(filter(visible, texts))
