@@ -57,7 +57,7 @@ class Metadata:
             self.mp3['album'] = album
             self.mp3.save()
             return True
-            
+
         except Exception:
             self.mp3['album'] = self.song
             self.mp3.save()
@@ -73,7 +73,7 @@ class Metadata:
 
             self.mp3['date'] = date
             self.mp3.save()
-            return release_date
+            return True
         except UnboundLocalError:
             return False
 

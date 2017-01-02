@@ -216,6 +216,10 @@ class Manager:
         search = self.args.artist + " " + self.args.album
         songs = self.get_album_contents(search)
 
+        if not songs:
+            print (bc.FAIL + "Could not find album." + bc.ENDC)
+            exit(1)
+
         print ("")
         print (bc.HEADER + "Album Contents:" + bc.ENDC)
         for song in songs:
@@ -298,7 +302,7 @@ class Manager:
             mp3.add_track_number(tracknum)
 
         image_url = mp3.add_album_art(self.get_album_art(artist, mp3.get_attr('album')))
-        exclaim_good("Album art added: ", image_url)
+        exclaim_good("Album art: ", image_url)
 
 
         print (color(song, ["BOLD", "UNDERLINE"]) + bc.OKGREEN + ' downloaded successfully!'+ bc.ENDC)

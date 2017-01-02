@@ -3,7 +3,7 @@ import sys
 def strip_special_chars(string):
     special_chars = "\ / : * ? \" < > | - ( )".split(" ")
     for char in special_chars:
-        string.replace(char, "")
+        string = string.replace(char, "")
     return string
 
 def supports_color():
