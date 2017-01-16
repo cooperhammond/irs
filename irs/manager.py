@@ -190,7 +190,6 @@ class Manager:
     def get_album_contents(self, search):
         spotify = spotipy.Spotify()
 
-
         results = spotify.search(q=search, type='album')
         items = results['albums']['items']
         if len(items) > 0:
@@ -212,7 +211,7 @@ class Manager:
                 names.append(song)
             return names, album_id
         else:
-            print (bc.FAIL + "No results were found for your album search." + bc.ENDC)
+            print (bc.FAIL + "There was no results." + bc.ENDC)
             exit(1)
 
     def get_album_art(self, artist, album, id=None):
@@ -231,9 +230,7 @@ class Manager:
 
     def rip_album(self):
         search = self.args.artist + " " + self.args.album
-        print(self.get_album_contents(search))
-        import time
-        time.sleep(10)
+        songs, album_uri = self.get_album_contents(search)
 
         if not songs:
             print (bc.FAIL + "Could not find album." + bc.ENDC)
