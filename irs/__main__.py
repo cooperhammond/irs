@@ -77,7 +77,7 @@ def main():
         import pkg_resources
         print ("\n\n" + color("Ingenious Redistribution System", ["HEADER", "BOLD"]))
         print ("Homepage: " + color("https://github.com/kepoorhampond/irs", ["OKGREEN"]))
-        print ("License: " + color("The GNU", ["YELLOW"]) + " (http://www.gnu.org/licenses/gpl.html)")
+        print ("License: " + color("GNU", ["YELLOW"]) + " (http://www.gnu.org/licenses/gpl.html)")
         print ("Version: " + pkg_resources.get_distribution("irs").version)
         print ("\n")
         exit(0)
@@ -90,11 +90,6 @@ def main():
         parser.error("error: must supply -A/--album or -s/--song if specifying -a/--artist")
         exit(1)
 
-
-
-    elif not args.artist and not args.playlist:
-        manager.console()
-
     elif args.playlist:
         manager.rip_playlist()
 
@@ -105,6 +100,8 @@ def main():
         elif args.song:
             manager.rip_mp3()
 
+    else:
+        manager.console()
 
 if __name__ == "__main__":
     main()

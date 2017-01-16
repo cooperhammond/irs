@@ -84,6 +84,20 @@ class Metadata:
         return True
 
 
+    def get_album_art(self, artist, album, id=None):
+        spotify = spotipy.Spotify()
+
+        if id:
+            album = spotify.album(id)
+            return album["images"][0]["url"]
+
+        results = spotify.search(q=artist + " " + album, type='album')
+        items = results['albums']['items']
+        if len(items) > 0:
+            album = items[0]['images'][0]['url']
+            return album
+
+
     def add_album_art(self, image_url):
         mp3 = EasyMP3(self.location, ID3=ID3)
 
@@ -93,7 +107,7 @@ class Metadata:
             pass
 
         if not image_url:
-            image_url = self.get_albumart_url(album)
+            image_url = self.get_album_art(self.args.artist, self.mp3["album"][0])
 
         mp3.tags.add(
             APIC(

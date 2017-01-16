@@ -193,19 +193,32 @@ class Manager:
         results = spotify.search(q=search, type='album')
         items = results['albums']['items']
         if len(items) > 0:
-            album = items[0]
+            print (bc.HEADER + "Album results:")
+            choice = ""
+            while choice not in tuple(range(0, 5)):
+                for index, album in enumerate(items[:5]):
+                    print (bc.HEADER + "\t" + str(index) + ") " + album["name"])
+                choice = int(input(bc.YELLOW + "\nEnter album number: " + bc.ENDC))
+
+            album = items[choice]
             album_id = (album['uri'])
             contents = spotify.album_tracks(album_id)["items"]
             contents = contents[0:-1]
             names = []
             for song in contents:
-                names.append(song["name"])
-            return names
+                song = song["name"]
+                song = song.split(" - ")[0]
+                names.append(song)
+            return names, album_id
 
-    def get_album_art(self, artist, album):
+    def get_album_art(self, artist, album, id=None):
         spotify = spotipy.Spotify()
 
-        results = spotify.search(q="album:" + album, type='album')
+        if id:
+            album = spotify.album(id)
+            return album["images"][0]["url"]
+
+        results = spotify.search(q=artist + " " + album, type='album')
         items = results['albums']['items']
         if len(items) > 0:
             album = items[0]['images'][0]['url']
@@ -214,7 +227,7 @@ class Manager:
 
     def rip_album(self):
         search = self.args.artist + " " + self.args.album
-        songs = self.get_album_contents(search)
+        songs, album_uri = self.get_album_contents(search)
 
         if not songs:
             print (bc.FAIL + "Could not find album." + bc.ENDC)
@@ -226,7 +239,7 @@ class Manager:
             print (bc.OKBLUE + "  - " + song + bc.ENDC)
 
         print (bc.YELLOW + "\nFinding album cover ... " + bc.ENDC, end="\r")
-        album_art_url = self.get_album_art(self.args.artist, self.args.album)
+        album_art_url = self.get_album_art(self.args.artist, self.args.album, id=album_uri)
         print (bc.OKGREEN + "Album cover found: " + bc.ENDC + album_art_url)
 
         for track_number, song in enumerate(songs):

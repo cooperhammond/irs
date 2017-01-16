@@ -1,4 +1,4 @@
-import sys
+import sys, os
 
 def strip_special_chars(string):
     special_chars = "\ / : * ? \" < > | - ( )".split(" ")
@@ -87,3 +87,26 @@ def search_google(self, search_terms=""):
         headers=hdr)).read(), 'html.parser').findAll(text=True)
 
     return list(filter(visible, texts))
+
+def unorganize(file_name, location, song_number, artist):
+
+    locations = location.split("/")
+
+    folder_name = ("playlist - " + file_name)[:40]
+
+    if not os.path.isdir(folder_name):
+        os.makedirs(folder_name)
+
+    os.rename(location, "%s/%s - %s" % (folder_name, song_number, locations[-1]))
+
+    if remove:
+        import shutil # Only import this if I have to.
+        shutil.rmtree(locations[0])
+
+
+def finish_unorganize(file_name):
+    folder_name = ("playlist - " + file_name)[:40]
+
+    os.rename(file_name, folder_name + "/" + file_name)
+
+    os.rename(folder_name, folder_name.replace("playlist - ", ""))
