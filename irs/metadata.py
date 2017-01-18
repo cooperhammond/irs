@@ -107,19 +107,22 @@ class Metadata:
             pass
 
         if not image_url:
-            image_url = self.get_album_art(self.args.artist, self.mp3["album"][0])
+            image_url = self.get_album_art(self.artist, self.mp3["album"][0])
 
-        mp3.tags.add(
-            APIC(
-                encoding = 3,
-                mime = 'image/png',
-                type = 3,
-                desc = 'cover',
-                data = urlopen(image_url).read()
+        try:
+            mp3.tags.add(
+                APIC(
+                    encoding = 3,
+                    mime = 'image/png',
+                    type = 3,
+                    desc = 'cover',
+                    data = urlopen(image_url).read()
+                )
             )
-        )
-        mp3.save()
-        return image_url
+            mp3.save()
+            return image_url
+        except Exception:
+            return False
 
 
     def search_google(self, search_terms=""):

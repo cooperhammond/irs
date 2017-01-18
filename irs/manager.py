@@ -317,8 +317,11 @@ class Manager:
         if tracknum:
             mp3.add_track_number(tracknum)
 
-        image_url = mp3.add_album_art(self.get_album_art(artist, mp3.get_attr('album')))
-        exclaim_good("Album art: ", image_url)
+        try:
+            image_url = mp3.add_album_art(self.get_album_art(artist, mp3.get_attr('album')))
+            exclaim_good("Album art: ", image_url)
+        except Exception:
+            print (bc.FAIL + "Album art not added." + bc.ENDC)
 
 
         print (color(song, ["BOLD", "UNDERLINE"]) + bc.OKGREEN + ' downloaded successfully!'+ bc.ENDC)
