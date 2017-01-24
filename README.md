@@ -7,6 +7,30 @@
 An ingenious program to download audio from youtube and then parse metadata for the downloaded file.
 ___
 ### Usage and Examples
+To download a specific song, you'll want to use the `-s` flag:
+```
+irs -a "David Bowie" -s "Ziggy Stardust"
+```
+To download an entire album, you'll want to use the `-A` flag:
+```
+irs -a "Milky Chance" -A "Sadnecessary"
+```
+If you want to download a playlist, you'll need to make a text file, such as `Awesome Mix.txt`. In the file, you'll want to write songs into it like this:
+```
+Hot Blood - Kaleo
+Work Song - Hozier
+Drop The Game - Flume & Chet Faker
+```
+Then, run a command like this where the playlist file resides:
+```
+irs -p "Awesome Mix.txt"
+```
+
+[![asciicast](https://asciinema.org/a/bcs7i0sjmka052wsdyxg5xrug.png)](https://asciinema.org/a/bcs7i0sjmka052wsdyxg5xrug?speed=3&autoplay=true)
+
+[![asciicast](https://asciinema.org/a/8kb9882j4cbtd4hwbsbb7h0ia.png)](https://asciinema.org/a/8kb9882j4cbtd4hwbsbb7h0ia?speed=3)
+
+Full usage:
 ```
 usage:
     irs (-h | -v)
@@ -36,9 +60,6 @@ Options:
   -ng, --no-organize    Only use if calling -p/--playlist. Forces all files
                         downloaded to be organized normally.
 ```
-[![asciicast](https://asciinema.org/a/bcs7i0sjmka052wsdyxg5xrug.png)](https://asciinema.org/a/bcs7i0sjmka052wsdyxg5xrug?speed=3&autoplay=true)
-
-[![asciicast](https://asciinema.org/a/8kb9882j4cbtd4hwbsbb7h0ia.png)](https://asciinema.org/a/8kb9882j4cbtd4hwbsbb7h0ia?speed=3)
 
 ___
 ### Installation
