@@ -1,11 +1,17 @@
-# Ingenious Redistribution System
+# Ironic Redistribution System
 [![License: GNU](https://img.shields.io/badge/License-GNU-yellow.svg)](http://www.gnu.org/licenses/gpl.html)
 [![PyPI](https://img.shields.io/badge/PyPi-Python_3.x-blue.svg)](https://pypi.python.org/pypi/irs)
 
 <em>Now with working album art!</em>
 
-An ingenious program to download audio from youtube and then parse metadata for the downloaded file.
+<em>Downloading of Spotify playlists coming soon!</em>
+
+An ironically named program to download audio from youtube and then parse metadata for the downloaded file.
 ___
+
+### Why the name?
+As an acronym, it spells IRS. I think this is breathtakingly hilarious because the Internal Revenue Service (also the IRS) takes away, while my program gives. I'm so funny. You can tell that I'll get laid in college.
+
 ### Usage and Examples
 To download a specific song, you'll want to use the `-s` flag:
 ```
@@ -81,3 +87,12 @@ Finally, install it!
 ```
 $ pip install irs
 ```
+
+### Wishlist
+ - [x] Finds album based off of song name and artist
+ - [x] Full album downloading
+ - [x] Album art metadata correctly displayed
+ - [x] Playlist downloading
+ - [ ] Spotify playlist downloading - <em>Coming soon</em>
+ - [ ] GUI/Console interactive version - <em>In progress</em>
+ - [ ] 100% success rate for automatic song choosing
