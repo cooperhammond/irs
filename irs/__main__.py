@@ -75,7 +75,7 @@ def main():
 
     elif args.version:
         import pkg_resources
-        print ("\n\n" + color("Ingenious Redistribution System", ["HEADER", "BOLD"]))
+        print ("\n\n" + color("Ironic Redistribution System", ["HEADER", "BOLD"]))
         print ("Homepage: " + color("https://github.com/kepoorhampond/irs", ["OKGREEN"]))
         print ("License: " + color("GNU", ["YELLOW"]) + " (http://www.gnu.org/licenses/gpl.html)")
         print ("Version: " + pkg_resources.get_distribution("irs").version)
