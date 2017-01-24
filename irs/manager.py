@@ -93,8 +93,12 @@ class Manager:
 
                 if given_up_score >= 10:
                     in_title = True
+                try:
+                    audio_url = ("http://www.youtube.com/watch?v=" + search_results[i])
+                except Exception:
+                    print (bc.FAIL + "Could not find song." + bc.ENDC)
+                    exit(1)
 
-                audio_url = ("http://www.youtube.com/watch?v=" + search_results[i])
                 title = strip_special_chars((BeautifulSoup(urlopen(audio_url), 'html.parser')).title.string.lower())
                 song_title = song.lower().split("/")
 
@@ -193,21 +197,13 @@ class Manager:
         results = spotify.search(q=search, type='album')
         items = results['albums']['items']
         if len(items) > 0:
-            print (bc.HEADER + "Album results:")
-            choice = ""
-            while choice not in tuple(range(0, 5)):
-                for index, album in enumerate(items[:5]):
-                    print (bc.HEADER + "\t" + str(index) + ") " + album["name"])
-                choice = int(input(bc.YELLOW + "\nEnter album number: " + bc.ENDC))
-
-            album = items[choice]
+            album = choose_from_list(items)
             album_id = (album['uri'])
             contents = spotify.album_tracks(album_id)["items"]
             contents = contents[0:-1]
             names = []
             for song in contents:
                 song = song["name"]
-                song = song.split(" - ")[0]
                 names.append(song)
             return names, album_id
         else:
@@ -226,6 +222,16 @@ class Manager:
         if len(items) > 0:
             album = items[0]['images'][0]['url']
             return album
+
+    def rip_spotify_list(self, search, type, id=None):
+        spotify = spotipy.Spotify()
+
+        results = spotify.search(q=search, type=type)
+        items = results[type + "s"]['items']
+        if len(items) > 0:
+            spotify_list = choose_from_spotify_list(items)
+        else:
+            print (bc.FAIL + "No results were found." + bc.ENDC)
 
 
     def rip_album(self):

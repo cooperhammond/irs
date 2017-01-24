@@ -110,3 +110,20 @@ def finish_unorganize(file_name):
     os.rename(file_name, folder_name + "/" + file_name)
 
     os.rename(folder_name, folder_name.replace("playlist - ", ""))
+
+def choose_from_spotify_list(thelist):
+    thelist = list(thelist)
+    print ("Results:")
+    choice = ""
+    while choice not in tuple(range(0, len(thelist[:5]))):
+        for index, album in enumerate(thelist[:5]):
+            info = spotify.user(album["owner"]["id"])
+            try:
+                display_info = " (" + str(info["followers"]["total"]) + " followers)" + " - " + info["display_name"]
+            except Exception:
+                display_info = " - info couldn't be found"
+
+            print ("\t" + str(index) + ") " + album["name"] + display_info)
+        choice = int(input(bc.YELLOW + "\nEnter result number: " + bc.ENDC))
+
+    return thelist[choice]
