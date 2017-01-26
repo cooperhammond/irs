@@ -8,8 +8,8 @@ CONFIG = dict(
 
 
     # These are necessary to download Spotify playlists
-    client_id = 'e4198f6a3f7b48029366f22528b5dc66',
-    client_secret = 'fa96b67d223547e88c931a978b2fcecc',
+    client_id = '',
+    client_secret = '',
 
     # For a custom directory. Note that `~` will not work as a shortcut.
     directory = '',
