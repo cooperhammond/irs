@@ -7,7 +7,7 @@
 An ironically named program to download audio from youtube and then parse metadata for the downloaded file.
 ___
 ### Usage and Examples
-To download Spotify playlists, you need to supply client_ids. To do this, you'll want to create an application [here](https://developer.spotify.com/my-applications/#!/applications/create). Once you've done that, you'll want to copy your 'client id' and your 'client secret' into the config file and their corresponding lines. To find the config file run this command: `irs -C`. If that's all working, enter the name of the playlist you would like to download like this:
+For a non-descript Spotify playlist:
 ```bash
 irs -p "Brain Food"
 ```
@@ -58,6 +58,8 @@ Make a note that capitalization and spelling matters a lot in this program.
 
 ___
 ### Installation
+To download Spotify playlists, you need to supply client_ids. To do this, you'll want to create an application [here](https://developer.spotify.com/my-applications/#!/applications/create). Once you've done that, you'll want to copy your 'client id' and your 'client secret' into the config file and their corresponding lines. To find the config file run this command: `irs -C`.
+
 Please note that it currently is only usable in `Python 3.x`. Almost all dependencies are automatically installed by pip, but `youtube_dl` still needs `ffmpeg` to convert video to audio, so for Windows, you can install [`Scoop`](http://scoop.sh/) and then just do:
 ```
 scoop install ffmpeg
