@@ -1,5 +1,6 @@
 # Powered by:
 import youtube_dl
+from spotipy.oauth2 import SpotifyClientCredentials
 import spotipy
 
 # Info getting
@@ -14,6 +15,7 @@ from bs4 import BeautifulSoup
 # Local utils
 from .utils import *
 from .metadata import *
+from .config import CONFIG
 
 class Manager:
     def __init__(self, args):
@@ -40,31 +42,18 @@ class Manager:
             except ValueError:
                 print (bc.FAIL + "\nPlease enter a valid number." + bc.ENDC)
 
-        if media in (1, 2):
-            self.args.artist = color_input("Artist of song/album")
+        if media == 1:
+            self.args.song = color_input("Song you would like to download")
+            self.rip_mp3()
 
-            if media == 1:
-                self.args.song = color_input("Song you would like to download")
-                self.rip_mp3()
-
-            elif media == 2:
-                self.args.album = color_input("Album you would like to download")
-                self.rip_album()
+        elif media == 2:
+            self.args.album = color_input("Album you would like to download")
+            self.rip_spotify_list("album")
 
         elif media == 3:
-            self.args.playlist = color_input("Playlist file name")
+            self.args.playlist = color_input("Playlist name to search for")
 
-            organize = ""
-            while organize not in ("y", "n", "yes", "no", ""):
-                print (bc.HEADER + "Would you like to place all songs into a single folder? (Y/n)", end="")
-                organize = input(bc.BOLD + bc.YELLOW + ": " + bc.ENDC).lower()
-
-            if organize in ("y", "yes", ""):
-                self.args.organize = True
-            elif organize in ("n", "no"):
-                self.args.organize = False
-
-            self.rip_playlist()
+            self.rip_spotify_list("playlist")
 
     def find_mp3(self, song=None, artist=None):
         if not song:
@@ -131,85 +120,6 @@ class Manager:
 
         return search_results[i]
 
-
-    def rip_playlist(self):
-        file_name = self.args.playlist
-        organize = self.args.organize
-
-        try:
-            file = open(file_name, 'r')
-        except Exception:
-            print (file_name + bc.FAIL + " could not be found." + bc.ENDC)
-            exit(1)
-
-        errors = []
-        song_number = 0
-
-        for line in file:
-            if line.strip() == "":
-                pass
-
-            #try:
-            arr = line.strip("\n").split(" - ")
-            self.args.song = arr[0]
-            self.args.artist = arr[1]
-
-            if os.path.isdir(self.args.artist):
-                remove = False
-            else:
-                remove = True
-
-            location = self.rip_mp3()
-            locations = location.split("/")
-            song_number += 1
-
-            # Enter... the reorganizing...
-            if organize:
-
-                folder_name = ("playlist - " + file_name)[:40]
-
-                if not os.path.isdir(folder_name):
-                    os.makedirs(folder_name)
-
-                os.rename(location, "%s/%s - %s" % (folder_name, song_number, locations[-1]))
-
-                if remove:
-                    import shutil # Only import this if I have to.
-                    shutil.rmtree(locations[0])
-
-        if organize:
-            os.rename(file_name, folder_name + "/" + file_name)
-
-            os.rename(folder_name, folder_name.replace("playlist - ", ""))
-
-            #except Exception as e:
-            #    errors.append(line + color(" : ", ["YELLOW"]) + bc.FAIL + str(e) + bc.ENDC)
-
-        if len(errors) > 0:
-            print (bc.FAIL + "Something was wrong with the formatting of the following lines:" + bc.ENDC)
-
-            for i in errors:
-                print ("\t%s" % i)
-
-    def get_album_contents(self, search):
-        spotify = spotipy.Spotify()
-
-        results = spotify.search(q=search, type='album')
-        items = results['albums']['items']
-        if len(items) > 0:
-            album = choose_from_list(items)
-            album_id = (album['uri'])
-            contents = spotify.album_tracks(album_id)["items"]
-            contents = contents[0:-1]
-            names = []
-            for song in contents:
-                song = song["name"]
-                names.append(song)
-            return names, album_id
-        else:
-            print (bc.FAIL + "There was no results." + bc.ENDC)
-            exit(1)
-
     def get_album_art(self, artist, album, id=None):
         spotify = spotipy.Spotify()
 
@@ -223,47 +133,91 @@ class Manager:
             album = items[0]['images'][0]['url']
             return album
 
-    def rip_spotify_list(self, search, type, id=None):
-        spotify = spotipy.Spotify()
+    def rip_spotify_list(self, type):
+
+        if type == "playlist":
+            search = self.args.playlist
+
+        elif type == "album":
+            search = self.args.album
+
+        if self.args.artist:
+            search += self.args.artist
+
+        try:
+            client_credentials_manager = SpotifyClientCredentials(CONFIG["client_id"], CONFIG["client_secret"])
+            spotify = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+        except spotipy.oauth2.SpotifyOauthError:
+            spotify = spotipy.Spotify()
 
         results = spotify.search(q=search, type=type)
         items = results[type + "s"]['items']
+        songs = []
+
         if len(items) > 0:
             spotify_list = choose_from_spotify_list(items)
+
+            list_type = spotify_list["type"]
+            if list_type != "playlist":
+                spotify_list = eval("spotify.%s" % list_type)(spotify_list["uri"])
+            else:
+                try:
+                    spotify_list = spotify.user_playlist(spotify_list["owner"]["id"], \
+                    playlist_id=spotify_list["uri"], fields="tracks,next")
+                except spotipy.client.SpotifyException:
+                    fail_oauth()
+
+            print (bc.YELLOW + "\nFetching tracks and their metadata: " + bc.ENDC)
+
+            increment = 0
+
+            for song in spotify_list["tracks"]["items"]:
+
+                increment += 1
+                list_size = increment / len(spotify_list["tracks"]["items"])
+                drawProgressBar(list_size)
+
+                if list_type == "playlist":
+                    song = song["track"]
+
+                artist = spotify.artist(song["artists"][0]["id"])
+
+
+                if list_type == "playlist":
+                    album = (spotify.track(song["uri"])["album"])
+                else:
+                    album = spotify_list
+
+                songs.append({
+                    "name": song["name"],
+                    "artist": artist["name"],
+                    "album": album["name"],
+                    "tracknum": song["track_number"],
+                    "album_cover": album["images"][0]["url"]
+                })
+
+            print (bc.OKGREEN + "\nFound tracks:" + bc.ENDC)
+
+            print (bc.HEADER)
+            for song in songs:
+                print ("\t" + song["name"] + " - " + song["artist"])
+            print (bc.ENDC + "\n")
+
+            for song in songs:
+                self.rip_mp3(song["name"], song["artist"], album=song["album"], \
+                tracknum=song["tracknum"], album_art_url=song["album_cover"])
+
         else:
-            print (bc.FAIL + "No results were found." + bc.ENDC)
-
-
-    def rip_album(self):
-        search = self.args.artist + " " + self.args.album
-        songs, album_uri = self.get_album_contents(search)
-
-        if not songs:
-            print (bc.FAIL + "Could not find album." + bc.ENDC)
+            print (bc.FAIL + "No results were found. Make sure to use proper spelling and capitalization." + bc.ENDC)
             exit(1)
-
-        print ("")
-        print (bc.HEADER + "Album Contents:" + bc.ENDC)
-        for song in songs:
-            print (bc.OKBLUE + "  - " + song + bc.ENDC)
-
-        print (bc.YELLOW + "\nFinding album cover ... " + bc.ENDC, end="\r")
-        album_art_url = self.get_album_art(self.args.artist, self.args.album, id=album_uri)
-        print (bc.OKGREEN + "Album cover found: " + bc.ENDC + album_art_url)
-
-        for track_number, song in enumerate(songs):
-            print (color("\n%s/%s - " % (track_number + 1, len(songs)), ["UNDERLINE"]), end="")
-            self.rip_mp3(song, album=self.args.album, tracknum=track_number + 1, album_art_url=album_art_url)
-
-        else:
-            print (bc.BOLD + bc.UNDERLINE + self.args.album + bc.ENDC + bc.OKGREEN + " downloaded successfully!\n")
-
 
     def rip_mp3(self, song=None, artist=None,
         album=None, # if you want to specify an album and save a bit of time.
         tracknum=None, # to specify the tracknumber in the album.
         album_art_url=None, # if you want to save a lot of time trying to find album cover.
+        organize=True
             ):
+
 
         if not song:
             song = self.args.song
@@ -273,7 +227,12 @@ class Manager:
 
         audio_code = self.find_mp3(song=song, artist=artist)
 
-        filename = strip_special_chars(song) + ".mp3"
+        if CONFIG["numbered_file_names"] and tracknum:
+            track = str(tracknum) + " - "
+        else:
+            track = ""
+
+        filename = track + strip_special_chars(song) + ".mp3"
 
         ydl_opts = {
             'format': 'bestaudio/best',
@@ -288,13 +247,13 @@ class Manager:
             ydl.download(["http://www.youtube.com/watch?v=" + audio_code])
 
 
-        artist_folder = artist
+        artist_folder = CONFIG["directory"] + "/" + artist
 
         if not os.path.isdir(artist_folder):
             os.makedirs(artist_folder)
 
         if album:
-            album_folder = artist + "/" + album
+            album_folder = CONFIG["directory"] + "/" + artist + "/" + album
             if not os.path.isdir(album_folder):
                 os.makedirs(album_folder)
             location = album_folder

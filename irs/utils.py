@@ -1,4 +1,7 @@
-import sys, os
+import sys, os, spotipy, irs
+
+def get_config_file_path():
+    return os.path.dirname(irs.__file__) + "/config.py"
 
 def strip_special_chars(string):
     special_chars = "\ / : * ? \" < > | - ( )".split(" ")
@@ -111,19 +114,50 @@ def finish_unorganize(file_name):
 
     os.rename(folder_name, folder_name.replace("playlist - ", ""))
 
+def fail_oauth():
+    print (bc.FAIL + "To download Spotify playlists, you need to supply client_ids." + bc.ENDC)
+    print ("To do this, you'll want to create an application here:")
+    print ("https://developer.spotify.com/my-applications/#!/applications/create")
+    print ("Once you've done that, you'll want to copy your 'client id' and your 'client secret'")
+    print ("into the config file and their corresponding locations:")
+    print (get_config_file_path())
+    exit(1)
+
 def choose_from_spotify_list(thelist):
+    spotify = spotipy.Spotify()
+
     thelist = list(thelist)
     print ("Results:")
     choice = ""
-    while choice not in tuple(range(0, len(thelist[:5]))):
-        for index, album in enumerate(thelist[:5]):
-            info = spotify.user(album["owner"]["id"])
-            try:
-                display_info = " (" + str(info["followers"]["total"]) + " followers)" + " - " + info["display_name"]
-            except Exception:
-                display_info = " - info couldn't be found"
+    while choice not in tuple(range(0, len(thelist[:10]))):
+        for index, result in enumerate(thelist[:10]):
+            type = result["type"]
 
-            print ("\t" + str(index) + ") " + album["name"] + display_info)
+            if type == "playlist":
+                info = spotify.user(result["owner"]["id"])
+                try:
+                    display_info = " (" + str(info["followers"]["total"]) + " followers)"
+                    display_info += " - " + info["display_name"]
+                except Exception:
+                    display_info = " - info couldn't be found"
+
+            elif type == "album":
+                info = spotify.album(result["id"])
+                display_info = " - " + info["artists"][0]["name"]
+
+            print ("\t" + str(index) + ") " + result["name"] + display_info)
         choice = int(input(bc.YELLOW + "\nEnter result number: " + bc.ENDC))
 
     return thelist[choice]
+
+def drawProgressBar(percent, barLen = 40):
+    import sys
+    sys.stdout.write("\r")
+    progress = ""
+    for i in range(barLen):
+        if i < int(barLen * percent):
+            progress += "#"
+        else:
+            progress += "-"
+    sys.stdout.write("[%s] %.2f%%" % (progress, percent * 100))
+    sys.stdout.flush()
