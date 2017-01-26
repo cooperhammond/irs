@@ -26,7 +26,6 @@ irs -A "Sadnecessary" # -a "Milky Chance"
 Full usage:
 ```
 usage:
-usage:
     irs (-h | -v)
     irs [-l]
     irs -p PLAYLIST [-c COMMAND] [-l]
@@ -50,6 +49,7 @@ Options:
   -l, --choose-link     If supplied, will bring up a console choice for what
                         link you want to download based off a list of titles.
 ```
+Make a note that capitalization and spelling matters a lot in this program.
 
 ___
 ### Installation
