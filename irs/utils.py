@@ -123,14 +123,14 @@ def fail_oauth():
     print (get_config_file_path())
     exit(1)
 
-def choose_from_spotify_list(thelist):
+def choose_from_spotify_list(thelist, length=10):
     spotify = spotipy.Spotify()
 
     thelist = list(thelist)
     print ("Results:")
     choice = ""
-    while choice not in tuple(range(0, len(thelist[:10]))):
-        for index, result in enumerate(thelist[:10]):
+    while choice not in tuple(range(0, len(thelist[:length]))):
+        for index, result in enumerate(thelist[:length]):
             type = result["type"]
 
             if type == "playlist":
@@ -145,7 +145,7 @@ def choose_from_spotify_list(thelist):
                 info = spotify.album(result["id"])
                 display_info = " - " + info["artists"][0]["name"]
 
-            print ("\t" + str(index) + ") " + result["name"] + display_info)
+            print ("\t" + str(index) + ") " + bc.HEADER + result["name"] + display_info + bc.ENDC)
         choice = int(input(bc.YELLOW + "\nEnter result number: " + bc.ENDC))
 
     return thelist[choice]

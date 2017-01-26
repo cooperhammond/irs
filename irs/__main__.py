@@ -21,6 +21,8 @@ Options:
   -p PLAYLIST, --playlist PLAYLIST
                         Search spotify for a playlist.
 
+  -u USER, --user USER  Download a user playlist.
+
   -c COMMAND, --command COMMAND
                         Run a background command with each song's location.
                         Example: `-c "rhythmbox %(loc)s"`
@@ -55,13 +57,13 @@ def main():
     parser.add_argument('-c', '--command', dest="command", help="Run a background command with each song's location.")
     parser.add_argument('-a', '--artist', dest="artist", help="Specify the artist name.")
 
+    parser.add_argument('-u', '--user', dest="user", help="Specify user to download playlists from.")
+
     parser.add_argument('-l', '--choose-link', action='store_true', dest="link", \
         help="Whether or not to choose the link from a list of titles.")
 
     parser.add_argument('-p', '--playlist', dest="playlist", \
     help="Specify playlist filename. Each line should be formatted like so: SONGNAME - ARTIST")
-    parser.add_argument('-ng', '--no-organize', action="store_false", dest="organize", \
-        help="Only use if calling -p/--playlist. Forces all files downloaded to be organizes normally.")
 
     media = parser.add_mutually_exclusive_group()
     media.add_argument('-s', '--song', dest="song", help="Specify song name of the artist.")
@@ -70,9 +72,6 @@ def main():
 
 
     args = parser.parse_args(sys.argv[1:] + CONFIG["default_flags"].split(" ")[:-1])
-
-    if args.organize == None:
-        args.organize = True
 
     manager = Manager(args)
 
@@ -93,16 +92,15 @@ def main():
     elif args.config:
         print (get_config_file_path())
 
-    elif not args.organize and not args.playlist:
-        parser.error("error: must supply -p/--playlist if specifying -ng/--no-organize")
-        exit(1)
-
     #elif args.artist and not (args.album or args.song):
     #    parser.error("error: must supply -A/--album or -s/--song if specifying -a/--artist")
     #    exit(1)
 
     elif args.playlist:
         manager.rip_spotify_list("playlist")
+
+    elif args.user:
+        manager.rip_spotify_list("user")
 
     elif args.album:
         manager.rip_spotify_list("album")

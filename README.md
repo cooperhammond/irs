@@ -2,7 +2,7 @@
 [![License: GNU](https://img.shields.io/badge/License-GNU-yellow.svg)](http://www.gnu.org/licenses/gpl.html)
 [![PyPI](https://img.shields.io/badge/PyPi-Python_3.x-blue.svg)](https://pypi.python.org/pypi/irs)
 
-<em>Spotify playlists are now downloadable!</em>
+<em>Spotify playlists are now downloadable! Just use the `-u` flag and your username!</em>
 
 An ironically named program to download audio from youtube and then parse metadata for the downloaded file.
 ___
@@ -10,6 +10,10 @@ ___
 To download Spotify playlists, you need to supply client_ids. To do this, you'll want to create an application [here](https://developer.spotify.com/my-applications/#!/applications/create). Once you've done that, you'll want to copy your 'client id' and your 'client secret' into the config file and their corresponding lines. To find the config file run this command: `irs -C`. If that's all working, enter the name of the playlist you would like to download like this:
 ```bash
 irs -p "Brain Food"
+```
+If you are looking for one of *your* playlists, you'll want to use the `-u` flag and put your username in:
+```bash
+irs -u "prakkillian"
 ```
 If you download a specific song, you'll want to use the `-s` and `-a` flag.
 ```bash
@@ -19,7 +23,7 @@ To download an entire album, you'll want to use the `-A` flag. If the album you 
 ```bash
 irs -A "Sadnecessary" # -a "Milky Chance"
 ```
-[![asciicast](https://asciinema.org/a/bcs7i0sjmka052wsdyxg5xrug.png)](https://asciinema.org/a/bcs7i0sjmka052wsdyxg5xrug?speed=3&autoplay=true)
+[![asciicast](https://asciinema.org/a/5aijmkdux6nk8ckhke0jmzlyq.png)](https://asciinema.org/a/5aijmkdux6nk8ckhke0jmzlyq?speed=3&autoplay=true)
 
 [![asciicast](https://asciinema.org/a/8kb9882j4cbtd4hwbsbb7h0ia.png)](https://asciinema.org/a/8kb9882j4cbtd4hwbsbb7h0ia?speed=3)
 
@@ -39,6 +43,7 @@ Options:
                         Search spotify for an album.
   -p PLAYLIST, --playlist PLAYLIST
                         Search spotify for a playlist.
+  -u USER, --user USER  Download a user playlist.
   -c COMMAND, --command COMMAND
                         Run a background command with each song's location.
                         Example: `-c "rhythmbox %(loc)s"`

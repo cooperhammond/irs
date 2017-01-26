@@ -150,12 +150,18 @@ class Manager:
         except spotipy.oauth2.SpotifyOauthError:
             spotify = spotipy.Spotify()
 
-        results = spotify.search(q=search, type=type)
-        items = results[type + "s"]['items']
+        if type == "user":
+            items = spotify.user_playlists(self.args.user)["items"]
+            length = None
+        else:
+            results = spotify.search(q=search, type=type)
+            items = results[type + "s"]['items']
+            length = 10
+
         songs = []
 
         if len(items) > 0:
-            spotify_list = choose_from_spotify_list(items)
+            spotify_list = choose_from_spotify_list(items, length=length)
 
             list_type = spotify_list["type"]
             if list_type != "playlist":
