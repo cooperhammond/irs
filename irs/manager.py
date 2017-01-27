@@ -242,7 +242,8 @@ class Manager:
 
         if CONFIG["download_file_names"]:
             filename = track + strip_special_chars((BeautifulSoup(\
-            urlopen("http://www.youtube.com/watch?v=" + audio_code), 'html.parser')).title.string.lower()) + ".mp3"
+            urlopen("http://www.youtube.com/watch?v=" + audio_code), 'html.parser'))\
+            .title.string.lower()).strip("youtube") + ".mp3"
 
         ydl_opts = {
             'format': 'bestaudio/best',

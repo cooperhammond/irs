@@ -1,3 +1,5 @@
+from os.path import expanduser
+
 CONFIG = dict(
 
     # To autostart rhythmbox with a new song:
@@ -12,7 +14,7 @@ CONFIG = dict(
     client_secret = '',
 
     # For a custom directory. Note that `~` will not work as a shortcut.
-    directory = '',
+    directory = str(expanduser("~")) + "/Music",
 
     # If you want numbered file names
     numbered_file_names = True,
