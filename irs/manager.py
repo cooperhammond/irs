@@ -164,6 +164,7 @@ class Manager:
             spotify_list = choose_from_spotify_list(items, length=length)
 
             list_type = spotify_list["type"]
+            name = spotify_list["name"]
             if list_type != "playlist":
                 spotify_list = eval("spotify.%s" % list_type)(spotify_list["uri"])
             else:
@@ -195,10 +196,10 @@ class Manager:
                     album = spotify_list
 
                 songs.append({
-                    "name": song["name"],
+                    "name": song["name"].split(" - ")[0],
                     "artist": artist["name"],
                     "album": album["name"],
-                    "tracknum": song["track_number"],
+                    "tracknum": increment,
                     "album_cover": album["images"][0]["url"]
                 })
 
@@ -209,9 +210,41 @@ class Manager:
                 print ("\t" + song["name"] + " - " + song["artist"])
             print (bc.ENDC + "\n")
 
-            for song in songs:
-                self.rip_mp3(song["name"], song["artist"], album=song["album"], \
-                tracknum=song["tracknum"], album_art_url=song["album_cover"])
+            if self.args.start_at:
+                start_at = int(self.args.start_at) - 1
+                if start_at < 0:
+                    start_at = 0
+            else:
+                start_at = 0
+
+            for song in songs[start_at:]:
+
+                already_there = False
+                if os.path.isdir(CONFIG["directory"] + "/" + song["artist"]):
+                    already_there = True
+
+                song_loc = self.rip_mp3(song["name"], song["artist"], album=song["album"], \
+                tracknum=song["tracknum"], album_art_url=song["album_cover"], \
+                out_of="%s/%s - " % (song["tracknum"], len(songs)))
+
+                if self.args.one_folder:
+
+                    one_folder = CONFIG["directory"] + "/" + strip_special_chars(name[:30])
+
+                    if not os.path.isdir(one_folder):
+                        os.makedirs(one_folder)
+
+                    new_loc = one_folder + "/" + song_loc.split("/")[-1]
+
+                    os.rename(song_loc, new_loc)
+
+                    if not already_there:
+                        import shutil
+                        shutil.rmtree(CONFIG["directory"] + "/" + song["artist"])
+
+                    if self.args.command:
+                        os.system((self.args.command.replace("%(loc)s", '"%s"' % new_loc) + " &"))
+
 
         else:
             print (bc.FAIL + "No results were found. Make sure to use proper spelling and capitalization." + bc.ENDC)
@@ -221,7 +254,7 @@ class Manager:
         album=None, # if you want to specify an album and save a bit of time.
         tracknum=None, # to specify the tracknumber in the album.
         album_art_url=None, # if you want to save a lot of time trying to find album cover.
-        organize=True
+        out_of="", # For a string to put before the song title.
             ):
 
 
@@ -231,6 +264,8 @@ class Manager:
         if not artist:
             artist = self.args.artist
 
+
+        print (color(out_of, ["UNDERLINE"]), end="")
         audio_code = self.find_mp3(song=song, artist=artist)
 
         if CONFIG["numbered_file_names"] and tracknum:

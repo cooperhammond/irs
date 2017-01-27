@@ -3,9 +3,9 @@ HELP = \
 """
 usage:
     irs (-h | -v | -C)
-    irs [-l]
-    irs -p PLAYLIST [-c COMMAND] [-l]
-    irs -A ALBUM [-c COMMAND] [-l]
+    irs [-l] [-sa]
+    irs -p PLAYLIST [-c COMMAND] [-l] [-sa]
+    irs -A ALBUM [-c COMMAND] [-l] [-sa]
     irs -a ARTIST -s SONG [-c COMMAND] [-l]
 
 Options:
@@ -35,6 +35,12 @@ Options:
 
   -l, --choose-link     If supplied, will bring up a console choice for what
                         link you want to download based off a list of titles.
+
+  -sa, --start-at       A song index to start at if something goes wrong while
+                        downloading and you have to restart.
+
+  -of, --one-folder     To place all songs downloaded from a playlist into one
+                        folder.
 """
 
 # For exiting
@@ -60,10 +66,15 @@ def main():
     parser.add_argument('-u', '--user', dest="user", help="Specify user to download playlists from.")
 
     parser.add_argument('-l', '--choose-link', action='store_true', dest="link", \
-        help="Whether or not to choose the link from a list of titles.")
+    help="Whether or not to choose the link from a list of titles.")
+
+    parser.add_argument('-sa', '--start-at', dest="start_at", help="An index to start at if downloading a list.")
 
     parser.add_argument('-p', '--playlist', dest="playlist", \
     help="Specify playlist filename. Each line should be formatted like so: SONGNAME - ARTIST")
+
+    parser.add_argument('-of', '--one-folder', action="store_true", dest="one_folder", \
+    help="Place all downloaded playlist songs into one folder")
 
     media = parser.add_mutually_exclusive_group()
     media.add_argument('-s', '--song', dest="song", help="Specify song name of the artist.")

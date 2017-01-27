@@ -123,7 +123,7 @@ def fail_oauth():
     print (get_config_file_path())
     exit(1)
 
-def choose_from_spotify_list(thelist, length=10):
+def choose_from_spotify_list(thelist, length=100000):
     spotify = spotipy.Spotify()
 
     thelist = list(thelist)

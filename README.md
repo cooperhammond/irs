@@ -30,15 +30,16 @@ irs -A "Sadnecessary" # -a "Milky Chance"
 Full usage:
 ```
 usage:
-    irs (-h | -v)
-    irs [-l]
-    irs -p PLAYLIST [-c COMMAND] [-l]
-    irs -A ALBUM [-c COMMAND] [-l]
+    irs (-h | -v | -C)
+    irs [-l] [-sa]
+    irs -p PLAYLIST [-c COMMAND] [-l] [-sa]
+    irs -A ALBUM [-c COMMAND] [-l] [-sa]
     irs -a ARTIST -s SONG [-c COMMAND] [-l]
 
 Options:
   -h, --help            show this help message and exit
   -v, --version         Display the version and exit.
+  -C, --config          Return location of configuration file.
   -A ALBUM, --album ALBUM
                         Search spotify for an album.
   -p PLAYLIST, --playlist PLAYLIST
@@ -53,6 +54,8 @@ Options:
                         -a/--artist
   -l, --choose-link     If supplied, will bring up a console choice for what
                         link you want to download based off a list of titles.
+  -sa, --start-at       A song index to start at if something goes wrong while
+                        downloading and you have to restart.
 ```
 Make a note that capitalization and spelling matters a lot in this program.
 
