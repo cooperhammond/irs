@@ -80,7 +80,7 @@ pip install irs
 ```
 
 ### Why the name?
-As an acronym, it spells IRS. I think this is breathtakingly hilarious because the Internal Revenue Service (also the IRS) takes away, while my program gives. I'm so funny. You can tell that I'll get laid in college.
+As an acronym, it spells IRS. I think this is breathtakingly hilarious because the Internal Revenue Service (also the IRS) takes away, while my program gives. I'm so funny.
 
 
 ### Wishlist
