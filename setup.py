@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='irs',
-    version='4.7.22',
+    version='4.8.22',
     description='A music downloader that just gets metadata.',
     url='https://github.com/kepoorhampond/irs',
     author='Kepoor Hampond',

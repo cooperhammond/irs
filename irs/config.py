@@ -16,4 +16,7 @@ CONFIG = dict(
 
     # If you want numbered file names
     numbered_file_names = True,
+
+    # Downloaded file names
+    download_file_names = True,
 )
