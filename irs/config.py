@@ -12,8 +12,8 @@ CONFIG = dict(
 
 
     # These are necessary to download Spotify playlists
-    client_id = 'e4198f6a3f7b48029366f22528b5dc66',
-    client_secret = '69adc699f79e4640a6fd7610635b025f',
+    client_id = '',
+    client_secret = '',
 
     # For a custom directory. Note that `~` will not work as a shortcut.
     directory = str(expanduser("~")) + "/Music",
