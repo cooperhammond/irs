@@ -116,6 +116,10 @@ def main():
     elif args.album:
         manager.rip_spotify_list("album")
 
+    elif args.song and not args.artist:
+       parser.error("error: must supply -a/--artist if specifying -s/--song")
+       exit(1)
+
     elif args.song:
         manager.rip_mp3()
 
