@@ -15,7 +15,10 @@ CONFIG = dict(
     client_id = '',
     client_secret = '',
 
-    # For a custom directory. Note that `~` will not work as a shortcut.
+    additional_search_terms = 'lyrics',
+
+    # For a custom directory. Note that `~` will not work as a shortcut in a
+    # plain text manner.
     directory = str(expanduser("~")) + "/Music",
 
     # If you want numbered file names

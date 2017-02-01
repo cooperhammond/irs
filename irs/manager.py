@@ -64,7 +64,7 @@ class Manager:
 
         print (color(song, ["BOLD", "UNDERLINE"]) + ' by ' + color(artist, ["BOLD", "UNDERLINE"]))
 
-        search_terms = song + " " + artist + " lyrics"
+        search_terms = song + " " + artist + " " + CONFIG["additional_search_terms"]        
         query_string = urlencode({"search_query" : (search_terms)})
 
         html_content = urlopen("http://www.youtube.com/results?" + query_string)
@@ -86,7 +86,7 @@ class Manager:
                     audio_url = ("http://www.youtube.com/watch?v=" + search_results[i])
                 except Exception:
                     print (bc.FAIL + "Could not find song." + bc.ENDC)
-                    exit(1)
+                    return False
 
                 title = strip_special_chars((BeautifulSoup(urlopen(audio_url), 'html.parser')).title.string.lower())
                 song_title = song.lower().split("/")
@@ -227,6 +227,9 @@ class Manager:
                 tracknum=song["tracknum"], album_art_url=song["album_cover"], \
                 out_of="%s/%s - " % (song["tracknum"], len(songs)))
 
+                if song_loc == False:
+                    continue
+
                 if self.args.one_folder:
 
                     one_folder = CONFIG["directory"] + "/" + strip_special_chars(name[:30])
@@ -267,6 +270,9 @@ class Manager:
 
         print (color(out_of, ["UNDERLINE"]), end="")
         audio_code = self.find_mp3(song=song, artist=artist)
+
+        if audio_code == False:
+            return False
 
         if CONFIG["numbered_file_names"] and tracknum:
             track = str(tracknum) + " - "
