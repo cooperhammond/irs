@@ -55,7 +55,7 @@ def color(text, colors=[]):
     for color in colors:
         color_string += "bc.%s + " % color
     color_string = color_string[:-2]
-    return (bc.ENDC + eval(color_string) + text + bc.ENDC)
+    return (bc.ENDC + eval(color_string) + str(text) + bc.ENDC)
 
 def color_input(text):
     print (bc.HEADER + text, end=" ")
