@@ -44,6 +44,7 @@ class Manager:
 
         if media == 1:
             self.args.song = color_input("Song you would like to download")
+            self.args.artist = color_input("Name of artist")
             self.rip_mp3()
 
         elif media == 2:
@@ -64,7 +65,7 @@ class Manager:
 
         print (color(song, ["BOLD", "UNDERLINE"]) + ' by ' + color(artist, ["BOLD", "UNDERLINE"]))
 
-        search_terms = song + " " + artist + " " + CONFIG["additional_search_terms"]        
+        search_terms = song + " " + artist + " " + CONFIG["additional_search_terms"]
         query_string = urlencode({"search_query" : (search_terms)})
 
         html_content = urlopen("http://www.youtube.com/results?" + query_string)
