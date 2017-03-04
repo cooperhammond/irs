@@ -3,6 +3,7 @@
 /dist/
 /*.egg-info/
 /build/
+__pycache__/
 
 # For easy updating of stuff.
 update_pypi_and_github.py
