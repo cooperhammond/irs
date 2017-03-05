@@ -28,3 +28,25 @@ def individual_word_match(match_against, match):
             if match_ag == word:
                 matched.append(word)
     return (float(matched.uniq.size) / float(match_against.size))
+    
+def format_download_log_line(track, download_status="not downloaded"):
+    return " @@ ".join([t["name"], t["artist"], t["album"]["id"], \
+    t["genre"], t["track_number"], t["disc_number"], t["compilation"], \
+    t["prefix"], download_status]) + "\n"
+
+def format_download_log_data(data):
+    line = []
+    for track in data:
+        lines.append(format_download_log_line(track))
+    return lines
+    
+def update_download_log_line_status(track, status="downloaded"):
+    line_to_find = format_download_log_line(track)
+    with open(".irs-download-log", "r") as input_file, \
+    open(".irs-download-log", "w") as output_file:
+            for line in input_file:
+                if line == line_to_find:
+                    output_file.write(format_download_log_line(track, status))
+                else:
+                    output_file.write(line)
+            
