@@ -99,7 +99,7 @@ class Ripper:
                 search += " " + self.args["artist"]
             list_of_lists = self.spotify.search(q=search, type="album")["albums"]["items"]
         elif type == "playlist":
-            list_of_lists = self.spotify.user_playlists(username)
+            list_of_lists = self.spotify.user_playlists(username)["items"]
             
         if len(list_of_lists) > 0:
             the_list = None
@@ -113,7 +113,8 @@ class Ripper:
                         if type == "album":
                             the_list = self.spotify.album(list_["uri"])
                         else:
-                            the_list = self.spotify.playlist(list_["uri"])
+                            the_list = self.spotify.user_playlist(list_["owner"]["id"], list_["uri"])
+                            the_list["artists"] = [{"name": username}]
                         break
             if the_list != None:
                 print ('"%s" by "%s"' % (the_list["name"], the_list["artists"][0]["name"]))
@@ -132,9 +133,10 @@ class Ripper:
                 for track in the_list["tracks"]["items"]:
                     if type == "playlist": 
                         file_prefix = str(len(tracks) + 1) + " - "
+                        track = track["track"]
                     elif type == "album":
                         file_prefix = str(track["track_number"]) + " - "
-                    
+
                     data = {
                         "name":          track["name"],
                         "artist":        track["artists"][0]["name"],
@@ -251,4 +253,4 @@ class Ripper:
 
 
 #Ripper().song("Da Frame 2R", "Arctic Monkeys")
-Ripper().spotify_list("album", "Black Treacle")
+Ripper().spotify_list("playlist", "Jamboree Jams", "prakkillian")
