@@ -21,8 +21,8 @@ else:
     sys.exit(1)
     
 # Local utilities
-import utils
-from metadata import *
+import .utils
+from .metadata import *
 
 class Ripper:
     def __init__(self, args={}):
@@ -249,8 +249,3 @@ class Ripper:
             m.add_tag("discnumber",     str(data["disc_number"]))
             m.add_tag("compilation",    data["compilation"])
             m.add_album_art(            str(data["album_art"]))
-            
-
-
-#Ripper().song("Da Frame 2R", "Arctic Monkeys")
-Ripper().spotify_list("playlist", "Jamboree Jams", "prakkillian")

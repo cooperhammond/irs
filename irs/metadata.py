@@ -22,7 +22,7 @@ from re import match
 from bs4 import BeautifulSoup
 
 # Local utils
-import utils
+import .utils
 
 # Powered by...
 import spotipy

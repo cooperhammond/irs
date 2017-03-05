@@ -12,3 +12,7 @@ update_pypi_and_github.py
 /flexx-app/
 /.idea/
 *test.py
+
+# Temporarily downloaded files
+*.mp3
+*.zip
