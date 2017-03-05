@@ -6,6 +6,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
 # System
 import sys
 import os
+import glob
 
 # Parsing
 from bs4 import BeautifulSoup
@@ -21,6 +22,7 @@ else:
     
 # Local utilities
 import utils
+from metadata import *
 
 class Ripper:
     def __init__(self, args={}):
@@ -36,10 +38,10 @@ class Ripper:
             
     def find_yt_url(self, song=None, artist=None, additional_search="lyrics"):
         try:
-            if not song:    song = self.args["song"]
+            if not song:    song = self.args["song_title"]
             if not artist:  artist = self.args["artist"]
         except ValueError:
-            raise ValueError("Must have specify `song` and/or `artist` in either init with `args` or with method arguments.")
+            raise ValueError("Must specify song_title/artist in `args` with init, or in method arguments.")
             
         search_terms = song + " " + artist + " " + additional_search
         query_string = urlencode({"search_query" : (search_terms)})
@@ -85,10 +87,10 @@ class Ripper:
     def spotify_list(self, type=None, title=None, username=None):
         try:
             if not type:      type = self.args["type"]
-            if not title:     title = self.args["title"]
+            if not title:     title = self.args["list_title"]
             if not username:  username = self.args["username"] 
         except ValueError:
-            raise ValueError("Must specify type/title/username in `args` with init, or in method arguements.")
+            raise ValueError("Must specify type/title/username in `args` with init, or in method arguments.")
         
         if type == "album":
             search = title
@@ -128,6 +130,8 @@ class Ripper:
                 for track in the_list["tracks"]:
                     if type == "playlist": 
                         file_prefix = str(len(tracks)) + " - "
+                    elif type == "album":
+                        file_prefix = str(track["track_number"]) + " - "
                     
                     data = {
                         "name":          track["name"],
@@ -137,7 +141,7 @@ class Ripper:
                         "track_number":  track["track_number"],
                         "disc_number":   track["disc_number"],
                         "compilation":   compilation,
-                        "file_prefix":        file_prefix,
+                        "file_prefix":   file_prefix,
                     }
                     
                     tracks.append(data)
@@ -162,3 +166,76 @@ class Ripper:
         
         os.remove(".irs-download-log")
         return locations
+        
+    def song(song=None, artist=None, data={}):
+        try:
+            if not song:    song = self.args["song_title"]
+            if not artist:  artist = self.args["artist"]
+        except ValueError:
+            raise ValueError("Must specify song_title/artist in `args` with init, or in method arguments.")
+        
+        if data == {}: data = False
+        
+        video_url, video_title = self.find_yt_url(song, artist)
+        
+        print ('Downloading "%s" by "%s"' % (song, artist))
+        
+        file_prefix = ""
+        if data != False:
+            file_prefix = data["file_prefix"]
+            
+        file_name = file_prefix + utils.blank(song, False) + ".mp3"
+        
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            #'quiet': True,
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '192',
+            }],
+            'logger': utils.MyLogger(),
+            'progress_hooks': [utils.my_hook],
+        }
+        
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([video_url])
+            
+        for file in glob.glob("./*%s*" % video_title.split("/watch?v=")[-1]):
+            os.rename(file, file_name)
+            
+        if data == False:
+            if "album" not in self.args:
+                album, track = find_album_and_track(song, artist)
+            else:
+                album = self.args["album"]
+            if album != None:
+                genre = album["artists"][0]["genres"]
+        
+        album_name = ""
+        if album:
+            if utils.check_garbage_phrases(["remastered", "explicit"], album.name, "")
+                album_name = album["name"].split(" (")[0]
+            else:
+                album_name = album["name"]
+            
+            genre = parse_genre(genre)
+            
+        # Ease of Variables (copyright) (patent pending) (git yer filthy hands off)
+        #
+        # *5 Minutes Later*
+        # Depecrated. It won't be the next big thing. :(
+    
+        
+        m = Metadata(file_name)
+        
+        m.add_tag(    "title",         song)
+        m.add_tag(    "artist",        artist)
+        m.add_tag(    "comment",       "Downloaded from: %s\n Video Title: %s" % (video_url, video_title))
+        if album:
+            m.add_tag("album",         album_name)
+            m.add_tag("genre",         genre)
+            m.add_tag("compilation",   compilation)
+            m.add_tag("tracknumber",   track["track_number"])
+            m.add_tag("discnumber",    track["disc_number"])
+            m.add_album_art(           album["images"][0]["url"])
