@@ -15,7 +15,7 @@ class MyLogger(object):
 
 def my_hook(d):
     if d['status'] == 'finished':
-        print('Done downloading, now converting ...')
+        print ("Converting to mp3 ...")
 
 
 #=================================
@@ -58,16 +58,16 @@ def individual_word_match(match_against, match):
 # Download Log Reading/Updating/Formatting
 #=========================================
     
-def format_download_log_line(track, download_status="not downloaded"):
-    return " @@ ".join([t["name"], t["artist"], t["album"]["id"], \
-    t["genre"], t["track_number"], t["disc_number"], str(t["compilation"]), \
-    t["prefix"], download_status]) + "\n"
+def format_download_log_line(t, download_status="not downloaded"):
+    return (" @@ ".join([t["name"], t["artist"], t["album"]["id"], \
+    str(t["genre"]), t["track_number"], t["disc_number"], t["compilation"], \
+    t["file_prefix"], download_status]))
 
 def format_download_log_data(data):
-    line = []
+    lines = []
     for track in data:
         lines.append(format_download_log_line(track))
-    return lines
+    return "\n".join(lines)
     
 def read_download_log(spotify):
     data = []
@@ -78,7 +78,7 @@ def read_download_log(spotify):
                 "name":          line[0],
                 "artist":        line[1],
                 "album":         spotify.album(line[2]),
-                "genre":         line[3],
+                "genre":         eval(line[3]),
                 "track_number":  line[4],
                 "disc_number":   line[5],
                 "compilation":   bool(line[6]),
@@ -103,3 +103,4 @@ def update_download_log_line_status(track, status="downloaded"):
 
 def ease_of_variables(the_name, data):
     eval(the_name + " = " + data) # Forgive me my lord, for I have sinned
+    

@@ -44,10 +44,10 @@ class Metadata:
         mp3.tags.add(
             APIC(
                 encoding = 3,
-                mime = 'image/png',
-                type = 3,
-                desc = 'cover',
-                data = urlopen(image_url).read()
+                mime =     'image/png',
+                type =     3,
+                desc =     'cover',
+                data =     urlopen(image_url).read()
             )
         )
         mp3.save()
@@ -58,12 +58,15 @@ def find_album_and_track(song, artist):
         if utils.blank_include(track["name"], song):
             if utils.blank_include(track["artists"][0]["name"], artist):
                 return track["album"], track
+    return False, False
                 
 def parse_genre(genres):
     if genres != []:
         genres.reverse()
         genres = list(map(lambda x: x.replace("-", " "), genres))
         genres.sort(key=lambda x: len(x.split()))
-        return genres[0]
+        return genres[0].title()
     else:
         return ""
+        
+#Metadata("Da Frame 2R.mp3").add_album_art("https://i.scdn.co/image/c8931dc7eb717531de93ae0d4626362875c51ba9")

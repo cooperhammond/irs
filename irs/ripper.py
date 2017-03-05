@@ -86,10 +86,11 @@ class Ripper:
     
     def spotify_list(self, type=None, title=None, username=None):
         try:
-            if not type:      type = self.args["type"]
-            if not title:     title = self.args["list_title"]
-            if not username:  username = self.args["username"] 
-        except ValueError:
+            if not type:    type = self.args["type"]
+            if not title:   title = self.args["list_title"]
+            if not username and type == "playlist":
+                username = self.args["username"] 
+        except KeyError:
             raise ValueError("Must specify type/title/username in `args` with init, or in method arguments.")
         
         if type == "album":
@@ -103,43 +104,45 @@ class Ripper:
         if len(list_of_lists) > 0:
             the_list = None
             for list_ in list_of_lists:
-                if utils.blank_include(list_.name, title):
+                if utils.blank_include(list_["name"], title):
                     if "artist" in self.args:
                         if utils.blank_include(list_["artists"][0]["name"], self.args["artist"]):
                             the_list = list_
                             break
                     else:
-                        the_list = list_
+                        if type == "album":
+                            the_list = self.spotify.album(list_["uri"])
+                        else:
+                            the_list = self.spotify.playlist(list_["uri"])
                         break
             if the_list != None:
                 print ('"%s" by "%s"' % (the_list["name"], the_list["artists"][0]["name"]))
                 compilation = ""
                 if type == "album":
-                    tmp_albums = []
                     tmp_artists = []
-                    for track in the_list["tracks"]:
-                        tmp_albums.append(track["album"]["name"])
+                    for track in the_list["tracks"]["items"]:
                         tmp_artists.append(track["artists"][0]["name"])
-                    tmp_albums = list(set(tmp_albums))
                     tmp_artists = list(set(tmp_artists))
-                    if len(tmp_albums) == 1 and len(tmp_artists) > 1:
-                        compilation = "true"
+                    if len(tmp_artists) > 1:
+                        compilation = "1"
                 
                 tracks = []
                 file_prefix = ""
-                for track in the_list["tracks"]:
+                
+                for track in the_list["tracks"]["items"]:
                     if type == "playlist": 
-                        file_prefix = str(len(tracks)) + " - "
+                        file_prefix = str(len(tracks) + 1) + " - "
                     elif type == "album":
                         file_prefix = str(track["track_number"]) + " - "
                     
                     data = {
                         "name":          track["name"],
                         "artist":        track["artists"][0]["name"],
-                        "album":         track["album"],
-                        "genre":         self.spotify.artist(track["artists"][0]["uri"])["genres"],
+                        "album":         the_list["name"],
+                        "genre":         parse_genre(self.spotify.artist(track["artists"][0]["uri"])["genres"]),
                         "track_number":  track["track_number"],
                         "disc_number":   track["disc_number"],
+                        "album_art": the_list["images"][0]["url"],
                         "compilation":   compilation,
                         "file_prefix":   file_prefix,
                     }
@@ -147,44 +150,67 @@ class Ripper:
                     tracks.append(data)
                 
                 locations = self.list(tracks)
-                return self.post_processing(locations)
+                return locations
+                #return self.post_processing(locations)
                 
         print ('Could not find any lists.')
         return False
 
     def list(self, list_data):
         locations = []
-        with open(".irs-download-log", "w+") as file:
-            file.write(utils.format_download_log_data(list_data))
+        #with open(".irs-download-log", "w+") as file:
+        #    file.write(utils.format_download_log_data(list_data))
         
         for track in list_data:
             loc = self.song(track["name"], track["artist"], track)
 
             if loc != False:
-                utils.update_download_log_line_status(track, "downloaded")
+                #utils.update_download_log_line_status(track, "downloaded")
                 locations.append(loc)
         
-        os.remove(".irs-download-log")
+        #os.remove(".irs-download-log")
         return locations
         
-    def song(self, song=None, artist=None, data={}):
+    def parse_song_data(self, song, artist):
+        album, track = find_album_and_track(song, artist)
+        if album == False: 
+            return {}
+        
+        album = self.spotify.album(album["uri"])
+        track = self.spotify.track(track["uri"])            
+        genre = self.spotify.artist(album["artists"][0]["uri"])["genres"]
+
+        return {
+            "name":            track["name"],
+            "artist":          track["artists"][0]["name"],
+            "album":           album["name"],
+            "album_art":       album["images"][0]["url"],
+            "genre":           parse_genre(genre),
+            "track_number":    track["track_number"],
+            "disc_number":     track["disc_number"],
+            
+            "compilation": "", # If this method is being called, it's not a compilation
+            "file_prefix": "" # And therefore, won't have a prefix
+        }                
+        
+    def song(self, song, artist, data={}): # Takes data from `parse_song_data`
         try:
             if not song:    song = self.args["song_title"]
             if not artist:  artist = self.args["artist"]
-        except ValueError:
+        except KeyError:
             raise ValueError("Must specify song_title/artist in `args` with init, or in method arguments.")
         
-        if data == {}: data = False
+        if data == {}: 
+            data = self.parse_song_data(song, artist)
+                        
+        if "file_prefix" not in data:
+            data["file_prefix"] = ""
         
         video_url, video_title = self.find_yt_url(song, artist)
         
-        print ('Downloading "%s" by "%s"' % (song, artist))
-        
-        file_prefix = ""
-        if data != False:
-            file_prefix = data["file_prefix"]
-            
-        file_name = file_prefix + utils.blank(song, False) + ".mp3"
+        print ('Downloading "%s" by "%s" ...' % (song, artist))
+                    
+        file_name = data["file_prefix"] + utils.blank(song, False) + ".mp3"
         
         ydl_opts = {
             'format': 'bestaudio/best',
@@ -203,46 +229,26 @@ class Ripper:
             
         for file in glob.glob("./*%s*" % video_title.split("/watch?v=")[-1]):
             os.rename(file, file_name)
-            
-        if data == False:
-            if "album" not in self.args:
-                album, track = find_album_and_track(song, artist)
-                album = self.spotify.album(album["uri"])
-                track = self.spotify.track(track["uri"])
-            else:
-                album = self.args["album"]
-            if album != None:
-                genre = self.spotify.artist(album["artists"][0]["uri"])["genres"]
-        
-        album_name = ""
-        if album:
-            if utils.check_garbage_phrases(["remastered", "explicit"], album["name"], ""):
-                album_name = album["name"].split(" (")[0]
-            else:
-                album_name = album["name"]
-            
-            genre = parse_genre(genre)
                         
         # Ease of Variables (copyright) (patent pending) (git yer filthy hands off)
-        #
+        # [CENSORED BY THE BAD CODE ACT]
         # *5 Minutes Later*
         # Deprecated. It won't be the next big thing. :(
     
         
-        m = Metadata(file_name)
-        
-        m.add_tag(    "title",         song)
-        m.add_tag(    "artist",        artist)
-        #m.add_tag(    "comment",       "Downloaded from: %s\n Video Title: %s" % (video_url, video_title))
-        if album:
-            m.add_tag("album",         album_name)
-            m.add_tag("genre",         genre)
-            m.add_tag("tracknumber",   str(track["track_number"]))
-            m.add_tag("discnumber",    str(track["disc_number"]))
-            m.add_album_art(           album["images"][0]["url"])
-            # TODO: GET THIS WORKING:
-            #if "compilation" in data:
-            #    m.add_tag("compilation",   data["compilation"])
+        m = Metadata(file_name)        
+                    
+        m.add_tag(    "title",          data["name"])
+        m.add_tag(    "artist",         data["artist"])
+        if data != {}:
+            m.add_tag("album",          data["album"])
+            m.add_tag("genre",          data["genre"])
+            m.add_tag("tracknumber",    str(data["track_number"]))
+            m.add_tag("discnumber",     str(data["disc_number"]))
+            m.add_tag("compilation",    data["compilation"])
+            m.add_album_art(            str(data["album_art"]))
+            
 
 
-Ripper().song("Stomp", "The Stone Foxes")
+#Ripper().song("Da Frame 2R", "Arctic Monkeys")
+Ripper().spotify_list("album", "Black Treacle")
