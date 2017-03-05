@@ -2,6 +2,7 @@
 from mutagen.mp3 import MP3, EasyMP3
 from mutagen.easyid3 import EasyID3
 from mutagen.id3 import * # There's A LOT of stuff to import, forgive me.
+from mutagen.id3 import APIC
 
 # System
 import sys
@@ -35,8 +36,8 @@ class Metadata:
         
     def add_tag(self, tag, data):
         # For valid tags: `EasyID3.valid_keys.keys()`
-        audio[tag] = data
-        audio.save()    
+        self.mp3[tag] = data
+        self.mp3.save()    
 
     def add_album_art(self, image_url):
         mp3 = EasyMP3(self.location, ID3=ID3)
@@ -51,8 +52,8 @@ class Metadata:
         )
         mp3.save()
         
-def find_album(song, artist):
-    tracks = self.spotify.search(q=song, type="track")
+def find_album_and_track(song, artist):
+    tracks = spotipy.Spotify().search(q=song, type="track")["tracks"]["items"]
     for track in tracks:
         if utils.blank_include(track["name"], song):
             if utils.blank_include(track["artists"][0]["name"], artist):
@@ -63,7 +64,6 @@ def parse_genre(genres):
         genres.reverse()
         genres = list(map(lambda x: x.replace("-", " "), genres))
         genres.sort(key=lambda x: len(x.split()))
-        print (genres)
         return genres[0]
     else:
         return ""

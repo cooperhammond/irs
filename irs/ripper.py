@@ -96,7 +96,7 @@ class Ripper:
             search = title
             if "artist" in self.args:
                 search += " " + self.args["artist"]
-            list_of_lists = self.spotify.search(q=search, type="album")
+            list_of_lists = self.spotify.search(q=search, type="album")["albums"]["items"]
         elif type == "playlist":
             list_of_lists = self.spotify.user_playlists(username)
             
@@ -113,7 +113,7 @@ class Ripper:
                         break
             if the_list != None:
                 print ('"%s" by "%s"' % (the_list["name"], the_list["artists"][0]["name"]))
-                compilation = False
+                compilation = ""
                 if type == "album":
                     tmp_albums = []
                     tmp_artists = []
@@ -123,7 +123,7 @@ class Ripper:
                     tmp_albums = list(set(tmp_albums))
                     tmp_artists = list(set(tmp_artists))
                     if len(tmp_albums) == 1 and len(tmp_artists) > 1:
-                        compilation = True
+                        compilation = "true"
                 
                 tracks = []
                 file_prefix = ""
@@ -137,7 +137,7 @@ class Ripper:
                         "name":          track["name"],
                         "artist":        track["artists"][0]["name"],
                         "album":         track["album"],
-                        "genre":         track["artists"][0]["genres"],
+                        "genre":         self.spotify.artist(track["artists"][0]["uri"])["genres"],
                         "track_number":  track["track_number"],
                         "disc_number":   track["disc_number"],
                         "compilation":   compilation,
@@ -152,7 +152,7 @@ class Ripper:
         print ('Could not find any lists.')
         return False
 
-    def list(list_data):
+    def list(self, list_data):
         locations = []
         with open(".irs-download-log", "w+") as file:
             file.write(utils.format_download_log_data(list_data))
@@ -167,7 +167,7 @@ class Ripper:
         os.remove(".irs-download-log")
         return locations
         
-    def song(song=None, artist=None, data={}):
+    def song(self, song=None, artist=None, data={}):
         try:
             if not song:    song = self.args["song_title"]
             if not artist:  artist = self.args["artist"]
@@ -207,35 +207,42 @@ class Ripper:
         if data == False:
             if "album" not in self.args:
                 album, track = find_album_and_track(song, artist)
+                album = self.spotify.album(album["uri"])
+                track = self.spotify.track(track["uri"])
             else:
                 album = self.args["album"]
             if album != None:
-                genre = album["artists"][0]["genres"]
+                genre = self.spotify.artist(album["artists"][0]["uri"])["genres"]
         
         album_name = ""
         if album:
-            if utils.check_garbage_phrases(["remastered", "explicit"], album.name, "")
+            if utils.check_garbage_phrases(["remastered", "explicit"], album["name"], ""):
                 album_name = album["name"].split(" (")[0]
             else:
                 album_name = album["name"]
             
             genre = parse_genre(genre)
-            
+                        
         # Ease of Variables (copyright) (patent pending) (git yer filthy hands off)
         #
         # *5 Minutes Later*
-        # Depecrated. It won't be the next big thing. :(
+        # Deprecated. It won't be the next big thing. :(
     
         
         m = Metadata(file_name)
         
         m.add_tag(    "title",         song)
         m.add_tag(    "artist",        artist)
-        m.add_tag(    "comment",       "Downloaded from: %s\n Video Title: %s" % (video_url, video_title))
+        #m.add_tag(    "comment",       "Downloaded from: %s\n Video Title: %s" % (video_url, video_title))
         if album:
             m.add_tag("album",         album_name)
             m.add_tag("genre",         genre)
-            m.add_tag("compilation",   compilation)
-            m.add_tag("tracknumber",   track["track_number"])
-            m.add_tag("discnumber",    track["disc_number"])
+            m.add_tag("tracknumber",   str(track["track_number"]))
+            m.add_tag("discnumber",    str(track["disc_number"]))
             m.add_album_art(           album["images"][0]["url"])
+            # TODO: GET THIS WORKING:
+            #if "compilation" in data:
+            #    m.add_tag("compilation",   data["compilation"])
+
+
+Ripper().song("Stomp", "The Stone Foxes")
