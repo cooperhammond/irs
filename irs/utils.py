@@ -116,8 +116,14 @@ def update_download_log_line_status(track, status="downloaded"):
 
 import os, sys, re
 from time import sleep
+import pkg_resources
 
 COLS = int(os.popen('tput cols').read().strip("\n"))
+
+if sys.version_info[0] == 2:
+    def input(string):
+        return raw_input(string)
+    
 
 def code(code1):
     return "\x1b[%sm" % str(code1)
@@ -128,8 +134,14 @@ def no_colors(string):
 def center_colors(string, cols):
     return no_colors(string).center(cols).replace(no_colors(string), string) 
         
+def decode_utf8(string):
+    if sys.version_info[0] == 3:
+        return string.encode("utf8", "strict").decode()
+    elif sys.version_info[0] == 2:
+        return string.decode("utf8")
+    
 def center_unicode(string, cols):
-    tmp_chars = "X" * len(string.decode("utf8"))
+    tmp_chars = "X" * len(decode_utf8(string))
     chars = center_colors(tmp_chars, cols)
     return chars.replace(tmp_chars, string)
     
@@ -139,7 +151,7 @@ def center_lines(string, cols, end="\n"):
         lines.append(center_unicode(line, cols))
     return end.join(lines)
     
-def flush_puts(msg, time=0.03):
+def flush_puts(msg, time=0.01):
     # For slow *burrrp* scroll text, Morty. They-They just love it, Morty.
     # When they see this text. Just slowwwly extending across the page. Mmm, mmm.
     # You just give the time for how *buurp* slow you wa-want it, Morty.
@@ -171,13 +183,14 @@ YELLOW = code(33)
 BLUE = code(34)
 PURPLE = code(35)
 CYAN = code(36)
+GRAY = code(37)
 BRED = RED + BOLD
 BGREEN = GREEN + BOLD
 BYELLOW = YELLOW + BOLD
 BBLUE = BLUE + BOLD
 BPURPLE = PURPLE + BOLD
 BCYAN = CYAN + BOLD
-
+BGRAY = GRAY + BOLD
 
 def banner():
     title = (BCYAN + center_lines("""\
@@ -196,8 +209,60 @@ def banner():
             print ("")
         print (title)
         sleep(0.3)
-    flush_puts(center_colors(BYELLOW + "\
-Ironic Redistribution System (" + BRED + "IRS" + BYELLOW + ")" + END, COLS))
-    flush_puts(center_colors(BBLUE + "\
-Made with 😈  by: " + BYELLOW + "Kepoor Hampond (" + BRED + \
-"kepoorhampond" + BYELLOW + ")" + END, COLS))
+    flush_puts(center_colors("{0}Ironic Redistribution System ({1}IRS{2})"\
+    .format(BYELLOW, BRED, BYELLOW), COLS))
+    
+    flush_puts(center_colors("{0}Made with 😈  by: {1}Kepoor Hampond ({2}kepoorhampond{3})\r"\
+    .format(BBLUE, BYELLOW, BRED, BYELLOW) + END, COLS))
+    
+    flush_puts(center_colors("{0}Version: {1}".format(BBLUE, BYELLOW) + pkg_resources.get_distribution("irs").version, COLS))
+
+def menu(unicode, time=0.01):
+    flush_puts("Choose option from menu:", time)
+    flush_puts("\t[{0}song{1}] Download Song".format(BGREEN, END), time)
+    flush_puts("\t[{0}album{1}] Download Album".format(BGREEN, END), time)
+    flush_puts("\t[{0}{1}{2}] Download Playlist".format(BGREEN, unicode[-1], END), time)
+    flush_puts("\t[{0}help{1}] Print This Menu".format(BGREEN, END), time)
+    flush_puts("\t[{0}exit{1}] Exit IRS".format(BGREEN, END), time)
+    print ("")
+
+def console(ripper):
+    banner()
+    print (END)
+    if ripper.authorized == True:
+        unicode = [BGREEN + "✔" + END, "list"]
+    elif ripper.authorized == False:
+        unicode = [BRED + "✘" + END]
+    flush_puts("[{0}] Authenticated with Spotify".format(unicode[0]))
+    print ("")
+    menu(unicode)
+    while True:
+        try:
+            choice = input("{0}irs{1}>{2} ".format(BBLUE, BGRAY, END))
+
+            if choice in ("exit", "e"):
+                raise KeyboardInterrupt
+
+            try:
+                if choice in ("song", "s"):
+                    song_name = input("Song name{0}:{1} ".format(BBLUE, END))
+                    artist_name = input("Artist name{0}:{1} ".format(BBLUE, END))
+                    ripper.song(song_name, artist_name)
+
+                elif choice in ("album", "a"):
+                    album_name = input("Album name{0}:{1} ".format(BBLUE, END))
+                    ripper.spotify_list("album", album_name)
+
+                elif choice in ("list", "l") and ripper.authorized == True:
+                    username = input("Spotify Username{0}:{1} ".format(BBLUE, END))
+                    list_name = input("Playlist Name{0}:{1} ".format(BBLUE, END))
+                    ripper.spotify_list("playlist", list_name, username)
+
+                elif choice in ("help", "h", "?"):
+                    menu(unicode, 0)
+            except KeyboardInterrupt:
+                print ("")
+                pass
+                
+        except KeyboardInterrupt:
+            sys.exit(0)

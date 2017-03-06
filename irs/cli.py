@@ -7,6 +7,7 @@ import os
 
 # Powered by:
 from .ripper import Ripper
+from .utils import console
 
 def main():
     parser = argparse.ArgumentParser()
@@ -26,6 +27,8 @@ def main():
         Ripper().spotify_list("album", args.album)
     elif args.username and args.playlist:
         Ripper().spotify_list("playlist", args.playlist, args.username)
+    else:
+        console(Ripper())
 
 if __name__ == "__main__":
     main()

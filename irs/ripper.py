@@ -134,10 +134,11 @@ class Ripper:
                     if type == "playlist": 
                         file_prefix = str(len(tracks) + 1) + " - "
                         track = track["track"]
+                        album = self.spotify.album(track["album"]["uri"])
                     elif type == "album":
                         file_prefix = str(track["track_number"]) + " - "
-
-                    album = self.spotify.album(track["album"]["uri"])
+                        track = self.spotify.track(track["uri"])
+                        album = the_list
 
                     data = {
                         "name":          track["name"],
@@ -206,6 +207,8 @@ class Ripper:
         
         if data == {}: 
             data = self.parse_song_data(song, artist)
+            song = data["name"]
+            artist = data["artist"]
                         
         if "file_prefix" not in data:
             data["file_prefix"] = ""
