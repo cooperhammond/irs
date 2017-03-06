@@ -1,3 +1,6 @@
+# -*- coding: UTF-8 -*-
+
+
 #==========================
 # Youtube-DL Logs and Hooks
 #==========================
@@ -53,6 +56,15 @@ def individual_word_match(match_against, match):
                 matched.append(word)
     return (float(matched.uniq.size) / float(match_against.size))
 
+def flatten(l):
+    flattened_list = []
+    for x in l:
+        if type(x) != str:
+            for y in x:
+                flattened_list.append(y)
+        else:
+            flattened_list.append(x)
+    return flattened_list
     
 #=========================================
 # Download Log Reading/Updating/Formatting
@@ -100,7 +112,92 @@ def update_download_log_line_status(track, status="downloaded"):
 #============================================
 # And Now, For Something Completely Different
 #============================================
+#              (It's for the CLI)
 
-def ease_of_variables(the_name, data):
-    eval(the_name + " = " + data) # Forgive me my lord, for I have sinned
+import os, sys, re
+from time import sleep
+
+COLS = int(os.popen('tput cols').read().strip("\n"))
+
+def code(code1):
+    return "\x1b[%sm" % str(code1)
     
+def no_colors(string):
+    return re.sub("\x1b\[\d+m", "", string)
+    
+def center_colors(string, cols):
+    return no_colors(string).center(cols).replace(no_colors(string), string) 
+        
+def center_unicode(string, cols):
+    tmp_chars = "X" * len(string.decode("utf8"))
+    chars = center_colors(tmp_chars, cols)
+    return chars.replace(tmp_chars, string)
+    
+def center_lines(string, cols, end="\n"):
+    lines = []
+    for line in string.split("\n"):
+        lines.append(center_unicode(line, cols))
+    return end.join(lines)
+    
+def flush_puts(msg, time=0.03):
+    # For slow *burrrp* scroll text, Morty. They-They just love it, Morty.
+    # When they see this text. Just slowwwly extending across the page. Mmm, mmm.
+    # You just give the time for how *buurp* slow you wa-want it, Morty.
+    # It works with colors and escape characters too, Morty. 
+    # Your grandpa's a genius *burrrp* Morty
+    pattern = re.compile("(\x1b\[\d+m)")
+    def check_color(s):
+        if "\x1b" not in s:
+            new = list(s)
+        else:
+            new = s
+        return new
+    msg = re.split("(\x1b\[\d+m)", msg)
+    msg = list(filter(None, map(check_color, msg)))
+    msg = flatten(msg)
+    for char in msg:
+        if char not in (" ", "", "\n") and "\x1b" not in char:
+            sleep(time)
+        sys.stdout.write(char)
+        sys.stdout.flush()
+    print ("")
+    
+
+BOLD = code(1)
+END = code(0)
+RED = code(31)
+GREEN = code(32)
+YELLOW = code(33)
+BLUE = code(34)
+PURPLE = code(35)
+CYAN = code(36)
+BRED = RED + BOLD
+BGREEN = GREEN + BOLD
+BYELLOW = YELLOW + BOLD
+BBLUE = BLUE + BOLD
+BPURPLE = PURPLE + BOLD
+BCYAN = CYAN + BOLD
+
+
+def banner():
+    title = (BCYAN + center_lines("""\
+██╗██████╗ ███████╗
+██║██╔══██╗██╔════╝
+██║██████╔╝███████╗
+██║██╔══██╗╚════██║
+██║██║  ██║███████║
+╚═╝╚═╝  ╚═╝╚══════╝\
+""", COLS) + END)
+    for num in range(0, 6):
+        os.system("clear || cls")
+        if num % 2 == 1:
+            print (BRED + center_unicode("🚨   🚨  🚨    🚨  🚨   \r", COLS))
+        else:
+            print ("")
+        print (title)
+        sleep(0.3)
+    flush_puts(center_colors(BYELLOW + "\
+Ironic Redistribution System (" + BRED + "IRS" + BYELLOW + ")" + END, COLS))
+    flush_puts(center_colors(BBLUE + "\
+Made with 😈  by: " + BYELLOW + "Kepoor Hampond (" + BRED + \
+"kepoorhampond" + BYELLOW + ")" + END, COLS))

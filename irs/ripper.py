@@ -137,7 +137,6 @@ class Ripper:
                     elif type == "album":
                         file_prefix = str(track["track_number"]) + " - "
 
-                    #print (track)
                     album = self.spotify.album(track["album"]["uri"])
 
                     data = {
