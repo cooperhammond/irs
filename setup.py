@@ -17,6 +17,6 @@ setup(
       'spotipy',
     ],
     entry_points = {
-      'console_scripts': ['irs = irs.__main__:main'],
+      'console_scripts': ['irs = irs.cli:main'],
     },
 )

@@ -22,7 +22,7 @@ from re import match
 from bs4 import BeautifulSoup
 
 # Local utils
-import .utils
+from .utils import *
 
 # Powered by...
 import spotipy
@@ -55,8 +55,8 @@ class Metadata:
 def find_album_and_track(song, artist):
     tracks = spotipy.Spotify().search(q=song, type="track")["tracks"]["items"]
     for track in tracks:
-        if utils.blank_include(track["name"], song):
-            if utils.blank_include(track["artists"][0]["name"], artist):
+        if blank_include(track["name"], song):
+            if blank_include(track["artists"][0]["name"], artist):
                 return track["album"], track
     return False, False
                 

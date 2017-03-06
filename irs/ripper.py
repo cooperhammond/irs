@@ -21,7 +21,7 @@ else:
     sys.exit(1)
     
 # Local utilities
-import .utils
+from .utils import *
 from .metadata import *
 
 class Ripper:
@@ -64,15 +64,15 @@ class Ripper:
         
         self.code = None
         for link in results:
-            if utils.blank_include(link["title"], song) and utils.blank_include(link["title"], artist):
-                if utils.check_garbage_phrases: continue
+            if blank_include(link["title"], song) and blank_include(link["title"], artist):
+                if check_garbage_phrases: continue
                 self.code = link
                 break
                 
         if self.code == None:
             for link in results:
-                if utils.check_garbage_phrases: continue
-                if utils.individual_word_match(song, link["title"]) >= 0.8 and utils.blank_include(link["title"], artist):
+                if check_garbage_phrases: continue
+                if individual_word_match(song, link["title"]) >= 0.8 and blank_include(link["title"], artist):
                     self.code = link
                     break
         
@@ -104,9 +104,9 @@ class Ripper:
         if len(list_of_lists) > 0:
             the_list = None
             for list_ in list_of_lists:
-                if utils.blank_include(list_["name"], title):
+                if blank_include(list_["name"], title):
                     if "artist" in self.args:
-                        if utils.blank_include(list_["artists"][0]["name"], self.args["artist"]):
+                        if blank_include(list_["artists"][0]["name"], self.args["artist"]):
                             the_list = list_
                             break
                     else:
@@ -137,14 +137,17 @@ class Ripper:
                     elif type == "album":
                         file_prefix = str(track["track_number"]) + " - "
 
+                    #print (track)
+                    album = self.spotify.album(track["album"]["uri"])
+
                     data = {
                         "name":          track["name"],
                         "artist":        track["artists"][0]["name"],
-                        "album":         the_list["name"],
+                        "album":         album["name"],
                         "genre":         parse_genre(self.spotify.artist(track["artists"][0]["uri"])["genres"]),
                         "track_number":  track["track_number"],
                         "disc_number":   track["disc_number"],
-                        "album_art": the_list["images"][0]["url"],
+                        "album_art":     album["images"][0]["url"],
                         "compilation":   compilation,
                         "file_prefix":   file_prefix,
                     }
@@ -161,13 +164,13 @@ class Ripper:
     def list(self, list_data):
         locations = []
         #with open(".irs-download-log", "w+") as file:
-        #    file.write(utils.format_download_log_data(list_data))
+        #    file.write(format_download_log_data(list_data))
         
         for track in list_data:
             loc = self.song(track["name"], track["artist"], track)
 
             if loc != False:
-                #utils.update_download_log_line_status(track, "downloaded")
+                #update_download_log_line_status(track, "downloaded")
                 locations.append(loc)
         
         #os.remove(".irs-download-log")
@@ -212,7 +215,7 @@ class Ripper:
         
         print ('Downloading "%s" by "%s" ...' % (song, artist))
                     
-        file_name = data["file_prefix"] + utils.blank(song, False) + ".mp3"
+        file_name = data["file_prefix"] + blank(song, False) + ".mp3"
         
         ydl_opts = {
             'format': 'bestaudio/best',
@@ -222,8 +225,8 @@ class Ripper:
                 'preferredcodec': 'mp3',
                 'preferredquality': '192',
             }],
-            'logger': utils.MyLogger(),
-            'progress_hooks': [utils.my_hook],
+            'logger': MyLogger(),
+            'progress_hooks': [my_hook],
         }
         
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
