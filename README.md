@@ -1,4 +1,4 @@
-<div style="text-align:center">![](http://i.imgur.com/VbsyTe7.png)</div>
+[![img](http://i.imgur.com/VbsyTe7.png)](http://i.imgur.com/VbsyTe7.png)
 
 Ironic Redistribution System
 ===
