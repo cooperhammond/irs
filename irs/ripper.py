@@ -217,7 +217,7 @@ class Ripper:
         
         print ('Downloading "%s" by "%s" ...' % (song, artist))
                     
-        file_name = data["file_prefix"] + blank(song, False) + ".mp3"
+        file_name = str(data["file_prefix"] + blank(song, False) + ".mp3")
         
         ydl_opts = {
             'format': 'bestaudio/best',
@@ -233,6 +233,8 @@ class Ripper:
         
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             ydl.download([video_url])
+            
+        print ("./*%s*" % video_title.split("/watch?v=")[-1])
             
         for file in glob.glob("./*%s*" % video_title.split("/watch?v=")[-1]):
             os.rename(file, file_name)

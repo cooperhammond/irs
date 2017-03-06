@@ -1,96 +1,71 @@
-# Ironic Redistribution System
+<div style="text-align:center">![](http://i.imgur.com/VbsyTe7.png)</div>
+
+Ironic Redistribution System
+===
 [![License: GNU](https://img.shields.io/badge/License-GNU-yellow.svg)](http://www.gnu.org/licenses/gpl.html)
-[![PyPI](https://img.shields.io/badge/PyPi-Python_3.x-blue.svg)](https://pypi.python.org/pypi/irs)
+[![Stars](https://img.shields.io/github/stars/kepoorhampond/irs.svg)](https://github.com/kepoorhampond/irs/stargazers)
+[![PyPI](https://img.shields.io/badge/PyPi-irs-blue.svg)](https://pypi.python.org/pypi/irs)
 
-<em>Spotify playlists are now downloadable! Just use the `-u` flag and your username!</em>
+> A music downloader that understands your metadata needs.
 
-An ironically named program to download audio from youtube and then parse metadata for the downloaded file.
+A tool to download your music with metadata. It uses [Spotify](https://www.spotify.com/) for finding metadata and list contents and uses [Youtube](https://www.youtube.com/) for the actual audio.
+
+Works with Python 2 and 3.
 ___
-### Usage and Examples
-For a non-descript Spotify playlist:
-```bash
-irs -p "Brain Food"
-```
-If you are looking for one of *your* playlists, you'll want to use the `-u` flag and put your username in:
-```bash
-irs -u "prakkillian"
-```
-If you download a specific song, you'll want to use the `-s` and `-a` flag.
-```bash
-irs -a "David Bowie" -s "Ziggy Stardust"
-```
-To download an entire album, you'll want to use the `-A` flag. If the album you want can't be found, run it with the `-a` flag for some more specification.
-```bash
-irs -A "Sadnecessary" # -a "Milky Chance"
-```
-[![asciicast](https://asciinema.org/a/5aijmkdux6nk8ckhke0jmzlyq.png)](https://asciinema.org/a/5aijmkdux6nk8ckhke0jmzlyq?speed=3&autoplay=true)
+Demo and Usages
+---
+This is a demo of the CLI displayling its features:
+[![demo](https://asciinema.org/a/105993.png)](https://asciinema.org/a/105993?autoplay=1)
 
-[![asciicast](https://asciinema.org/a/8kb9882j4cbtd4hwbsbb7h0ia.png)](https://asciinema.org/a/8kb9882j4cbtd4hwbsbb7h0ia?speed=3)
-
-Full usage:
+The usages can be found with the `-h` or `--help` flag:
 ```
-usage:
-    irs (-h | -v | -C)
-    irs [-l] [-sa]
-    irs -p PLAYLIST [-c COMMAND] [-l] [-sa]
-    irs -A ALBUM [-c COMMAND] [-l] [-sa]
-    irs -a ARTIST -s SONG [-c COMMAND] [-l]
+usage: irs [-h] [(-a ARTIST -s SONG)] [-A ALBUM] [(-u USERNAME -p PLAYLIST)]
 
-Options:
+optional arguments:
   -h, --help            show this help message and exit
-  -v, --version         Display the version and exit.
-  -C, --config          Return location of configuration file.
-  -A ALBUM, --album ALBUM
-                        Search spotify for an album.
-  -p PLAYLIST, --playlist PLAYLIST
-                        Search spotify for a playlist.
-  -u USER, --user USER  Download a user playlist.
-  -c COMMAND, --command COMMAND
-                        Run a background command with each song's location.
-                        Example: `-c "rhythmbox %(loc)s"`
   -a ARTIST, --artist ARTIST
-                        Specify the artist name. Only needed for -s/--song
-  -s SONG, --song SONG  Specify song name of the artist. Must be used with
-                        -a/--artist
-  -l, --choose-link     If supplied, will bring up a console choice for what
-                        link you want to download based off a list of titles.
-  -sa, --start-at       A song index to start at if something goes wrong while
-                        downloading and you have to restart.
+                        Specify artist name. Must be used with -s/--song
+  -s SONG, --song SONG  Specify song name. Must be used with -a/--artist
+  -A ALBUM, --album ALBUM
+                        Specify album name
+  -u USERNAME, --username USERNAME
+                        Specify username. Must be used with -p/--playlist
+  -p PLAYLIST, --playlist PLAYLIST
+                        Specify playlist name. Must be used with -u/--username
 ```
-Make a note that capitalization and spelling matters a lot in this program.
-
-___
-### Installation
-To download Spotify playlists, you need to supply client_ids. To do this, you'll want to create an application [here](https://developer.spotify.com/my-applications/#!/applications/create). Once you've done that, you'll want to copy your 'client id' and your 'client secret' into the config file and their corresponding lines. To find the config file run this command: `irs -C`.
-
-Please note that it currently is only usable in `Python 3.x`. Almost all dependencies are automatically installed by pip, but `youtube_dl` still needs `ffmpeg` to convert video to audio, so for Windows, you can install [`Scoop`](http://scoop.sh/) and then just do:
+So all of these are valid commands:
 ```
-scoop install ffmpeg
+$ irs -a "Brandon Flowers" -s "Lonely Town"
+$ irs -u "spotify" -p "Brain Food"
+$ irs -A "Suicide Squad: The Album"
 ```
-For OSX, you can use [`Brew`](http://brew.sh/) to install `ffmpeg`:
+But these are not:
 ```
-brew install ffmpeg
-```
-And then for Ubuntu:
-```
-sudo apt-get install ffmpeg
-```
-Most other linux distros have `ffmpeg` or `libav-tools` in their package manager repos, so you can install one or the other for other distros.
-
-Finally, install it!
-```
-pip install irs
+$ irs -s "Bohemian Rhapsody"
+$ irs -p "Best Nirvana"
 ```
 
-### Why the name?
-As an acronym, it spells IRS. I think this is breathtakingly hilarious because the Internal Revenue Service (also the IRS) takes away, while my program gives. I'm so funny.
+Metadata
+---
+Currently, the program attaches the following metadata to the downloaded files:
+ - Title
+ - Artist
+ - Album
+ - Album Art
+ - Genre
+ - Track Number
+ - Disc Number
+ - Compilation (iTunes only)
 
+### Philosophy
+When I made this program I was pretty much broke and my music addiction wasn't really helping that problem. So, I did the obvious thing: make an uber-complicated program to ~~steal~~ download music for me! As for the name, its acronym spells IRS, which I found amusing, seeing as the IRS ~~takes~~ steals money while my program ~~gives~~ reimburses you with music.
 
 ### Wishlist
  - [x] Finds album based off of song name and artist
  - [x] Full album downloading
  - [x] Album art metadata correctly displayed
- - [x] Playlist downloading
  - [x] Spotify playlist downloading
- - [ ] GUI/Console interactive version - <em>In progress</em>
- - [ ] 100% success rate for automatic song choosing
+ - [ ] GUI/Console interactive version - *in progress*
+ - [ ] Lyric metadata
+ - [ ] 99% success rate for automatic song choosing
+
