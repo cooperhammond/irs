@@ -4,13 +4,10 @@ python:
   - "3.5"
 
 before_script: 
-  - "sudo add-apt-repository ppa:mc3man/trusty-media -y"
-  - "sudo apt-get update -y"
-  - "sudo apt-get install ffmpeg -y"
-  - "sudo apt-get install frei0r-plugins -y"
+  - libav-tools -y
 
 install: 
-  - "pip install irs"
+  - pip install irs
 
 script:
   - python tests/song.py
