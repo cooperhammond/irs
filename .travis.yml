@@ -7,8 +7,7 @@ before_script:
   - sudo aptitude -y -q install ffmpeg
 
 install: 
-  - "sudo python setup.py install"
-  - "sudo pip install irs"
+  - pip install irs
 
 script:
   - python tests/song.py
