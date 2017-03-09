@@ -5,6 +5,7 @@ python:
 
 before_script: 
   - sudo aptitude -y -q install ffmpeg libavcodec-extra-53
+  - sudo apt-get purge libav-tools
 
 install: 
   - "pip install irs"
