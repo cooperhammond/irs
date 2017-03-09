@@ -4,7 +4,7 @@ python:
   - "3.5"
 
 before_script: 
-  - libav-tools -y
+  - sudo apt-get install libav-tools -y
 
 install: 
   - pip install irs
