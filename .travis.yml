@@ -8,6 +8,7 @@ before_script:
 
 install: 
   - "sudo python setup.py install"
+  - "sudo pip install irs"
 
 script:
   - python tests/song.py
