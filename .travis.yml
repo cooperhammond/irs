@@ -4,7 +4,7 @@ python:
   - "3.5"
 
 before_script: 
-  - sudo aptitude -y -q install libavtools libavcodec-extra-53 lame libmp3lame0
+  - sudo aptitude -y -q install libav-tools libavcodec-extra-53 lame libmp3lame0
 
 install: 
   - pip install irs
