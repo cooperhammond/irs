@@ -18,4 +18,7 @@ update_pypi_and_github.py
 *.zip
 
 # I hate ffmpeg on Travis CI
-.travis.yml
+#.travis.yml
+
+# Temporarily built binaries
+ffmpeg binaries/

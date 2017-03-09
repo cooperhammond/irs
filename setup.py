@@ -15,6 +15,7 @@ setup(
       'youtube-dl',
       'requests',
       'spotipy',
+      'ffprobe',
     ],
     entry_points = {
       'console_scripts': ['irs = irs.cli:main'],
