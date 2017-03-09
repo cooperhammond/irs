@@ -238,6 +238,7 @@ class Ripper:
             'logger': MyLogger(),
             'progress_hooks': [my_hook],
             'output': "tmp_file",
+            'prefer-ffmpeg': True,
         }
         
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
