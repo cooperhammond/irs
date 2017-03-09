@@ -40,8 +40,12 @@ class Ripper:
         try:
             if not song:    song = self.args["song_title"]
             if not artist:  artist = self.args["artist"]
-        except ValueError:
+        except KeyError:
             raise ValueError("Must specify song_title/artist in `args` with init, or in method arguments.")
+            
+        clear_line()
+        sys.stdout.write("Finding Youtube Link ...\r")
+        sys.stdout.flush()
             
         search_terms = song + " " + artist + " " + additional_search
         query_string = urlencode({"search_query" : (search_terms)})
@@ -117,7 +121,9 @@ class Ripper:
                             the_list["artists"] = [{"name": username}]
                         break
             if the_list != None:
-                print ('"%s" by "%s"' % (the_list["name"], the_list["artists"][0]["name"]))
+                clear_line()
+                sys.stdout.write(type.title() + ': "%s" by "%s"\r' % (the_list["name"], the_list["artists"][0]["name"]))
+                sys.stdout.flush()
                 compilation = ""
                 if type == "album":
                     tmp_artists = []
@@ -215,7 +221,9 @@ class Ripper:
         
         video_url, video_title = self.find_yt_url(song, artist)
         
-        print ('Downloading "%s" by "%s" ...' % (song, artist))
+        clear_line()
+        sys.stdout.write('Downloading "%s" by "%s" ...\r' % (song, artist))
+        sys.stdout.flush()
                     
         file_name = str(data["file_prefix"] + blank(song, False) + ".mp3")
         
@@ -229,14 +237,14 @@ class Ripper:
             }],
             'logger': MyLogger(),
             'progress_hooks': [my_hook],
+            'output': "tmp_file",
         }
         
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             ydl.download([video_url])
             
-        print ("./*%s*" % video_title.split("/watch?v=")[-1])
             
-        for file in glob.glob("./*%s*" % video_title.split("/watch?v=")[-1]):
+        for file in glob.glob("./*%s*" % video_url.split("/watch?v=")[-1]):
             os.rename(file, file_name)
                         
         # Ease of Variables (copyright) (patent pending) (git yer filthy hands off)
@@ -256,3 +264,6 @@ class Ripper:
             m.add_tag("discnumber",     str(data["disc_number"]))
             m.add_tag("compilation",    data["compilation"])
             m.add_album_art(            str(data["album_art"]))
+            
+            
+        return file_name

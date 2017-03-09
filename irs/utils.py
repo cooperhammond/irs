@@ -5,6 +5,9 @@
 # Youtube-DL Logs and Hooks
 #==========================
 
+def clear_line():
+    sys.stdout.write("\x1b[2K\r")
+
 class MyLogger(object):
     def debug(self, msg):
         pass
@@ -18,7 +21,9 @@ class MyLogger(object):
 
 def my_hook(d):
     if d['status'] == 'finished':
-        print ("Converting to mp3 ...")
+        clear_line() # TODO: Make this into a method.
+        sys.stdout.write("Converting to mp3 ...\r")
+        sys.stdout.flush()
 
 
 #=================================
@@ -212,7 +217,7 @@ def banner():
     flush_puts(center_colors("{0}Ironic Redistribution System ({1}IRS{2})"\
     .format(BYELLOW, BRED, BYELLOW), COLS))
     
-    flush_puts(center_colors("{0}Made with 😈  by: {1}Kepoor Hampond ({2}kepoorhampond{3})\r"\
+    flush_puts(center_colors("{0}Made with 😈  by: {1}Kepoor Hampond ({2}kepoorhampond{3})"\
     .format(BBLUE, BYELLOW, BRED, BYELLOW) + END, COLS))
     
     flush_puts(center_colors("{0}Version: {1}".format(BBLUE, BYELLOW) + pkg_resources.get_distribution("irs").version, COLS))
