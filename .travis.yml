@@ -4,7 +4,7 @@ python:
   - "3.5"
 
 before_script: 
-  - sudo aptitude -y -q install ffmpeg libavcodec-extra-53
+  - sudo aptitude -y -q install ffmpeg libavcodec-extra-53 lame
 
 install: 
   - pip install irs
