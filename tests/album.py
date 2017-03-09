@@ -1,3 +1,3 @@
-from irs import Ripper
+from irs.ripper import Ripper
 
-locations = Ripper().spotify_list("album", "Da Frame 2R / Matador")
+locations = irs.ripper.Ripper().spotify_list("album", "Da Frame 2R / Matador")
