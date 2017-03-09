@@ -16,3 +16,6 @@ update_pypi_and_github.py
 # Temporarily downloaded files
 *.mp3
 *.zip
+
+# I hate ffmpeg on Travis CI
+.travis.yml

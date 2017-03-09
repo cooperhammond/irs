@@ -4,6 +4,7 @@ Ironic Redistribution System
 ===
 [![License: GNU](https://img.shields.io/badge/License-GNU-yellow.svg)](http://www.gnu.org/licenses/gpl.html)
 [![Stars](https://img.shields.io/github/stars/kepoorhampond/irs.svg)](https://github.com/kepoorhampond/irs/stargazers)
+[![Build Status](https://travis-ci.org/kepoorhampond/irs.svg?branch=master)](https://travis-ci.org/kepoorhampond/irs)
 [![PyPI](https://img.shields.io/badge/PyPi-irs-blue.svg)](https://pypi.python.org/pypi/irs)
 
 > A music downloader that understands your metadata needs.
