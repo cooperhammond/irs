@@ -5,6 +5,7 @@ python:
 
 before_script: 
   - sudo aptitude -y -q install ffmpeg libavcodec-extra-53 lame
+  - export LD_LIBRARY_PATH=/usr/local/lib:/usr/lib:/lib:/usr/lib64/:/usr/local/lipob64/:/lib64:$LD_LIBRARY_PATH
 
 install: 
   - pip install irs
