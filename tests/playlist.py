@@ -1,3 +1,3 @@
 from irs.ripper import Ripper
 
-Ripper().spotify_list("playlist", "Jamboree Jams", "prakkillian")
+Ripper().spotify_list("playlist", "IRS Testing", "prakkillian")
