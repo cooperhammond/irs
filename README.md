@@ -1,5 +1,4 @@
-[![img](http://i.imgur.com/VbsyTe7.png)](http://i.imgur.com/VbsyTe7.png)
-
+<div style="text-align:center"><img src ="http://i.imgur.com/VbsyTe7.png" /></div>
 Ironic Redistribution System
 ===
 [![License: GNU](https://img.shields.io/badge/License-GNU-yellow.svg)](http://www.gnu.org/licenses/gpl.html)
@@ -46,6 +45,23 @@ $ irs -s "Bohemian Rhapsody"
 $ irs -p "Best Nirvana"
 ```
 
+Install & The Dependencies <sub><sup>(my new band name)</sub></sup>
+---
+Really there's only one actual external dependency: `ffmpeg`. For windows, you'll want to follow [this](http://www.wikihow.com/Install-FFmpeg-on-Windows) guide. For OSX, you'll want to install it through [`brew`](https://brew.sh/) with this command:
+```
+$ brew install ffmpeg
+```
+For Linux, most package managers have `ffmpeg` in their default repositories, so it can be installed like so:
+```
+$ sudo apt-get install ffmpeg
+```
+Or whatever your appropriate package manager is.
+
+Other than `ffmpeg` though, all other dependencies are automatically installed with [`pip`](https://pip.pypa.io/en/stable/):
+```
+$ sudo pip install irss
+```
+
 Metadata
 ---
 Currently, the program attaches the following metadata to the downloaded files:
@@ -62,7 +78,6 @@ Currently, the program attaches the following metadata to the downloaded files:
 When I made this program I was pretty much broke and my music addiction wasn't really helping that problem. So, I did the obvious thing: make an uber-complicated program to ~~steal~~ download music for me! As for the name, its acronym spells IRS, which I found amusing, seeing as the IRS ~~takes~~ steals money while my program ~~gives~~ reimburses you with music.
 
 ### Wishlist
- - [x] Finds album based off of song name and artist
  - [x] Full album downloading
  - [x] Album art metadata correctly displayed
  - [x] Spotify playlist downloading
