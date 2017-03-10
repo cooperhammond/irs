@@ -64,7 +64,7 @@ Or whatever your appropriate package manager is.
 
 Other than `ffmpeg` though, all other dependencies are automatically installed with [`pip`](https://pip.pypa.io/en/stable/):
 ```
-$ sudo pip install irss
+$ sudo pip install irs
 ```
 
 Metadata
