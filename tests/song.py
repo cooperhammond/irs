@@ -1,3 +1,3 @@
 from irs.ripper import Ripper
 
-Ripper().song("Bohemian Rhapsody", "Queen")
+Ripper().song("Da Frame 2R", "Arctic Monkeys")
