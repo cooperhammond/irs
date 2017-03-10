@@ -16,3 +16,4 @@ script:
   - python tests/song.py
   - python tests/album.py
   - python tests/playlist.py
+  - python tests/post_processors.py

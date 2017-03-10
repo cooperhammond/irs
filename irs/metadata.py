@@ -1,6 +1,6 @@
 # MP3 Metadata editing
 from mutagen.mp3 import MP3, EasyMP3
-from mutagen.easyid3 import EasyID3
+from mutagen.easyid3 import EasyID3, EasyID3KeyError
 from mutagen.id3 import * # There's A LOT of stuff to import, forgive me.
 from mutagen.id3 import APIC
 
@@ -37,7 +37,13 @@ class Metadata:
     def add_tag(self, tag, data):
         # For valid tags: `EasyID3.valid_keys.keys()`
         self.mp3[tag] = data
-        self.mp3.save()    
+        self.mp3.save()
+        
+    def read_tag(self, tag):
+        try:
+            return self.mp3[tag]
+        except EasyID3KeyError:
+            return []
 
     def add_album_art(self, image_url):
         mp3 = EasyMP3(self.location, ID3=ID3)

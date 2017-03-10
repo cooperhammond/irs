@@ -27,7 +27,7 @@ def my_hook(d):
 
 
 #=================================
-# String Manipulation and Checking
+# Object Manipulation and Checking
 #=================================
 
 def check_garbage_phrases(phrases, string, title):
@@ -70,7 +70,16 @@ def flatten(l):
         else:
             flattened_list.append(x)
     return flattened_list
-    
+
+def remove_none_values(d):
+    new_d = d
+    for x in list(d.keys()):
+        if type(new_d[x]) is list:
+            new_d[x] = remove_none_values(d[x])
+        elif new_d[x] == None:
+            del new_d[x]    
+    return new_d
+
 #=========================================
 # Download Log Reading/Updating/Formatting
 #=========================================

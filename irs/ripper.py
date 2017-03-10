@@ -28,6 +28,7 @@ class Ripper:
     def __init__(self, args={}):
         self.args = args
         self.locations = []
+        self.type = None
         try:
             client_credentials_manager = SpotifyClientCredentials(os.environ["SPOTIFY_CLIENT_ID"], os.environ["SPOTIFY_CLIENT_SECRET"])
             self.spotify = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
@@ -35,6 +36,52 @@ class Ripper:
         except spotipy.oauth2.SpotifyOauthError:
             self.spotify = spotipy.Spotify()
             self.authorized = False
+            
+    def post_processing(self, locations):
+        post_processors = self.args.get("post_processors")
+        if post_processors:
+            if type(post_processors.get("location")) is str:
+                for index, loc in enumerate(locations):
+                    new_file_name = post_processors["location"] + "/" + loc
+                    os.rename(loc, new_file_name)
+                    locations[index] = new_file_name
+            if post_processors.get("organize") == True:
+                if self.type == "album":
+                    for index, loc in enumerate(locations):
+                        mp3 = Metadata(loc)
+                        new_loc = ""
+                        if len(loc.split("/")) > 1:
+                            new_loc = "/".join(loc.split("/")[0:-1])
+                            file_name = loc.split("/")[-1]
+                        else:
+                            file_name = loc
+                        artist, album = mp3.read_tag("artist")[0], mp3.read_tag("album")
+                        new_loc += blank(artist, False)
+                        if album != []:
+                            new_loc += "/" + blank(album[0], False)
+                        if not os.path.exists(new_loc):
+                            os.makedirs(new_loc)
+                        new_loc += "/" + file_name
+                        loc = loc.replace("//", "/")
+                        new_loc = new_loc.replace("//", "/")
+                        os.rename(loc, new_loc)
+                        locations[index] = new_loc
+                elif self.type == "playlist":
+                    for index, loc in enumerate(locations):
+                        new_loc = ""
+                        if len(loc.split("/")) > 1:
+                            new_loc = "/".join(loc.split("/")[0:-1])
+                            file_name = loc.split("/")[-1]
+                        else:
+                            file_name = loc
+                        new_loc += blank(self.playlist_title, False)
+                        if not os.path.exists(new_loc):
+                            os.makedirs(new_loc)
+                        loc = loc.replace("//", "/")
+                        new_loc = (new_loc  + "/" + file_name).replace("//", "/")
+                        os.rename(loc, new_loc)
+                        
+        return locations
             
     def find_yt_url(self, song=None, artist=None, additional_search="lyrics"):
         try:
@@ -87,6 +134,12 @@ class Ripper:
                 self.code = results[0]
                 
         return ("https://youtube.com" + self.code["href"], self.code["title"])
+        
+    def album(self, title): # Alias for `spotify_list("album", ...)`
+        return self.spotify_list("album", title)
+        
+    def playlist(self, title, username): # Alias for `spotify_list("playlist", ...)`
+        return self.spotify_list("playlist", title, username)
     
     def spotify_list(self, type=None, title=None, username=None):
         try:
@@ -96,6 +149,9 @@ class Ripper:
                 username = self.args["username"] 
         except KeyError:
             raise ValueError("Must specify type/title/username in `args` with init, or in method arguments.")
+            
+        if not self.type:
+            self.type = type
         
         if type == "album":
             search = title
@@ -138,6 +194,8 @@ class Ripper:
                 
                 for track in the_list["tracks"]["items"]:
                     if type == "playlist": 
+                        self.playlist_title = the_list["name"] # For post-processors
+                        
                         file_prefix = str(len(tracks) + 1) + " - "
                         track = track["track"]
                         album = self.spotify.album(track["album"]["uri"])
@@ -178,7 +236,10 @@ class Ripper:
             if loc != False:
                 #update_download_log_line_status(track, "downloaded")
                 locations.append(loc)
-        
+                
+        if self.type in ("album", "playlist"):
+            return self.post_processing(locations)
+            
         #os.remove(".irs-download-log")
         return locations
         
@@ -201,10 +262,13 @@ class Ripper:
             "disc_number":     track["disc_number"],
             
             "compilation": "", # If this method is being called, it's not a compilation
-            "file_prefix": "" # And therefore, won't have a prefix
+            "file_prefix": ""  # And therefore, won't have a prefix
         }                
         
     def song(self, song, artist, data={}): # Takes data from `parse_song_data`
+        if not self.type:
+            self.type = "song"
+            
         try:
             if not song:    song = self.args["song_title"]
             if not artist:  artist = self.args["artist"]
@@ -266,5 +330,7 @@ class Ripper:
             m.add_tag("compilation",    data["compilation"])
             m.add_album_art(            str(data["album_art"]))
             
+        if self.type == "song":
+            return self.post_processing([file_name])
             
         return file_name

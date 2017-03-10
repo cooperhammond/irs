@@ -1,4 +1,6 @@
-<div style="text-align:center"><img src ="http://i.imgur.com/VbsyTe7.png" /></div>
+<div align="center">
+<img src ="http://i.imgur.com/VbsyTe7.png" />
+</div>
 Ironic Redistribution System
 ===
 [![License: GNU](https://img.shields.io/badge/License-GNU-yellow.svg)](http://www.gnu.org/licenses/gpl.html)
@@ -32,6 +34,9 @@ optional arguments:
                         Specify username. Must be used with -p/--playlist
   -p PLAYLIST, --playlist PLAYLIST
                         Specify playlist name. Must be used with -u/--username
+  -l LOCATION, --location LOCATION
+                        Specify a directory to place files in.
+  -o, --organize        Organize downloaded files.
 ```
 So all of these are valid commands:
 ```
