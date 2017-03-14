@@ -1,4 +1,4 @@
-<div align="center"><img src ="http://i.imgur.com/VbsyTe7.png"/>
+<div align="center"><img src ="http://i.imgur.com/VbsyTe7.png" /></div>
 Ironic Redistribution System
 ===
 
@@ -9,8 +9,9 @@ Ironic Redistribution System
 [![Coverage Status](http://img.shields.io/coveralls/kepoorhampond/irs.svg?style=flat-square)](https://coveralls.io/github/kepoorhampond/irs?branch=master&style=flat-square)
 [![PyPI](https://img.shields.io/badge/pypi-irs-blue.svg?style=flat-square)](https://pypi.python.org/pypi/irs)
 [![Beerpay](https://beerpay.io/kepoorhampond/irs/badge.svg?style=flat-square)](https://beerpay.io/kepoorhampond/irs)
-<sub><sup>(Shields: Gotta Catch Em All)</sup></sub>
-</div>
+
+<sup><sub>(Shields: Gotta Catch Em All)</sub></sup>
+
 > A music downloader that understands your metadata needs.
 
 A tool to download your music with metadata. It uses [Spotify](https://www.spotify.com/) for finding metadata and [Youtube](https://www.youtube.com/) for the actual audio source.
