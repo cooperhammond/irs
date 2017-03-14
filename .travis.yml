@@ -5,15 +5,16 @@ python:
 
 before_script: 
   - sudo aptitude -y -q install ffmpeg libavcodec-extra-53 lame libmp3lame0
-# These dependencies are necessary for ffmpeg. I currently hate all things 
-# doing with Travis and ffmpeg because I have no direct access to test stuff. 
-# I've gone through 25 seperate commits to get it working.
+  # These dependencies are necessary for ffmpeg. I currently hate all things 
+  # doing with Travis and ffmpeg because I have no direct access to test stuff. 
+  # I've gone through 25 seperate commits to get it working.
 
 install: 
   - pip install irs
+  - pip install coveralls # For coveralls.io
 
 script:
-  - python tests/song.py
-  - python tests/album.py
-  - python tests/playlist.py
-  - python tests/post_processors.py
+  - coverage run --source=irs test/test_all.py
+  
+after_success:
+  - coveralls
