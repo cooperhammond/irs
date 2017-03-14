@@ -1,8 +1,7 @@
-<div align="center"><img src ="http://i.imgur.com/VbsyTe7.png" />
-<div align="center">Ironic Redistribution System
+<div align="center"><img src ="http://i.imgur.com/VbsyTe7.png"/>
+Ironic Redistribution System
 ===
 
-<div align="center">
 [![License: GNU](https://img.shields.io/badge/license-gnu-yellow.svg?style=flat-square)](http://www.gnu.org/licenses/gpl.html)
 [![Stars](https://img.shields.io/github/stars/kepoorhampond/irs.svg?style=flat-square)](https://github.com/kepoorhampond/irs/stargazers)
 [![Build Status](https://img.shields.io/travis/kepoorhampond/irs/master.svg?style=flat-square)](https://travis-ci.org/karma-runner/karma-coverage)
@@ -10,8 +9,8 @@
 [![Coverage Status](http://img.shields.io/coveralls/kepoorhampond/irs.svg?style=flat-square)](https://coveralls.io/github/kepoorhampond/irs?branch=master&style=flat-square)
 [![PyPI](https://img.shields.io/badge/pypi-irs-blue.svg?style=flat-square)](https://pypi.python.org/pypi/irs)
 [![Beerpay](https://beerpay.io/kepoorhampond/irs/badge.svg?style=flat-square)](https://beerpay.io/kepoorhampond/irs)
-<div align="center"><sub><sup>(Shields: Gotta Catch Em All)</sup></sub>
-
+<sub><sup>(Shields: Gotta Catch Em All)</sup></sub>
+</div>
 > A music downloader that understands your metadata needs.
 
 A tool to download your music with metadata. It uses [Spotify](https://www.spotify.com/) for finding metadata and [Youtube](https://www.youtube.com/) for the actual audio source.
