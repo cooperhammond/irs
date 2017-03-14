@@ -7,7 +7,7 @@ setup(
     url='https://github.com/kepoorhampond/irs',
     author='Kepoor Hampond',
     author_email='kepoorh@gmail.com',
-    license='GNU',
+    license='GPL',
     packages =['irs'],
     install_requires=[
       'bs4',

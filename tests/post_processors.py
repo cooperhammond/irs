@@ -1,6 +1,8 @@
 from irs.ripper import Ripper
 import os
 
+print ("[*] Testing `post_processors.py`")
+
 if not os.path.exists("test_dir"):
     os.makedirs("test_dir")
 Ripper({
@@ -16,3 +18,5 @@ Ripper({
         "organize": True,
     }
 }).playlist("IRS Testing", "prakkillian")
+
+print ("[+] Passed!")
