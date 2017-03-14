@@ -1,17 +1,20 @@
-<div align="center">
-<img src ="http://i.imgur.com/VbsyTe7.png" />
-</div>
-Ironic Redistribution System
+<div align="center"><img src ="http://i.imgur.com/VbsyTe7.png" />
+<div align="center">Ironic Redistribution System
 ===
-[![License: GNU](https://img.shields.io/badge/License-GNU-yellow.svg)](http://www.gnu.org/licenses/gpl.html)
-[![Stars](https://img.shields.io/github/stars/kepoorhampond/irs.svg)](https://github.com/kepoorhampond/irs/stargazers)
-[![Build Status](https://travis-ci.org/kepoorhampond/irs.svg?branch=master)](https://travis-ci.org/kepoorhampond/irs)
-[![Coverage Status](https://coveralls.io/repos/github/kepoorhampond/irs/badge.svg?branch=master)](https://coveralls.io/github/kepoorhampond/irs?branch=master)
-[![PyPI](https://img.shields.io/badge/PyPi-irs-blue.svg)](https://pypi.python.org/pypi/irs)
+
+<div align="center">
+[![License: GNU](https://img.shields.io/badge/license-gnu-yellow.svg?style=flat-square)](http://www.gnu.org/licenses/gpl.html)
+[![Stars](https://img.shields.io/github/stars/kepoorhampond/irs.svg?style=flat-square)](https://github.com/kepoorhampond/irs/stargazers)
+[![Build Status](https://img.shields.io/travis/kepoorhampond/irs/master.svg?style=flat-square)](https://travis-ci.org/karma-runner/karma-coverage)
+[![Say Thanks](https://img.shields.io/badge/say-thanks-ff69b4.svg?style=flat-square)](https://saythanks.io/to/kepoorhampond)
+[![Coverage Status](http://img.shields.io/coveralls/kepoorhampond/irs.svg?style=flat-square)](https://coveralls.io/github/kepoorhampond/irs?branch=master&style=flat-square)
+[![PyPI](https://img.shields.io/badge/pypi-irs-blue.svg?style=flat-square)](https://pypi.python.org/pypi/irs)
+[![Beerpay](https://beerpay.io/kepoorhampond/irs/badge.svg?style=flat-square)](https://beerpay.io/kepoorhampond/irs)
+<div align="center"><sub><sup>(Shields: Gotta Catch Em All)</sup></sub>
 
 > A music downloader that understands your metadata needs.
 
-A tool to download your music with metadata. It uses [Spotify](https://www.spotify.com/) for finding metadata and list contents and uses [Youtube](https://www.youtube.com/) for the actual audio.
+A tool to download your music with metadata. It uses [Spotify](https://www.spotify.com/) for finding metadata and [Youtube](https://www.youtube.com/) for the actual audio source.
 
 Works with Python 2 and 3.
 ___
@@ -82,6 +85,8 @@ Currently, the program attaches the following metadata to the downloaded files:
 
 ### Philosophy
 When I made this program I was pretty much broke and my music addiction wasn't really helping that problem. So, I did the obvious thing: make an uber-complicated program to ~~steal~~ download music for me! As for the name, its acronym spells IRS, which I found amusing, seeing as the IRS ~~takes~~ steals money while my program ~~gives~~ reimburses you with music.
+
+The design/style inspiration of pretty much everything goes to [k4m4](https://github.com/k4m4).
 
 ### Wishlist
  - [x] Full album downloading
