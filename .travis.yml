@@ -10,11 +10,12 @@ before_script:
   # I've gone through 25 seperate commits to get it working.
 
 install: 
-  - pip install irs
   - pip install coveralls # For coveralls.io
+  - pip install nose
 
 script:
-  - coverage run --source=irs tests/test_all.py
+  - python setup.py install
+  - nosetests --with-coverage
   
 after_success:
   - coveralls
