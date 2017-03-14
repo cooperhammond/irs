@@ -17,8 +17,8 @@ update_pypi_and_github.py
 *.mp3
 *.zip
 
-# I hate ffmpeg on Travis CI
-#.travis.yml
+# Coverage files
+.coverage
 
 # Temporarily built binaries
 ffmpeg binaries/
