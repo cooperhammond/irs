@@ -8,6 +8,7 @@ import os
 # Powered by:
 from .ripper import Ripper
 from .utils import console, remove_none_values
+from .config import CONFIG
 
 def main():
     parser = argparse.ArgumentParser()
@@ -28,7 +29,7 @@ def main():
     parser.add_argument("-o", "--organize", dest="organize", action="store_true", help="Organize downloaded files.")
     
     
-    args = parser.parse_args()
+    args = parser.parse_args(sys.argv[1:] + CONFIG.get("default_flags").split(" "))
     
     ripper_args = {
         "post_processors": {
@@ -46,7 +47,7 @@ def main():
     elif args.username and args.playlist:
         ripper.spotify_list("playlist", args.playlist, args.username)
     else:
-        console(Ripper())
+        console(ripper)
 
 if __name__ == "__main__":
     main()

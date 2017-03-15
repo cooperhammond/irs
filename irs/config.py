@@ -11,19 +11,14 @@ CONFIG = dict(
     default_flags = '',
 
 
-    # These are necessary to download Spotify playlists
-    client_id = '',
-    client_secret = '',
+    # You can either specify Spotify keys here, or in environment variables.
+    SPOTIFY_CLIENT_ID = '',
+    SPOTIFY_CLIENT_SECRET = '',
 
     additional_search_terms = 'lyrics',
 
     # For a custom directory. Note that `~` will not work as a shortcut in a
     # plain text manner.
-    directory = str(expanduser("~")) + "/Music",
-
-    # If you want numbered file names
-    numbered_file_names = True,
-
-    # Downloaded file names
-    download_file_names = False,
+    # TODO: Implement this into the utils arguments.
+    custom_directory = str(expanduser("~")) + "/Music",
 )

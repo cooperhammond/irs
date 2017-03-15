@@ -30,10 +30,11 @@ class Ripper:
         self.locations = []
         self.type = None
         try:
-            client_credentials_manager = SpotifyClientCredentials(os.environ["SPOTIFY_CLIENT_ID"], os.environ["SPOTIFY_CLIENT_SECRET"])
+            CLIENT_ID, CLIENT_SECRET = parse_spotify_creds(self)
+            client_credentials_manager = SpotifyClientCredentials(CLIENT_ID, CLIENT_SECRET)
             self.spotify = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
             self.authorized = True
-        except spotipy.oauth2.SpotifyOauthError:
+        except Exception as e:
             self.spotify = spotipy.Spotify()
             self.authorized = False
             
@@ -46,6 +47,16 @@ class Ripper:
                     os.rename(loc, new_file_name)
                     locations[index] = new_file_name
             if post_processors.get("organize") == True:
+            # I'd just go on believing that code this terrible doesn't exist.
+            # You can just close your eyes and scroll by. I'd encourage it.
+            # It's okay if you need to cry though. 
+            # The rest of the code is here for you.
+            # It's like loving someone,
+            # Everyone has some flaws, but you still appreciate and embrace
+            # those flaws for being exclusive to them.
+            # And if those flaws are really enough to turn you off of them, then
+            # you *probably* don't really want to be with them anyways.
+            # Either way, it's up to you.
                 if self.type == "album":
                     for index, loc in enumerate(locations):
                         mp3 = Metadata(loc)
@@ -83,7 +94,7 @@ class Ripper:
                         
         return locations
             
-    def find_yt_url(self, song=None, artist=None, additional_search="lyrics"):
+    def find_yt_url(self, song=None, artist=None, additional_search=parse_search_terms(self)):
         try:
             if not song:    song = self.args["song_title"]
             if not artist:  artist = self.args["artist"]
