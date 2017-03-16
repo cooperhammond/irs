@@ -21,9 +21,7 @@ class MyLogger(object):
 
 def my_hook(d):
     if d['status'] == 'finished':
-        clear_line() # TODO: Make this into a method.
-        sys.stdout.write("Converting to mp3 ...\r")
-        sys.stdout.flush()
+        print ("Converting to mp3 ...")
 
 
 #=================================
@@ -36,14 +34,14 @@ def check_garbage_phrases(phrases, string, title):
             if not phrase in blank(title):
                 return True
     return False
-        
+
 def blank(string, downcase=True):
     import re
     regex = re.compile('[^a-zA-Z0-9\ ]')
     string = regex.sub('', string)
     if downcase: string = string.lower()
     return string
-    
+
 def blank_include(this, includes_this):
     this = blank(this)
     includes_this = blank(includes_this)
@@ -77,13 +75,13 @@ def remove_none_values(d):
         if type(new_d[x]) is list:
             new_d[x] = remove_none_values(d[x])
         elif new_d[x] == None:
-            del new_d[x]    
+            del new_d[x]
     return new_d
 
 #=========================================
 # Download Log Reading/Updating/Formatting
 #=========================================
-    
+
 def format_download_log_line(t, download_status="not downloaded"):
     return (" @@ ".join([t["name"], t["artist"], t["album"]["id"], \
     str(t["genre"]), t["track_number"], t["disc_number"], t["compilation"], \
@@ -94,7 +92,7 @@ def format_download_log_data(data):
     for track in data:
         lines.append(format_download_log_line(track))
     return "\n".join(lines)
-    
+
 def read_download_log(spotify):
     data = []
     with open(".irs-download-log", "r") as file:
@@ -111,7 +109,7 @@ def read_download_log(spotify):
                 "file_prefix":   line[7],
             })
     return data
-    
+
 def update_download_log_line_status(track, status="downloaded"):
     line_to_find = format_download_log_line(track)
     with open(".irs-download-log", "r") as input_file, \
@@ -121,8 +119,8 @@ def update_download_log_line_status(track, status="downloaded"):
                     output_file.write(format_download_log_line(track, status))
                 else:
                     output_file.write(line)
-                    
-                    
+
+
 #============================================
 # And Now, For Something Completely Different
 #============================================
@@ -137,39 +135,39 @@ COLS = int(os.popen('tput cols').read().strip("\n"))
 if sys.version_info[0] == 2:
     def input(string):
         return raw_input(string)
-    
+
 
 def code(code1):
     return "\x1b[%sm" % str(code1)
-    
+
 def no_colors(string):
     return re.sub("\x1b\[\d+m", "", string)
-    
+
 def center_colors(string, cols):
-    return no_colors(string).center(cols).replace(no_colors(string), string) 
-        
+    return no_colors(string).center(cols).replace(no_colors(string), string)
+
 def decode_utf8(string):
     if sys.version_info[0] == 3:
         return string.encode("utf8", "strict").decode()
     elif sys.version_info[0] == 2:
         return string.decode("utf8")
-    
+
 def center_unicode(string, cols):
     tmp_chars = "X" * len(decode_utf8(string))
     chars = center_colors(tmp_chars, cols)
     return chars.replace(tmp_chars, string)
-    
+
 def center_lines(string, cols, end="\n"):
     lines = []
     for line in string.split("\n"):
         lines.append(center_unicode(line, cols))
     return end.join(lines)
-    
+
 def flush_puts(msg, time=0.01):
     # For slow *burrrp* scroll text, Morty. They-They just love it, Morty.
     # When they see this text. Just slowwwly extending across the page. Mmm, mmm.
     # You just give the time for how *buurp* slow you wa-want it, Morty.
-    # It works with colors and escape characters too, Morty. 
+    # It works with colors and escape characters too, Morty.
     # Your grandpa's a genius *burrrp* Morty
     pattern = re.compile("(\x1b\[\d+m)")
     def check_color(s):
@@ -187,7 +185,7 @@ def flush_puts(msg, time=0.01):
         sys.stdout.write(char)
         sys.stdout.flush()
     print ("")
-    
+
 
 BOLD = code(1)
 END = code(0)
@@ -225,10 +223,10 @@ def banner():
         sleep(0.3)
     flush_puts(center_colors("{0}Ironic Redistribution System ({1}IRS{2})"\
     .format(BYELLOW, BRED, BYELLOW), COLS))
-    
+
     flush_puts(center_colors("{0}Made with 😈  by: {1}Kepoor Hampond ({2}kepoorhampond{3})"\
     .format(BBLUE, BYELLOW, BRED, BYELLOW) + END, COLS))
-    
+
     flush_puts(center_colors("{0}Version: {1}".format(BBLUE, BYELLOW) + pkg_resources.get_distribution("irs").version, COLS))
 
 def menu(unicode, time=0.01):
@@ -277,6 +275,67 @@ def console(ripper):
             except KeyboardInterrupt:
                 print ("")
                 pass
-                
+
         except KeyboardInterrupt:
             sys.exit(0)
+
+#======================
+# Config File and Flags
+#======================
+from .config import CONFIG
+
+def check_sources(ripper, key, default=None, environment=False, where=None):
+    if where != None:
+        tmp_args = ripper.args.get(where)
+    else:
+        tmp_args = ripper.args
+
+    if tmp_args.get(key):
+        return tmp_args.get(key)
+#============
+# CONFIG FILE
+#============
+from .config import CONFIG
+
+def check_sources(ripper, key, default=None, environment=False):
+    if ripper.args.get(key):
+        return ripper.args.get(key)
+    elif CONFIG.get(key):
+        return CONFIG.get(key)
+    elif os.environ.get(key) and environment == True:
+        return os.environ.get(key)
+    else:
+        return default
+
+def parse_spotify_creds(ripper):
+    CLIENT_ID = check_sources(ripper, "SPOTIFY_CLIENT_ID", environment=True)
+    CLIENT_SECRET = check_sources(ripper, "SPOTIFY_CLIENT_SECRET", environment=True)
+    return CLIENT_ID, CLIENT_SECRET
+
+def parse_search_terms(ripper):
+    search_terms = check_sources(ripper, "additional_search_terms", "lyrics")
+    return search_terms
+
+def parse_directory(ripper):
+    directory = check_sources(ripper, "custom_directory", where="post_processors")
+    if directory == None:
+        directory = check_sources(ripper, "custom_directory", "~/Music")
+    return directory.replace("~", os.path.expanduser("~"))
+
+def parse_default_flags(default=""):
+    if CONFIG.get("default_flags"):
+        args = sys.argv[1:] + CONFIG.get("default_flags")
+    else:
+        args = default
+    return args
+
+def parse_organize(ripper):
+    organize = check_sources(ripper, "organize")
+    if organize == None:
+        return check_sources(ripper, "organize", False, where="post_processors")
+    else:
+        return True
+
+def parse_search_terms(ripper):
+    search_terms = check_sources(ripper, "additional_search_terms", "lyrics")
+    return search_terms
