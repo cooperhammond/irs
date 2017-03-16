@@ -74,5 +74,3 @@ def parse_genre(genres):
         return genres[0].title()
     else:
         return ""
-        
-#Metadata("Da Frame 2R.mp3").add_album_art("https://i.scdn.co/image/c8931dc7eb717531de93ae0d4626362875c51ba9")

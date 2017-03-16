@@ -1,29 +1,23 @@
-from os.path import expanduser
-
 CONFIG = dict(
 
-    # To autostart rhythmbox with a new song:
-    # default_flags = '-c rhythmbox %(loc)s',
-    # To make choosing of links default:
-    # default_flags = '-l',
-    # To place all playlist songs into one folder:
-    # default_flags = '-of',
-    default_flags = '',
+    default_flags = ['-o'],
+    # For default flags. Right now, it organizes your files into an
+    # artist/album/song structure.
+    # To add a flag or argument, add an element to the index:
+    # default_flags = ['-o', '-l', '~/Music']
 
 
-    # These are necessary to download Spotify playlists
-    client_id = '',
-    client_secret = '',
+    SPOTIFY_CLIENT_ID = '',
+    SPOTIFY_CLIENT_SECRET = '',
+    # You can either specify Spotify keys here, or in environment variables.
 
     additional_search_terms = 'lyrics',
 
-    # For a custom directory. Note that `~` will not work as a shortcut in a
-    # plain text manner.
-    directory = str(expanduser("~")) + "/Music",
+    organize = True,
+    # True always forces organization.
+    # False always forces non-organization.
+    # None allows options and flags to determine if the files will be organized.
 
-    # If you want numbered file names
-    numbered_file_names = True,
-
-    # Downloaded file names
-    download_file_names = False,
+    custom_directory = "",
+    # Defaults to '~/Music'
 )
