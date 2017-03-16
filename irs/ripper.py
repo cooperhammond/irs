@@ -94,7 +94,9 @@ class Ripper:
                         
         return locations
             
-    def find_yt_url(self, song=None, artist=None, additional_search=parse_search_terms(self)):
+    def find_yt_url(self, song=None, artist=None, additional_search=None):
+        if additional_search == None:
+            additional_search = parse_search_terms(self)
         try:
             if not song:    song = self.args["song_title"]
             if not artist:  artist = self.args["artist"]
