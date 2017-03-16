@@ -297,9 +297,13 @@ def check_sources(ripper, key, default=None, environment=False, where=None):
 #============
 from .config import CONFIG
 
-def check_sources(ripper, key, default=None, environment=False):
-    if ripper.args.get(key):
-        return ripper.args.get(key)
+def check_sources(ripper, key, default=None, environment=False, where=None):
+    tmp_args = ripper.args
+    if where != None and ripper.args.get(where):
+        tmp_args = ripper.args.get(where)
+
+    if tmp_args.get(key):
+        return tmp_args.get(key)
     elif CONFIG.get(key):
         return CONFIG.get(key)
     elif os.environ.get(key) and environment == True:
