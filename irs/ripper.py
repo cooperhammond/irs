@@ -44,6 +44,8 @@ class Ripper:
             if parse_directory(self) != None:
                 for index, loc in enumerate(locations):
                     new_file_name = parse_directory(self) + "/" + loc
+                    if not os.path.exists(parse_directory(self)):
+                        os.makedirs(parse_directory(self))
                     os.rename(loc, new_file_name)
                     locations[index] = new_file_name
             # I'd just go on believing that code this terrible doesn't exist.
