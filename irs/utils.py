@@ -292,6 +292,14 @@ def check_sources(ripper, key, default=None, environment=False, where=None):
 
     if tmp_args.get(key):
         return tmp_args.get(key)
+#============
+# CONFIG FILE
+#============
+from .config import CONFIG
+
+def check_sources(ripper, key, default=None, environment=False):
+    if ripper.args.get(key):
+        return ripper.args.get(key)
     elif CONFIG.get(key):
         return CONFIG.get(key)
     elif os.environ.get(key) and environment == True:
@@ -327,3 +335,7 @@ def parse_organize(ripper):
         return check_sources(ripper, "organize", False, where="post_processors")
     else:
         return True
+
+def parse_search_terms(ripper):
+    search_terms = check_sources(ripper, "additional_search_terms", "lyrics")
+    return search_terms

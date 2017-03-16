@@ -28,7 +28,17 @@ def main():
     parser.add_argument("-l", "--location", dest="location", help="Specify a directory to place files in.")
     parser.add_argument("-o", "--organize", dest="organize", action="store_true", help="Organize downloaded files.")
 
+    # Config
+    parser.add_argument("-c", "--config", dest="config", action="store_true", help="Display path to config file.")
+
+
     args = parser.parse_args(parse_default_flags())
+
+    if args.config:
+        import irs
+        print (os.path.dirname(irs.__file__) + "/config.py")
+        sys.exit()
+
 
     ripper_args = {
         "post_processors": {

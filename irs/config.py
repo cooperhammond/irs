@@ -6,7 +6,6 @@ CONFIG = dict(
     # To add a flag or argument, add an element to the index:
     # default_flags = ['-o', '-l', '~/Music']
 
-
     SPOTIFY_CLIENT_ID = '',
     SPOTIFY_CLIENT_SECRET = '',
     # You can either specify Spotify keys here, or in environment variables.

@@ -41,6 +41,7 @@ optional arguments:
   -l LOCATION, --location LOCATION
                         Specify a directory to place files in.
   -o, --organize        Organize downloaded files.
+  -c, --config          Display path to config file.
 ```
 So all of these are valid commands:
 ```
