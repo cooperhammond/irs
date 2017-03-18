@@ -2,7 +2,7 @@
 from mutagen.mp3 import MP3, EasyMP3
 from mutagen.easyid3 import EasyID3, EasyID3KeyError
 from mutagen.id3 import * # There's A LOT of stuff to import, forgive me.
-from mutagen.id3 import APIC
+from mutagen.id3 import APIC, ID3, COMM
 
 # System
 import sys
@@ -31,8 +31,8 @@ class Metadata:
     def __init__(self, location):
         self.spotify = spotipy.Spotify()
         self.location = location
-        #self.mp3 = MP3(self.location, ID3=EasyID3)
         self.mp3 = EasyID3(self.location)
+        EasyID3.RegisterTextKey("comment", "COMM")
 
     def add_tag(self, tag, data):
         # For valid tags: `EasyID3.valid_keys.keys()`

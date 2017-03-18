@@ -334,6 +334,7 @@ class Ripper:
 
         m.add_tag(    "title",          data["name"])
         m.add_tag(    "artist",         data["artist"])
+        m.add_tag(    "comment",        'URL: "%s"\nVideo Title: "%s"' % (video_url, video_title))
         if data != {}:
             m.add_tag("album",          data["album"])
             m.add_tag("genre",          data["genre"])
