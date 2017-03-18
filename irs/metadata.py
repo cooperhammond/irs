@@ -33,12 +33,12 @@ class Metadata:
         self.location = location
         #self.mp3 = MP3(self.location, ID3=EasyID3)
         self.mp3 = EasyID3(self.location)
-        
+
     def add_tag(self, tag, data):
         # For valid tags: `EasyID3.valid_keys.keys()`
         self.mp3[tag] = data
         self.mp3.save()
-        
+
     def read_tag(self, tag):
         try:
             return self.mp3[tag]
@@ -57,7 +57,7 @@ class Metadata:
             )
         )
         mp3.save()
-        
+
 def find_album_and_track(song, artist):
     tracks = spotipy.Spotify().search(q=song, type="track")["tracks"]["items"]
     for track in tracks:
@@ -65,7 +65,7 @@ def find_album_and_track(song, artist):
             if blank_include(track["artists"][0]["name"], artist):
                 return track["album"], track
     return False, False
-                
+
 def parse_genre(genres):
     if genres != []:
         genres.reverse()

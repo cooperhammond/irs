@@ -40,7 +40,7 @@ def blank(string, downcase=True):
     regex = re.compile('[^a-zA-Z0-9\ ]')
     string = regex.sub('', string)
     if downcase: string = string.lower()
-    return string
+    return ' '.join(string.split())
 
 def blank_include(this, includes_this):
     this = blank(this)
@@ -300,10 +300,10 @@ from .config import CONFIG
 def check_sources(ripper, key, default=None, environment=False, where=None):
     tmp_args = ripper.args
     if where != None and ripper.args.get(where):
-        tmp_args = ripper.args.get(where)
+            tmp_args = ripper.args.get("where")
 
-    if tmp_args.get(key):
-        return tmp_args.get(key)
+    if ripper.args.get(key):
+        return ripper.args.get(key)
     elif CONFIG.get(key):
         return CONFIG.get(key)
     elif os.environ.get(key) and environment == True:

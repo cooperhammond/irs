@@ -288,8 +288,9 @@ class Ripper:
 
         if data == {}:
             data = self.parse_song_data(song, artist)
-            song = data["name"]
-            artist = data["artist"]
+            if data != {}:
+                song = data["name"]
+                artist = data["artist"]
 
         if "file_prefix" not in data:
             data["file_prefix"] = ""
