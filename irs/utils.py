@@ -272,11 +272,11 @@ def console(ripper):
 
                 elif choice in ("help", "h", "?"):
                     menu(unicode, 0)
-            except KeyboardInterrupt:
+            except (KeyboardInterrupt, EOFError):
                 print ("")
                 pass
 
-        except KeyboardInterrupt:
+        except (KeyboardInterrupt, EOFError):
             sys.exit(0)
 
 #======================
