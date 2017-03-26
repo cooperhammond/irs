@@ -42,7 +42,7 @@ class Metadata:
     def read_tag(self, tag):
         try:
             return self.mp3[tag]
-        except EasyID3KeyError:
+        except Exception:
             return []
 
     def add_album_art(self, image_url):

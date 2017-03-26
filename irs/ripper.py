@@ -332,16 +332,20 @@ class Ripper:
 
         m = Metadata(file_name)
 
-        m.add_tag(    "title",          data["name"])
-        m.add_tag(    "artist",         data["artist"])
-        m.add_tag(    "comment",        'URL: "%s"\nVideo Title: "%s"' % (video_url, video_title))
-        if data != {}:
+        m.add_tag("comment",        'URL: "%s"\nVideo Title: "%s"' % (video_url, video_title))
+        if len(data.keys()) > 1:
+            m.add_tag("title",          data["name"])
+            m.add_tag("artist",         data["artist"])
             m.add_tag("album",          data["album"])
             m.add_tag("genre",          data["genre"])
             m.add_tag("tracknumber",    str(data["track_number"]))
             m.add_tag("discnumber",     str(data["disc_number"]))
             m.add_tag("compilation",    data["compilation"])
             m.add_album_art(            str(data["album_art"]))
+        else:
+            print ("Could not find metadata.")
+            m.add_tag("title",          song)
+            m.add_tag("artist",         artist)
 
         if self.type == "song":
             return self.post_processing([file_name])
