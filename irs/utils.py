@@ -28,6 +28,15 @@ def my_hook(d):
 # Object Manipulation and Checking
 #=================================
 
+def limit_song_name(song):
+    bad_phrases = "remaster  remastered  master".split("  ")
+    # I have "master" here because Spotify actually sometimes mispells stuff
+    # and it is hella annoying, so this was my solution
+    for phrase in bad_phrases:
+        if blank_include(song.split(" - ")[-1], phrase):
+            return song.split(" - ")[0]
+    return song
+
 def check_garbage_phrases(phrases, string, title):
     for phrase in phrases:
         if phrase in blank(string):
@@ -57,7 +66,7 @@ def individual_word_match(match_against, match):
         for word in match:
             if match_ag == word:
                 matched.append(word)
-    return (float(matched.uniq.size) / float(match_against.size))
+    return (float(len(set(matched))) / float(len(match_against)))
 
 def flatten(l):
     flattened_list = []
@@ -300,7 +309,7 @@ from .config import CONFIG
 def check_sources(ripper, key, default=None, environment=False, where=None):
     tmp_args = ripper.args
     if where != None and ripper.args.get(where):
-            tmp_args = ripper.args.get("where")
+        tmp_args = ripper.args.get("where")
 
     if ripper.args.get(key):
         return ripper.args.get(key)
@@ -319,6 +328,10 @@ def parse_spotify_creds(ripper):
 def parse_search_terms(ripper):
     search_terms = check_sources(ripper, "additional_search_terms", "lyrics")
     return search_terms
+
+def parse_artist(ripper):
+    artist = check_sources(ripper, "artist")
+    return artist
 
 def parse_directory(ripper):
     directory = check_sources(ripper, "custom_directory", where="post_processors")
