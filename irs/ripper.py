@@ -79,7 +79,6 @@ class Ripper:
                         new_loc = new_loc.replace("//", "/")
                         os.rename(loc, new_loc)
                         locations[index] = new_loc
-                        print (new_loc)
                 elif self.type == "playlist":
                     for index, loc in enumerate(locations):
                         new_loc = ""
@@ -113,7 +112,7 @@ class Ripper:
         link = "http://www.youtube.com/results?" + query_string
 
         html_content = urlopen(link).read()
-        soup = BeautifulSoup(html_content, 'html.parser')#.prettify
+        soup = BeautifulSoup(html_content, 'html.parser')#.prettify()
 
         def find_link(link):
             try:
@@ -125,21 +124,29 @@ class Ripper:
 
         results = list(filter(None, (map(find_link, soup.find_all("a")))))
 
-        garbage_phrases = "cover  album  live  clean  rare version".split("  ")
+        garbage_phrases = "cover  album  live  clean  rare version  full  full album".split("  ")
 
         self.code = None
-        for link in results:
-            if blank_include(link["title"], song) and blank_include(link["title"], artist):
-                if check_garbage_phrases: continue
-                self.code = link
-                break
+        counter = 0
 
-        if self.code == None:
+
+        while self.code == None and counter <= 10:
+            counter += 1
             for link in results:
-                if check_garbage_phrases: continue
-                if individual_word_match(song, link["title"]) >= 0.8 and blank_include(link["title"], artist):
+                if blank_include(link["title"], song) and blank_include(link["title"], artist):
+                    if check_garbage_phrases(garbage_phrases, link["title"], song): continue
                     self.code = link
                     break
+
+            if self.code == None:
+                for link in results:
+                    if check_garbage_phrases(garbage_phrases, link["title"], song): continue
+                    if individual_word_match(song, link["title"]) >= 0.8 and blank_include(link["title"], artist):
+                        self.code = link
+                        break
+
+            if self.code == None:
+                song = limit_song_name(song)
 
         if self.code == None:
             if additional_search == "lyrics":
@@ -155,7 +162,7 @@ class Ripper:
     def playlist(self, title, username): # Alias for `spotify_list("playlist", ...)`
         return self.spotify_list("playlist", title, username)
 
-    def spotify_list(self, type=None, title=None, username=None):
+    def spotify_list(self, type=None, title=None, username=None, artist=None):
         try:
             if not type:    type = self.args["type"]
             if not title:   title = self.args["list_title"]
@@ -179,9 +186,9 @@ class Ripper:
             the_list = None
             for list_ in list_of_lists:
                 if blank_include(list_["name"], title):
-                    if "artist" in self.args:
-                        if blank_include(list_["artists"][0]["name"], self.args["artist"]):
-                            the_list = list_
+                    if parse_artist(self):
+                        if blank_include(list_["artists"][0]["name"], parse_artist(self)):
+                            the_list = self.spotify.album(list_["uri"])
                             break
                     else:
                         if type == "album":
@@ -196,6 +203,7 @@ class Ripper:
                 compilation = ""
                 if type == "album":
                     tmp_artists = []
+
                     for track in the_list["tracks"]["items"]:
                         tmp_artists.append(track["artists"][0]["name"])
                     tmp_artists = list(set(tmp_artists))

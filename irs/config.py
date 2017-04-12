@@ -11,6 +11,7 @@ CONFIG = dict(
     # You can either specify Spotify keys here, or in environment variables.
 
     additional_search_terms = 'lyrics',
+    # Search terms for youtube
 
     organize = True,
     # True always forces organization.

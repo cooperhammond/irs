@@ -14,7 +14,7 @@ def main():
     parser = argparse.ArgumentParser()
 
     # Single Song
-    parser.add_argument("-a", "--artist", dest="artist", help="Specify artist name. Must be used with -s/--song")
+    parser.add_argument("-a", "--artist", dest="artist", help="Specify artist name. Must be used with -s/--song or -A/--album")
     parser.add_argument("-s", "--song",   dest="song",   help="Specify song name. Must be used with -a/--artist")
 
     # Album
@@ -39,7 +39,6 @@ def main():
         print (os.path.dirname(irs.__file__) + "/config.py")
         sys.exit()
 
-
     ripper_args = {
         "post_processors": {
             "custom_directory": args.location,
@@ -47,12 +46,17 @@ def main():
         }
     }
 
+    # Combiner args from argparse and the ripper_args as above and then
+    # remove all keys with the value of "None"
+    ripper_args.update(vars(args))
+    ripper_args = dict((k, v) for k, v in ripper_args.iteritems() if v)
+
     ripper = Ripper(ripper_args)
 
     if args.artist and args.song:
         ripper.song(args.song, args.artist)
     elif args.album:
-        ripper.spotify_list("album", args.album)
+        ripper.spotify_list("album", args.album, artist=args.artist)
     elif args.username and args.playlist:
         ripper.spotify_list("playlist", args.playlist, args.username)
     else:
