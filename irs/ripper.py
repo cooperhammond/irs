@@ -8,6 +8,11 @@ import sys
 import os
 import glob
 
+# Local utilities
+from .utils import YdlUtils, ObjManip, Config
+from .metadata import Metadata
+from .metadata import find_album_and_track, parse_genre
+
 # Parsing
 from bs4 import BeautifulSoup
 if sys.version_info[0] >= 3:
@@ -17,12 +22,9 @@ elif sys.version_info[0] < 3:
     from urllib import urlencode
     from urllib import urlopen
 else:
-    print ("Must be using Python 2 or 3")
+    print("Must be using Python 2 or 3")
     sys.exit(1)
 
-# Local utilities
-from .utils import *
-from .metadata import *
 
 class Ripper:
     def __init__(self, args={}):
@@ -30,9 +32,15 @@ class Ripper:
         self.locations = []
         self.type = None
         try:
-            CLIENT_ID, CLIENT_SECRET = parse_spotify_creds(self)
-            client_credentials_manager = SpotifyClientCredentials(CLIENT_ID, CLIENT_SECRET)
-            self.spotify = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+            CLIENT_ID, CLIENT_SECRET = Config.parse_spotify_creds(self)
+            client_credentials_manager = SpotifyClientCredentials(CLIENT_ID,
+                                                                  CLIENT_SECRET
+                                                                  # Stupid lint
+                                                                  )
+
+            self.spotify = spotipy.Spotify(
+                client_credentials_manager=client_credentials_manager)
+
             self.authorized = True
         except Exception as e:
             self.spotify = spotipy.Spotify()
@@ -40,12 +48,13 @@ class Ripper:
 
     def post_processing(self, locations):
         post_processors = self.args.get("post_processors")
+        directory_option = Config.parse_directory(self)
         if post_processors:
-            if parse_directory(self) != None:
+            if directory_option is not None:
                 for index, loc in enumerate(locations):
-                    new_file_name = parse_directory(self) + "/" + loc
-                    if not os.path.exists(parse_directory(self)):
-                        os.makedirs(parse_directory(self))
+                    new_file_name = directory_option + "/" + loc
+                    if not os.path.exists(directory_option):
+                        os.makedirs(directory_option)
                     os.rename(loc, new_file_name)
                     locations[index] = new_file_name
             # I'd just go on believing that code this terrible doesn't exist.
@@ -55,10 +64,11 @@ class Ripper:
             # It's like loving someone,
             # Everyone has some flaws, but you still appreciate and embrace
             # those flaws for being exclusive to them.
-            # And if those flaws are really enough to turn you off of them, then
-            # you *probably* don't really want to be with them anyways.
+            # And if those flaws are really enough to turn you off of them,
+            # then you *probably* don't really want to be with them anyways.
             # Either way, it's up to you.
-            if parse_organize(self):
+
+            if Config.parse_organize(self):
                 if self.type in ("album", "song"):
                     for index, loc in enumerate(locations):
                         mp3 = Metadata(loc)
@@ -68,10 +78,11 @@ class Ripper:
                             file_name = loc.split("/")[-1]
                         else:
                             file_name = loc
-                        artist, album = mp3.read_tag("artist")[0], mp3.read_tag("album")
-                        new_loc += blank(artist, False)
+                        artist, album = mp3.read_tag("artist")[0]
+                        album = mp3.read_tag("album")
+                        new_loc += ObjManip.blank(artist, False)
                         if album != []:
-                            new_loc += "/" + blank(album[0], False)
+                            new_loc += "/" + ObjManip.blank(album[0], False)
                         if not os.path.exists(new_loc):
                             os.makedirs(new_loc)
                         new_loc += "/" + file_name
@@ -87,68 +98,80 @@ class Ripper:
                             file_name = loc.split("/")[-1]
                         else:
                             file_name = loc
-                        new_loc += blank(self.playlist_title, False)
+                        new_loc += ObjManip.blank(self.playlist_title, False)
                         if not os.path.exists(new_loc):
                             os.makedirs(new_loc)
                         loc = loc.replace("//", "/")
-                        new_loc = (new_loc  + "/" + file_name).replace("//", "/")
+                        new_loc = (new_loc + "/" + file_name)\
+                            .replace("//", "/")
                         os.rename(loc, new_loc)
 
         return locations
 
     def find_yt_url(self, song=None, artist=None, additional_search=None):
-        if additional_search == None:
-            additional_search = parse_search_terms(self)
+        if additional_search is None:
+            additional_search = Config.parse_search_terms(self)
         try:
-            if not song:    song = self.args["song_title"]
-            if not artist:  artist = self.args["artist"]
+            if not song:
+                song = self.args["song_title"]
+            if not artist:
+                artist = self.args["artist"]
         except KeyError:
-            raise ValueError("Must specify song_title/artist in `args` with init, or in method arguments.")
+            raise ValueError("Must specify song_title/artist in `args` with \
+init, or in method arguments.")
 
-        print ("Finding Youtube Link ...")
+        print("Finding Youtube Link ...")
 
         search_terms = song + " " + artist + " " + additional_search
-        query_string = urlencode({"search_query" : (search_terms)})
+        query_string = urlencode({"search_query": (search_terms)})
         link = "http://www.youtube.com/results?" + query_string
 
         html_content = urlopen(link).read()
-        soup = BeautifulSoup(html_content, 'html.parser')#.prettify()
+        soup = BeautifulSoup(html_content, 'html.parser')  # .prettify()
 
         def find_link(link):
             try:
-                if "yt-uix-tile-link yt-ui-ellipsis yt-ui-ellipsis-2 yt-uix-sessionlink spf-link" in str(" ".join(link["class"])):
-                    if not "&list=" in link["href"]:
+                if "yt-uix-tile-link yt-ui-ellipsis yt-ui-ellipsis-2 yt-uix-\
+sessionlink spf-link" in str(" ".join(link["class"])):
+                    if "&list=" not in link["href"]:
                         return link
             except KeyError:
                 pass
 
         results = list(filter(None, (map(find_link, soup.find_all("a")))))
 
-        garbage_phrases = "cover  album  live  clean  rare version  full  full album".split("  ")
+        garbage_phrases = "cover  album  live  clean  rare version  full  full \
+album".split("  ")
 
         self.code = None
         counter = 0
 
-
-        while self.code == None and counter <= 10:
+        while self.code is None and counter <= 10:
             counter += 1
             for link in results:
-                if blank_include(link["title"], song) and blank_include(link["title"], artist):
-                    if check_garbage_phrases(garbage_phrases, link["title"], song): continue
+                if ObjManip.blank_include(link["title"], song) and \
+                        ObjManip.blank_include(link["title"], artist):
+                    if ObjManip.check_garbage_phrases(garbage_phrases,
+                                                      link["title"], song):
+                        continue
                     self.code = link
                     break
 
-            if self.code == None:
+            if self.code is None:
                 for link in results:
-                    if check_garbage_phrases(garbage_phrases, link["title"], song): continue
-                    if individual_word_match(song, link["title"]) >= 0.8 and blank_include(link["title"], artist):
+                    if ObjManip.check_garbage_phrases(garbage_phrases,
+                                                      link["title"], song):
+                        continue
+                    if ObjManip.individual_word_match(song, link["title"]) \
+                            >= 0.8 and ObjManip.blank_include(link["title"],
+                                                              artist):
                         self.code = link
                         break
 
-            if self.code == None:
-                song = limit_song_name(song)
+            if self.code is None:
+                song = ObjManip.limit_song_name(song)
 
-        if self.code == None:
+        if self.code is None:
             if additional_search == "lyrics":
                 return self.find_yt_url(song, artist, "")
             else:
@@ -156,20 +179,24 @@ class Ripper:
 
         return ("https://youtube.com" + self.code["href"], self.code["title"])
 
-    def album(self, title): # Alias for `spotify_list("album", ...)`
+    def album(self, title):  # Alias for `spotify_list("album", ...)`
         return self.spotify_list("album", title)
 
-    def playlist(self, title, username): # Alias for `spotify_list("playlist", ...)`
+    def playlist(self, title, username):
+        # Alias for `spotify_list("playlist", ...)`
         return self.spotify_list("playlist", title, username)
 
     def spotify_list(self, type=None, title=None, username=None, artist=None):
         try:
-            if not type:    type = self.args["type"]
-            if not title:   title = self.args["list_title"]
+            if not type:
+                type = self.args["type"]
+            if not title:
+                title = self.args["list_title"]
             if not username and type == "playlist":
                 username = self.args["username"]
         except KeyError:
-            raise ValueError("Must specify type/title/username in `args` with init, or in method arguments.")
+            raise ValueError("Must specify type/title/username in `args` \
+with init, or in method arguments.")
 
         if not self.type:
             self.type = type
@@ -178,28 +205,34 @@ class Ripper:
             search = title
             if "artist" in self.args:
                 search += " " + self.args["artist"]
-            list_of_lists = self.spotify.search(q=search, type="album")["albums"]["items"]
+            list_of_lists = self.spotify.search(q=search, type="album")
+            list_of_lists = list_of_lists["albums"]["items"]
         elif type == "playlist":
             list_of_lists = self.spotify.user_playlists(username)["items"]
 
         if len(list_of_lists) > 0:
             the_list = None
             for list_ in list_of_lists:
-                if blank_include(list_["name"], title):
-                    if parse_artist(self):
-                        if blank_include(list_["artists"][0]["name"], parse_artist(self)):
+                if ObjManip.blank_include(list_["name"], title):
+                    if Config.parse_artist(self):
+                        if ObjManip.blank_include(list_["artists"][0]["name"],
+                                                  ObjManip.arse_artist(self)):
                             the_list = self.spotify.album(list_["uri"])
                             break
                     else:
                         if type == "album":
                             the_list = self.spotify.album(list_["uri"])
                         else:
-                            the_list = self.spotify.user_playlist(list_["owner"]["id"], list_["uri"])
+                            the_list = self.spotify.user_playlist(
+                                list_["owner"]["id"], list_["uri"])
                             the_list["artists"] = [{"name": username}]
                         break
-            if the_list != None:
-                clear_line()
-                print (type.title() + ': "%s" by "%s"' % (the_list["name"], the_list["artists"][0]["name"]))
+            if the_list is not None:
+                YdlUtils.clear_line()
+
+                print(type.title() + ': "%s" by \
+"%s"' % (the_list["name"], the_list["artists"][0]["name"]))
+
                 compilation = ""
                 if type == "album":
                     tmp_artists = []
@@ -215,7 +248,8 @@ class Ripper:
 
                 for track in the_list["tracks"]["items"]:
                     if type == "playlist":
-                        self.playlist_title = the_list["name"] # For post-processors
+                        # For post-processors
+                        self.playlist_title = the_list["name"]
 
                         file_prefix = str(len(tracks) + 1) + " - "
                         track = track["track"]
@@ -229,7 +263,9 @@ class Ripper:
                         "name":          track["name"],
                         "artist":        track["artists"][0]["name"],
                         "album":         album["name"],
-                        "genre":         parse_genre(self.spotify.artist(track["artists"][0]["uri"])["genres"]),
+                        "genre":         m.MetadataUtils.parse_genre(
+                            self.spotify.artist(track["artists"][0]["uri"]
+                                                )["genres"]),
                         "track_number":  track["track_number"],
                         "disc_number":   track["disc_number"],
                         "album_art":     album["images"][0]["url"],
@@ -241,32 +277,32 @@ class Ripper:
 
                 locations = self.list(tracks)
                 return locations
-                #return self.post_processing(locations)
+                # return self.post_processing(locations)
 
-        print ('Could not find any lists.')
+        print("Could not find any lists.")
         return False
 
     def list(self, list_data):
         locations = []
-        #with open(".irs-download-log", "w+") as file:
-        #    file.write(format_download_log_data(list_data))
+        # with open(".irs-download-log", "w+") as file:
+        #     file.write(format_download_log_data(list_data))
 
         for track in list_data:
             loc = self.song(track["name"], track["artist"], track)
 
-            if loc != False:
-                #update_download_log_line_status(track, "downloaded")
+            if loc is not False:
+                # update_download_log_line_status(track, "downloaded")
                 locations.append(loc)
 
         if self.type in ("album", "playlist"):
             return self.post_processing(locations)
 
-        #os.remove(".irs-download-log")
+        # os.remove(".irs-download-log")
         return locations
 
     def parse_song_data(self, song, artist):
         album, track = find_album_and_track(song, artist)
-        if album == False:
+        if album is False:
             return {}
 
         album = self.spotify.album(album["uri"])
@@ -282,19 +318,26 @@ class Ripper:
             "track_number":    track["track_number"],
             "disc_number":     track["disc_number"],
 
-            "compilation": "", # If this method is being called, it's not a compilation
-            "file_prefix": ""  # And therefore, won't have a prefix
+            # If this method is being called, it's not a compilation
+            "compilation": "",
+            # And therefore, won't have a prefix
+            "file_prefix": ""
         }
 
-    def song(self, song, artist, data={}): # Takes data from `parse_song_data`
+    def song(self, song, artist, data={}):
+        # "data" comes from "self.parse_song_data"'s layout
+
         if not self.type:
             self.type = "song"
 
         try:
-            if not song:    song = self.args["song_title"]
-            if not artist:  artist = self.args["artist"]
+            if not song:
+                song = self.args["song_title"]
+            if not artist:
+                artist = self.args["artist"]
         except KeyError:
-            raise ValueError("Must specify song_title/artist in `args` with init, or in method arguments.")
+            raise ValueError("Must specify song_title/artist in `args` with \
+init, or in method arguments.")
 
         if data == {}:
             data = self.parse_song_data(song, artist)
@@ -307,20 +350,20 @@ class Ripper:
 
         video_url, video_title = self.find_yt_url(song, artist)
 
-        print ('Downloading "%s" by "%s" ...' % (song, artist))
+        print('Downloading "%s" by "%s" ...' % (song, artist))
 
-        file_name = str(data["file_prefix"] + blank(song, False) + ".mp3")
+        file_name = str(data["file_prefix"] + ObjManip.blank(song, False) +
+                        ".mp3")
 
         ydl_opts = {
             'format': 'bestaudio/best',
-            #'quiet': True,
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',
                 'preferredquality': '192',
             }],
-            'logger': MyLogger(),
-            'progress_hooks': [my_hook],
+            'logger': YdlUtils.MyLogger(),
+            'progress_hooks': [YdlUtils.my_hook],
             'output': "tmp_file",
             'prefer-ffmpeg': True,
         }
@@ -328,19 +371,18 @@ class Ripper:
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             ydl.download([video_url])
 
-
         for file in glob.glob("./*%s*" % video_url.split("/watch?v=")[-1]):
             os.rename(file, file_name)
 
-        # Ease of Variables (copyright) (patent pending) (git yer filthy hands off)
+        # Ease of Variables (C) (patent pending) (git yer filthy hands off)
         # [CENSORED BY THE BAD CODE ACT]
         # *5 Minutes Later*
         # Deprecated. It won't be the next big thing. :(
 
-
         m = Metadata(file_name)
 
-        m.add_tag("comment",        'URL: "%s"\nVideo Title: "%s"' % (video_url, video_title))
+        m.add_tag("comment", 'URL: "%s"\nVideo Title: "%s"' %
+                             (video_url, video_title))
         if len(data.keys()) > 1:
             m.add_tag("title",          data["name"])
             m.add_tag("artist",         data["artist"])
@@ -349,9 +391,9 @@ class Ripper:
             m.add_tag("tracknumber",    str(data["track_number"]))
             m.add_tag("discnumber",     str(data["disc_number"]))
             m.add_tag("compilation",    data["compilation"])
-            m.add_album_art(            str(data["album_art"]))
+            m.add_album_art(str(data["album_art"]))
         else:
-            print ("Could not find metadata.")
+            print("Could not find metadata.")
             m.add_tag("title",          song)
             m.add_tag("artist",         artist)
 
