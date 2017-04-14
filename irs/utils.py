@@ -4,6 +4,9 @@
 # Imports
 # =======
 
+# Static Method Hook
+import inspect
+
 # And Now For Something Completely Different
 import os
 import sys
@@ -15,10 +18,21 @@ import pkg_resources
 from .config import CONFIG
 
 
+# ==================
+# Static Method Hook
+# ==================
+
+def staticmethods(cls):
+    for name, method in inspect.getmembers(cls, inspect.ismethod):
+        setattr(cls, name, staticmethod(method.__func__))
+    return cls
+
+
 # =========================
 # Youtube-DL Logs and Hooks
 # =========================
 
+@staticmethods
 class YdlUtils:
     def clear_line():
         sys.stdout.write("\x1b[2K\r")
@@ -33,7 +47,6 @@ class YdlUtils:
         def error(self, msg):
             print(msg)
 
-    @staticmethod
     def my_hook(d):
         if d['status'] == 'finished':
             print("Converting to mp3 ...")
@@ -43,6 +56,7 @@ class YdlUtils:
 # Object Manipulation and Checking
 # ================================
 
+@staticmethods
 class ObjManip:  # Object Manipulation
     def limit_song_name(song):
         bad_phrases = "remaster  remastered  master".split("  ")
@@ -53,7 +67,6 @@ class ObjManip:  # Object Manipulation
                 return song.split(" - ")[0]
         return song
 
-    @staticmethod
     def check_garbage_phrases(phrases, string, title):
         for phrase in phrases:
             if phrase in ObjManip.blank(string):
@@ -61,7 +74,6 @@ class ObjManip:  # Object Manipulation
                     return True
         return False
 
-    @staticmethod
     def blank(string, downcase=True):
         import re
         regex = re.compile('[^a-zA-Z0-9\ ]')
@@ -70,7 +82,6 @@ class ObjManip:  # Object Manipulation
             string = string.lower()
         return ' '.join(string.split())
 
-    @staticmethod
     def blank_include(this, includes_this):
         this = ObjManip.blank(this)
         includes_this = ObjManip.blank(includes_this)
@@ -112,6 +123,7 @@ class ObjManip:  # Object Manipulation
 # Download Log Reading/Updating/Formatting
 # ========================================
 
+@staticmethods
 class DLog:
     def format_download_log_line(t, download_status="not downloaded"):
         return (" @@ ".join([t["name"], t["artist"], t["album"]["id"],
@@ -357,6 +369,7 @@ def check_sources(ripper, key, default=None, environment=False, where=None):
         return default
 
 
+@staticmethods
 class Config:
 
     def parse_spotify_creds(ripper):
@@ -366,7 +379,6 @@ class Config:
                                       environment=True)
         return CLIENT_ID, CLIENT_SECRET
 
-    @staticmethod
     def parse_search_terms(ripper):
         search_terms = check_sources(ripper, "additional_search_terms",
                                      "lyrics")
@@ -376,7 +388,6 @@ class Config:
         artist = check_sources(ripper, "artist")
         return artist
 
-    @staticmethod
     def parse_directory(ripper):
         directory = check_sources(ripper, "custom_directory",
                                   where="post_processors")
