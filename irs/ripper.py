@@ -263,7 +263,7 @@ with init, or in method arguments.")
                         "name":          track["name"],
                         "artist":        track["artists"][0]["name"],
                         "album":         album["name"],
-                        "genre":         m.MetadataUtils.parse_genre(
+                        "genre":         parse_genre(
                             self.spotify.artist(track["artists"][0]["uri"]
                                                 )["genres"]),
                         "track_number":  track["track_number"],
