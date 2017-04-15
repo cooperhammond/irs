@@ -1,11 +1,18 @@
 # MP3 Metadata editing
-from mutagen.mp3 import MP3, EasyMP3
-from mutagen.easyid3 import EasyID3, EasyID3KeyError
-from mutagen.id3 import * # There's A LOT of stuff to import, forgive me.
-from mutagen.id3 import APIC, ID3, COMM
+from mutagen.mp3 import EasyMP3
+from mutagen.easyid3 import EasyID3
+from mutagen.id3 import *  # There's A LOT of stuff to import, forgive me.
+from mutagen.id3 import APIC, ID3
 
 # System
 import sys
+
+# Powered by...
+import spotipy
+
+# Local utils
+from .utils import ObjManip
+om = ObjManip
 
 # Info finding
 if sys.version_info[0] >= 3:
@@ -16,16 +23,6 @@ elif sys.version_info[0] < 3:
     from urllib import urlopen
     from urllib2 import Request
 
-# Info parsing
-import json
-from re import match
-from bs4 import BeautifulSoup
-
-# Local utils
-from .utils import *
-
-# Powered by...
-import spotipy
 
 class Metadata:
     def __init__(self, location):
@@ -50,21 +47,24 @@ class Metadata:
         mp3.tags.add(
             APIC(
                 encoding = 3,
-                mime =     'image/png',
-                type =     3,
-                desc =     'cover',
-                data =     urlopen(image_url).read()
+                mime     = 'image/png',
+                type     = 3,
+                desc     = 'cover',
+                data     = urlopen(image_url).read()
             )
         )
         mp3.save()
 
+
 def find_album_and_track(song, artist):
-    tracks = spotipy.Spotify().search(q=song, type="track")["tracks"]["items"]
+    tracks = spotipy.Spotify().search(q=song, type="track"
+                                      )["tracks"]["items"]
     for track in tracks:
-        if blank_include(track["name"], song):
-            if blank_include(track["artists"][0]["name"], artist):
+        if om.blank_include(track["name"], song):
+            if om.blank_include(track["artists"][0]["name"], artist):
                 return track["album"], track
     return False, False
+
 
 def parse_genre(genres):
     if genres != []:

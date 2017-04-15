@@ -16,7 +16,8 @@ CONFIG = dict(
     organize = True,
     # True always forces organization.
     # False always forces non-organization.
-    # None allows options and flags to determine if the files will be organized.
+    # None allows options and flags to determine if the files
+    # will be organized.
 
     custom_directory = "",
     # Defaults to '~/Music'
