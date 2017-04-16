@@ -78,7 +78,7 @@ class Ripper:
                             file_name = loc.split("/")[-1]
                         else:
                             file_name = loc
-                        artist, album = mp3.read_tag("artist")[0]
+                        artist = mp3.read_tag("artist")[0]
                         album = mp3.read_tag("album")
                         new_loc += ObjManip.blank(artist, False)
                         if album != []:

@@ -7,7 +7,7 @@ import os
 
 # Powered by:
 from .ripper import Ripper
-from .utils import console, parse_default_flags
+from .utils import Config, console
 
 
 def main():
@@ -39,7 +39,7 @@ directory to place files in.")
     parser.add_argument("-c", "--config", dest="config", action="store_true",
                         help="Display path to config file.")
 
-    args = parser.parse_args(parse_default_flags())
+    args = parser.parse_args(Config.parse_default_flags())
 
     if args.config:
         import irs
