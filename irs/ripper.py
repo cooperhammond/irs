@@ -216,7 +216,7 @@ with init, or in method arguments.")
                 if ObjManip.blank_include(list_["name"], title):
                     if Config.parse_artist(self):
                         if ObjManip.blank_include(list_["artists"][0]["name"],
-                                                  ObjManip.arse_artist(self)):
+                                                  Config.parse_artist(self)):
                             the_list = self.spotify.album(list_["uri"])
                             break
                     else:
