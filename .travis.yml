@@ -16,6 +16,7 @@ install:
 
 script:
   - python setup.py install
+  - irs -u "spotify" -p "Coffee Table Jazz"
   - nosetests --with-coverage --cover-package=irs
 
 after_success:
