@@ -210,7 +210,9 @@ with init, or in method arguments.")
         elif type == "playlist":
             try:
                 list_of_lists = self.spotify.user_playlists(username)["items"]
-            except
+            except spotipy.client.SpotifyException:
+                print("No user was found by that name.")
+                return False
 
         if len(list_of_lists) > 0:
             the_list = None
