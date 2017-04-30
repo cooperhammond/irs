@@ -2,20 +2,21 @@ language: python
 python:
   - "2.7"
   - "3.5"
+  - "3.6"
 
-before_script: 
+before_script:
   - sudo aptitude -y -q install ffmpeg libavcodec-extra-53 lame libmp3lame0
-  # These dependencies are necessary for ffmpeg. I currently hate all things 
-  # doing with Travis and ffmpeg because I have no direct access to test stuff. 
+  # These dependencies are necessary for ffmpeg. I currently hate all things
+  # doing with Travis and ffmpeg because I have no direct access to test stuff.
   # I've gone through 25 seperate commits to get it working.
 
-install: 
+install:
   - pip install coveralls # For coveralls.io
   - pip install nose
 
 script:
   - python setup.py install
   - nosetests --with-coverage --cover-package=irs
-  
+
 after_success:
   - coveralls
