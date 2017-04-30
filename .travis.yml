@@ -11,13 +11,11 @@ before_script:
   # I've gone through 25 seperate commits to get it working.
 
 install:
-  - pip install coveralls # For coveralls.io
-  - pip install nose
   - python setup.py install
 
 script:
   - irs -u "spotify" -p "Coffee Table Jazz"
-  - nosetests --with-coverage --cover-package=irs
-
-after_success:
-  - coveralls
+  - python tests/album.py
+  - python tests/playlist.py
+  - python tests/post_processors.py
+  - python tests/song.py

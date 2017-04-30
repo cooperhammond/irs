@@ -208,7 +208,9 @@ with init, or in method arguments.")
             list_of_lists = self.spotify.search(q=search, type="album")
             list_of_lists = list_of_lists["albums"]["items"]
         elif type == "playlist":
-            list_of_lists = self.spotify.user_playlists(username)["items"]
+            try:
+                list_of_lists = self.spotify.user_playlists(username)["items"]
+            except
 
         if len(list_of_lists) > 0:
             the_list = None

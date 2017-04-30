@@ -56,7 +56,12 @@ directory to place files in.")
     # Combiner args from argparse and the ripper_args as above and then
     # remove all keys with the value of "None"
     ripper_args.update(vars(args))
-    ripper_args = dict((k, v) for k, v in ripper_args.iteritems() if v)
+
+    # Python 2 and below uses list.iteritems() while Python 3 uses list.items()
+    if sys.version_info[0] >= 3:
+        ripper_args = dict((k, v) for k, v in ripper_args.items() if v)
+    elif sys.version_info[0] < 3:
+        ripper_args = dict((k, v) for k, v in ripper_args.iteritems() if v)
 
     ripper = Ripper(ripper_args)
 
