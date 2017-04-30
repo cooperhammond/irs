@@ -7,7 +7,6 @@ Ironic Redistribution System
 [![Stars](https://img.shields.io/github/stars/kepoorhampond/irs.svg?style=flat-square)](https://github.com/kepoorhampond/irs/stargazers)
 [![Build Status](https://img.shields.io/travis/kepoorhampond/irs/master.svg?style=flat-square)](https://travis-ci.org/kepoorhampond/irs)
 [![Say Thanks](https://img.shields.io/badge/say-thanks-ff69b4.svg?style=flat-square)](https://saythanks.io/to/kepoorhampond)
-[![Coverage Status](http://img.shields.io/coveralls/kepoorhampond/irs.svg?style=flat-square)](https://coveralls.io/github/kepoorhampond/irs?branch=master&style=flat-square)
 [![PyPI](https://img.shields.io/badge/pypi-irs-blue.svg?style=flat-square)](https://pypi.python.org/pypi/irs)
 [![Beerpay](https://beerpay.io/kepoorhampond/irs/badge.svg?style=flat-square)](https://beerpay.io/kepoorhampond/irs)
 
@@ -19,8 +18,9 @@ A tool to download your music with metadata. It uses [Spotify](https://www.spoti
 
 Works with Python 2 and 3.
 ___
-Demo and Usages
----
+
+## Demo and Usages
+
 This is a demo of the CLI displayling its features:
 [![demo](https://asciinema.org/a/105993.png)](https://asciinema.org/a/105993?autoplay=1)
 
@@ -56,8 +56,8 @@ $ irs -s "Bohemian Rhapsody"
 $ irs -p "Best Nirvana"
 ```
 
-Install & The Dependencies <sub><sup>(my new band name)</sub></sup>
----
+## Install & The Dependencies <sub><sup>(my new band name)</sub></sup>
+
 Really there's only one actual external dependency: `ffmpeg`. For windows, you'll want to follow [this](http://www.wikihow.com/Install-FFmpeg-on-Windows) guide. For OSX, you'll want to install it through [`brew`](https://brew.sh/) with this command:
 ```
 $ brew install ffmpeg
@@ -73,8 +73,12 @@ Other than `ffmpeg` though, all other dependencies are automatically installed w
 $ sudo pip install irs
 ```
 
-Metadata
----
+## Spotify Playlists
+
+To download spotify playlists, you'll want to head to their Dev Apps page, [here](https://developer.spotify.com/my-applications/). After doing that you'll want to create a new app. Name it whatever you want and then once you've done that, find the `Client ID` and `Client Secret` keys. You'll want to take those keys and paste them into your system's environment variables as `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET`, correspondingly. Viola! You can now download playlists!
+
+## Metadata
+
 Currently, the program attaches the following metadata to the downloaded files:
  - Title
  - Artist
@@ -85,16 +89,17 @@ Currently, the program attaches the following metadata to the downloaded files:
  - Disc Number
  - Compilation (iTunes only)
 
-### Philosophy
+## Philosophy
+
 When I made this program I was pretty much broke and my music addiction wasn't really helping that problem. So, I did the obvious thing: make an uber-complicated program to ~~steal~~ download music for me! As for the name, its acronym spells IRS, which I found amusing, seeing as the IRS ~~takes~~ steals money while my program ~~gives~~ reimburses you with music.
 
 The design/style inspiration of pretty much everything goes to [k4m4](https://github.com/k4m4).
 
-### Wishlist
+## Wishlist
+
  - [x] Full album downloading
  - [x] Album art metadata correctly displayed
  - [x] Spotify playlist downloading
  - [ ] GUI/Console interactive version - *in progress*
  - [ ] Lyric metadata
  - [ ] 99% success rate for automatic song choosing
-
