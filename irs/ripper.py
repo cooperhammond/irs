@@ -123,7 +123,8 @@ init, or in method arguments.")
         print("Finding Youtube Link ...")
 
         search_terms = song + " " + artist + " " + additional_search
-        query_string = urlencode({"search_query": (search_terms)})
+        query_string = urlencode({"search_query": (
+                                 search_terms.encode('utf-8'))})
         link = "http://www.youtube.com/results?" + query_string
 
         html_content = urlopen(link).read()
