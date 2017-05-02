@@ -26,8 +26,8 @@ This is a demo of the CLI displayling its features:
 
 The usages can be found with the `-h` or `--help` flag:
 ```
-usage: irs [-h] [-a ARTIST] [-s SONG] [-A ALBUM] [-u USERNAME] [-p PLAYLIST]
-           [-l LOCATION] [-o] [-c]
+usage: irs [-h] [-a ARTIST -s SONG] [-A ALBUM [-a ARTIST]]
+           [-u USERNAME -p PLAYLIST] [-l LOCATION] [-o] [-c]
 
 optional arguments:
   -h, --help            show this help message and exit
