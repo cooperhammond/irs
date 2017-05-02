@@ -26,12 +26,14 @@ This is a demo of the CLI displayling its features:
 
 The usages can be found with the `-h` or `--help` flag:
 ```
-usage: irs [-h] [(-a ARTIST -s SONG)] [-A ALBUM] [(-u USERNAME -p PLAYLIST)]
+usage: irs [-h] [-a ARTIST] [-s SONG] [-A ALBUM] [-u USERNAME] [-p PLAYLIST]
+           [-l LOCATION] [-o] [-c]
 
 optional arguments:
   -h, --help            show this help message and exit
   -a ARTIST, --artist ARTIST
-                        Specify artist name. Must be used with -s/--song
+                        Specify artist name. Must be used with -s/--song or
+                        -A/--album
   -s SONG, --song SONG  Specify song name. Must be used with -a/--artist
   -A ALBUM, --album ALBUM
                         Specify album name
@@ -44,6 +46,7 @@ optional arguments:
   -o, --organize        Organize downloaded files.
   -c, --config          Display path to config file.
 ```
+
 So all of these are valid commands:
 ```
 $ irs -a "Brandon Flowers" -s "Lonely Town"
