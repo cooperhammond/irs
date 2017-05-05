@@ -111,6 +111,9 @@ class Ripper:
     def find_yt_url(self, song=None, artist=None, additional_search=None):
         if additional_search is None:
             additional_search = Config.parse_search_terms(self)
+        else:
+            print("Finding Youtube link ...")
+
         try:
             if not song:
                 song = self.args["song_title"]
