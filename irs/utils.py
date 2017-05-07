@@ -49,7 +49,7 @@ class YdlUtils:
 
     def my_hook(d):
         if d['status'] == 'finished':
-            print("Converting to mp3 ...")
+            print(CONFIG["converting"])
 
 
 # ================================
@@ -271,8 +271,7 @@ def banner():
                              .format(BYELLOW, BRED, BYELLOW), COLS))
 
     flush_puts(center_colors("{0}Made with 😈  by: {1}Kepoor Hampond \
-                             ({2}kepoorhampond{3})".format(BBLUE, BYELLOW,
-                             BRED, BYELLOW) + END, COLS))
+({2}kepoorhampond{3})".format(BBLUE, BYELLOW, BRED, BYELLOW) + END, COLS))
 
     flush_puts(center_colors("{0}Version: {1}".format(BBLUE, BYELLOW) +
                pkg_resources.get_distribution("irs").version, COLS))
