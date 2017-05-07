@@ -13,6 +13,9 @@ from .utils import YdlUtils, ObjManip, Config
 from .metadata import Metadata
 from .metadata import find_album_and_track, parse_genre
 
+# Config File and Flags
+from .config import CONFIG
+
 # Parsing
 from bs4 import BeautifulSoup
 if sys.version_info[0] >= 3:
@@ -29,6 +32,16 @@ else:
 class Ripper:
     def __init__(self, args={}):
         self.args = args
+        if self.args.get("hook-text") is None:
+            self.args["hook-text"] = {
+                "youtube": "Finding Youtube link ...",
+                "list": '{0}: "{1}" by "{2}"',
+                "song": 'Downloading "{0}" by "{1}"',
+                "converting": "Converting to mp3 ...",
+            }
+        if self.args["hook-text"].get("converting") is not None:
+            CONFIG["converting"] = self.args["hook-text"]["converting"]
+
         self.locations = []
         self.type = None
         try:
@@ -42,7 +55,7 @@ class Ripper:
                 client_credentials_manager=client_credentials_manager)
 
             self.authorized = True
-        except Exception as e:
+        except Exception:
             self.spotify = spotipy.Spotify()
             self.authorized = False
 
@@ -111,8 +124,7 @@ class Ripper:
     def find_yt_url(self, song=None, artist=None, additional_search=None):
         if additional_search is None:
             additional_search = Config.parse_search_terms(self)
-        else:
-            print("Finding Youtube link ...")
+            print(self.args["hook-text"].get("youtube"))
 
         try:
             if not song:
@@ -122,8 +134,6 @@ class Ripper:
         except KeyError:
             raise ValueError("Must specify song_title/artist in `args` with \
 init, or in method arguments.")
-
-        print("Finding Youtube Link ...")
 
         search_terms = song + " " + artist + " " + additional_search
         query_string = urlencode({"search_query": (
@@ -238,8 +248,9 @@ with init, or in method arguments.")
             if the_list is not None:
                 YdlUtils.clear_line()
 
-                print(type.title() + ': "%s" by \
-"%s"' % (the_list["name"], the_list["artists"][0]["name"]))
+                print(self.args["hook-text"].get("list")
+                      .format(type.title(), the_list["name"],
+                      the_list["artists"][0]["name"]))
 
                 compilation = ""
                 if type == "album":
@@ -358,7 +369,7 @@ init, or in method arguments.")
 
         video_url, video_title = self.find_yt_url(song, artist)
 
-        print('Downloading "%s" by "%s" ...' % (song, artist))
+        print(self.args["hook-text"].get("song").format(song, artist))
 
         file_name = str(data["file_prefix"] + ObjManip.blank(song, False) +
                         ".mp3")
