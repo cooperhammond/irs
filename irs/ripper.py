@@ -193,12 +193,12 @@ album".split("  ")
 
         return ("https://youtube.com" + self.code["href"], self.code["title"])
 
-    def album(self, title):  # Alias for `spotify_list("album", ...)`
-        return self.spotify_list("album", title)
+    def album(self, title, artist=None):  # Alias for `spotify_list("album", ...)`
+        return self.spotify_list("album", title=title, artist=artist)
 
     def playlist(self, title, username):
         # Alias for `spotify_list("playlist", ...)`
-        return self.spotify_list("playlist", title, username)
+        return self.spotify_list("playlist", title=title, username=username)
 
     def spotify_list(self, type=None, title=None, username=None, artist=None):
         try:
