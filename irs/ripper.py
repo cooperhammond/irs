@@ -7,6 +7,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
 import sys
 import os
 import glob
+import shutil
 
 # Local utilities
 from .utils import YdlUtils, ObjManip, Config
@@ -68,7 +69,7 @@ class Ripper:
                     new_file_name = directory_option + "/" + loc
                     if not os.path.exists(directory_option):
                         os.makedirs(directory_option)
-                    os.rename(loc, new_file_name)
+                    shutil.move(loc, new_file_name)
                     locations[index] = new_file_name
             # I'd just go on believing that code this terrible doesn't exist.
             # You can just close your eyes and scroll by. I'd encourage it.
@@ -101,7 +102,7 @@ class Ripper:
                         new_loc += "/" + file_name
                         loc = loc.replace("//", "/")
                         new_loc = new_loc.replace("//", "/")
-                        os.rename(loc, new_loc)
+                        shutil.move(loc, new_loc)
                         locations[index] = new_loc
                 elif self.type == "playlist":
                     for index, loc in enumerate(locations):
@@ -117,7 +118,7 @@ class Ripper:
                         loc = loc.replace("//", "/")
                         new_loc = (new_loc + "/" + file_name)\
                             .replace("//", "/")
-                        os.rename(loc, new_loc)
+                        shutil.move(loc, new_loc)
 
         return locations
 
@@ -391,7 +392,7 @@ init, or in method arguments.")
             ydl.download([video_url])
 
         for file in glob.glob("./*%s*" % video_url.split("/watch?v=")[-1]):
-            os.rename(file, file_name)
+            shutil.move(file, file_name)
 
         # Ease of Variables (C) (patent pending) (git yer filthy hands off)
         # [CENSORED BY THE BAD CODE ACT]
