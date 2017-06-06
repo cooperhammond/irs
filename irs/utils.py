@@ -58,11 +58,11 @@ class YdlUtils:
 
 def set_utf8_encoding(ld):  # ld => a list or dictionary with strings in it
     if type(ld) == dict:
-        for k, v in ld.iteritems():
-            if type(v) == dict or type(v) == list:
-                ld[k] = set_utf8_encoding(v)
-            elif type(v) == str:
-                ld[k] = v.encode('utf-8')
+        for k in ld:
+            if type(ld[k]) == dict or type(ld[k]) == list:
+                ld[k] = set_utf8_encoding(ld[k])
+            elif type(ld[k]) == str:
+                ld[k] = ld[k].encode('utf-8')
     elif type(ld) == list:
         for index, datum in enumerate(ld):
             if type(datum) == str:
