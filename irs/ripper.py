@@ -252,7 +252,7 @@ with init, or in method arguments.")
 
                 the_list = ObjManip.set_utf8_encoding(the_list)
 
-                print(unicode(self.args["hook-text"].get("list"))
+                print(self.args["hook-text"].get("list").encode('utf-8')
                       .format(type.title(), the_list["name"],
                       the_list["artists"][0]["name"]))
 
@@ -374,7 +374,8 @@ init, or in method arguments.")
 
         video_url, video_title = self.find_yt_url(song, artist)
 
-        print(unicode(self.args["hook-text"].get("song")).format(song, artist))
+        print(self.args["hook-text"].get("song")
+              .encode('utf-8').format(song, artist))
 
         file_name = str(data["file_prefix"] + ObjManip.blank(song, False) +
                         ".mp3")
