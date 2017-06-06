@@ -1,7 +1,6 @@
 <div align="center"><img src ="http://i.imgur.com/VbsyTe7.png" /></div>
 
-Ironic Redistribution System
-===
+# Ironic Redistribution System
 
 [![License: GNU](https://img.shields.io/badge/license-gnu-yellow.svg?style=flat-square)](http://www.gnu.org/licenses/gpl.html)
 [![Stars](https://img.shields.io/github/stars/kepoorhampond/irs.svg?style=flat-square)](https://github.com/kepoorhampond/irs/stargazers)
@@ -17,7 +16,6 @@ Ironic Redistribution System
 A tool to download your music with metadata. It uses [Spotify](https://www.spotify.com/) for finding metadata and [Youtube](https://www.youtube.com/) for the actual audio source.
 
 Works with Python 2 and 3.
-___
 
 ## Demo and Usages
 
@@ -59,7 +57,7 @@ $ irs -s "Bohemian Rhapsody"
 $ irs -p "Best Nirvana"
 ```
 
-## Install & The Dependencies <sub><sup>(my new band name)</sub></sup>
+## Install & The Dependencies <sub><sup>(my new band name <sub><sup><sup><sub>\s</sub></sup></sup></sub>)</sub></sup>
 
 Really there's only one actual external dependency: `ffmpeg`. For windows, you'll want to follow [this](http://www.wikihow.com/Install-FFmpeg-on-Windows) guide. For OSX, you'll want to install it through [`brew`](https://brew.sh/) with this command:
 ```
