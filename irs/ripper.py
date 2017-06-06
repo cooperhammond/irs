@@ -42,6 +42,8 @@ class Ripper:
         if self.args["hook-text"].get("converting") is not None:
             CONFIG["converting"] = self.args["hook-text"]["converting"]
 
+        self.args = ObjManip.set_utf8_encoding(self.args)
+
         self.locations = []
         self.type = None
         try:
@@ -79,7 +81,7 @@ class Ripper:
             # those flaws for being exclusive to them.
             # And if those flaws are really enough to turn you off of them,
             # then you *probably* don't really want to be with them anyways.
-            # Either way, it's up to you.
+            # Either way, it's up to you. (I'd just ignore this)
 
             if Config.parse_organize(self):
                 if self.type in ("album", "song"):
@@ -193,7 +195,7 @@ album".split("  ")
 
         return ("https://youtube.com" + self.code["href"], self.code["title"])
 
-    def album(self, title, artist=None):  # Alias for `spotify_list("album", ...)`
+    def album(self, title, artist=None):  # Alias for spotify_list("album", ..)
         return self.spotify_list("album", title=title, artist=artist)
 
     def playlist(self, title, username):
@@ -248,7 +250,9 @@ with init, or in method arguments.")
             if the_list is not None:
                 YdlUtils.clear_line()
 
-                print(self.args["hook-text"].get("list")
+                the_list = ObjManip.set_utf8_encoding(the_list)
+
+                print(unicode(self.args["hook-text"].get("list"))
                       .format(type.title(), the_list["name"],
                       the_list["artists"][0]["name"]))
 
@@ -361,6 +365,7 @@ init, or in method arguments.")
         if data == {}:
             data = self.parse_song_data(song, artist)
             if data != {}:
+                data = ObjManip.set_utf8_encoding(data)
                 song = data["name"]
                 artist = data["artist"]
 
@@ -369,7 +374,7 @@ init, or in method arguments.")
 
         video_url, video_title = self.find_yt_url(song, artist)
 
-        print(self.args["hook-text"].get("song").format(song, artist))
+        print(unicode(self.args["hook-text"].get("song")).format(song, artist))
 
         file_name = str(data["file_prefix"] + ObjManip.blank(song, False) +
                         ".mp3")

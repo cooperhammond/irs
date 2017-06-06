@@ -56,6 +56,20 @@ class YdlUtils:
 # Object Manipulation and Checking
 # ================================
 
+def set_utf8_encoding(ld):  # ld => a list or dictionary with strings in it
+    if type(ld) == dict:
+        for k, v in ld.iteritems():
+            if type(v) == dict or type(v) == list:
+                ld[k] = set_utf8_encoding(v)
+            elif type(v) == str:
+                ld[k] = v.encode('utf-8')
+    elif type(ld) == list:
+        for index, datum in enumerate(ld):
+            if type(datum) == str:
+                ld[index] = datum.encode('utf-8')
+    return ld
+
+
 @staticmethods
 class ObjManip:  # Object Manipulation
     def limit_song_name(song):
@@ -118,10 +132,13 @@ class ObjManip:  # Object Manipulation
                 del new_d[x]
         return new_d
 
+    def set_utf8_encoding(ld):  # ld => a list or dictionary with strings in it
+        return set_utf8_encoding(ld)
 
 # ========================================
 # Download Log Reading/Updating/Formatting
 # ========================================
+
 
 @staticmethods
 class DLog:
