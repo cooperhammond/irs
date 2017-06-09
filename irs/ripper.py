@@ -324,7 +324,7 @@ with init, or in method arguments.")
         return locations
 
     def parse_song_data(self, song, artist):
-        album, track = find_album_and_track(song, artist)
+        album, track = find_album_and_track(song, artist, self.spotify)
         if album is False:
             return {}
 
