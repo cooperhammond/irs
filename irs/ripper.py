@@ -1,12 +1,17 @@
-# Powered by:
-import youtube_dl
-import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
-
 # System
 import sys
 import os
 import glob
+
+
+# Add youtube-dl binary to path
+sys.path.append(os.path.expanduser("~/.irs/bin/youtube-dl"))
+
+# Powered by:
+import youtube_dl  # Locally imported from the binary
+import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
+
 
 # Local utilities
 from .utils import YdlUtils, ObjManip, Config
@@ -391,6 +396,7 @@ init, or in method arguments.")
             'progress_hooks': [YdlUtils.my_hook],
             'output': "tmp_file",
             'prefer-ffmpeg': True,
+            'ffmpeg_location': os.path.expanduser("~/.irs/bin/")
         }
 
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
