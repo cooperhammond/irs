@@ -15,7 +15,8 @@ from time import sleep
 import pkg_resources
 
 # Config File and Flags
-from .config import CONFIG
+import config
+CONFIG = config.CONFIG
 
 
 # ==================
