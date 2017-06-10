@@ -16,6 +16,9 @@ class PostInstallCommand(install):
     def run(self):
         install.run(self)  # Actually install the module and dependencies
 
+        import pip
+        pip.main(['install', "ydl-binaries"])
+
         import ydl_binaries
         from os import path
         from shutil import copyfile
