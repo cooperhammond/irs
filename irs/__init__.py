@@ -7,7 +7,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-S", "--setup", dest="setup", help="Setup IRS",
                     action="store_true")
 
-args = parser.parse_args()
+args, unknown = parser.parse_known_args()
 
 if args.setup:
     setup()
