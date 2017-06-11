@@ -27,8 +27,8 @@ class PostInstallCommand(install):
         from shutil import copyfile
 
         print("\n\nDownloading Dependencies:\n")
-        ydl_binaries.download_ffmpeg("~/.irs/bin")
-        ydl_binaries.update_ydl("~/.irs/bin")
+        # ydl_binaries.download_ffmpeg("~/.irs/bin")
+        # ydl_binaries.update_ydl("~/.irs/bin")
 
         config_file = path.expanduser("~/.irs/config_.py")
         if not path.isfile(config_file):
