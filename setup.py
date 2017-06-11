@@ -37,7 +37,7 @@ class PostInstallCommand(install):
 
 setup(
     name =         'irs',
-    version =      '6.5.6',
+    version =      '6.6.0',
     description =  'A music downloader that just gets metadata.',
     url =          'https://github.com/kepoorhampond/irs',
     author =       'Kepoor Hampond',
