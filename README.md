@@ -57,19 +57,7 @@ $ irs -s "Bohemian Rhapsody"
 $ irs -p "Best Nirvana"
 ```
 
-## Install & The Dependencies <sub><sup>(my new band name <sub><sup><sup><sub>\s</sub></sup></sup></sub>)</sub></sup>
-
-Really there's only one actual external dependency: `ffmpeg`. For windows, you'll want to follow [this](http://www.wikihow.com/Install-FFmpeg-on-Windows) guide. For OSX, you'll want to install it through [`brew`](https://brew.sh/) with this command:
-```
-$ brew install ffmpeg
-```
-For Linux, most package managers have `ffmpeg` in their default repositories, so it can be installed like so:
-```
-$ sudo apt-get install ffmpeg
-```
-Or whatever your appropriate package manager is.
-
-Other than `ffmpeg` though, all other dependencies are automatically installed with [`pip`](https://pip.pypa.io/en/stable/):
+## Install
 ```
 $ sudo pip install irs
 ```
