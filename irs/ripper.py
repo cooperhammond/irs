@@ -254,7 +254,7 @@ with init, or in method arguments.")
             if the_list is not None:
                 YdlUtils.clear_line()
 
-                print(self.args["hook-text"].get("list").encode('utf-8')
+                print(self.args["hook-text"].get("list")
                       .format(type.title(), the_list["name"],
                       the_list["artists"][0]["name"]))
 
