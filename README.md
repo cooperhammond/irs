@@ -17,6 +17,13 @@ A tool to download your music with metadata. It uses [Spotify](https://www.spoti
 
 Works with Python 2 and 3.
 
+## Install
+```
+$ sudo pip install irs
+```
+
+**You will need to have some Spotify tokens, the instructions to set them up are [here](https://github.com/kepoorhampond/irs#spotify-tokens).**
+
 ## Demo and Usages
 
 This is a demo of the CLI displayling its features:
@@ -56,13 +63,6 @@ But these are not:
 $ irs -s "Bohemian Rhapsody"
 $ irs -p "Best Nirvana"
 ```
-
-## Install
-```
-$ sudo pip install irs
-```
-
-**You will need to have some Spotify tokens, the instructions to set them up are [here](https://github.com/kepoorhampond/irs#spotify-tokens).**
 
 ## Spotify Tokens
 
