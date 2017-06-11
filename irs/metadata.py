@@ -56,9 +56,9 @@ class Metadata:
         mp3.save()
 
 
-def find_album_and_track(song, artist):
-    tracks = spotipy.Spotify().search(q=song, type="track"
-                                      )["tracks"]["items"]
+def find_album_and_track(song, artist, spotify=spotipy.Spotify()):
+    tracks = spotify.search(q=song, type="track")["tracks"]["items"]
+
     for track in tracks:
         if om.blank_include(track["name"], song):
             if om.blank_include(track["artists"][0]["name"], artist):

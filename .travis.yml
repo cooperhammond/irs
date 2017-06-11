@@ -4,13 +4,8 @@ python:
   - "3.5"
   - "3.6"
 
-before_script:
-  - sudo aptitude -y -q install ffmpeg libavcodec-extra-53 lame libmp3lame0
-  # These dependencies are necessary for ffmpeg. I currently hate all things
-  # doing with Travis and ffmpeg because I have no direct access to test stuff.
-  # I've gone through 25 seperate commits to get it working.
-
 install:
+  - pip install -r requirements.txt
   - python setup.py install
 
 script:

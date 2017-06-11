@@ -1,24 +1,9 @@
-CONFIG = dict(
+import sys
+from os import path
 
-    default_flags = ['-o'],
-    # For default flags. Right now, it organizes your files into an
-    # artist/album/song structure.
-    # To add a flag or argument, add an element to the index:
-    # default_flags = ['-o', '-l', '~/Music']
 
-    SPOTIFY_CLIENT_ID = '',
-    SPOTIFY_CLIENT_SECRET = '',
-    # You can either specify Spotify keys here, or in environment variables.
+sys.path.append(path.expanduser("~/.irs"))  # Add config to path
 
-    additional_search_terms = 'lyrics',
-    # Search terms for youtube
+import config_  # from "~/.irs/config_.py"
 
-    organize = True,
-    # True always forces organization.
-    # False always forces non-organization.
-    # None allows options and flags to determine if the files
-    # will be organized.
-
-    custom_directory = "",
-    # Defaults to '~/Music'
-)
+CONFIG = config_.CONFIG
