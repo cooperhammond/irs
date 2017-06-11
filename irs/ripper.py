@@ -47,8 +47,6 @@ class Ripper:
         if self.args["hook-text"].get("converting") is not None:
             CONFIG["converting"] = self.args["hook-text"]["converting"]
 
-        print(self.args["song"])
-
         self.locations = []
         self.type = None
         try:
