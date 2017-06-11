@@ -254,8 +254,6 @@ with init, or in method arguments.")
             if the_list is not None:
                 YdlUtils.clear_line()
 
-                the_list = ObjManip.set_utf8_encoding(the_list)
-
                 print(self.args["hook-text"].get("list").encode('utf-8')
                       .format(type.title(), the_list["name"],
                       the_list["artists"][0]["name"]))
