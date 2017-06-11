@@ -47,7 +47,7 @@ class Ripper:
         if self.args["hook-text"].get("converting") is not None:
             CONFIG["converting"] = self.args["hook-text"]["converting"]
 
-        self.args = ObjManip.set_utf8_encoding(self.args)
+        print(self.args["song"])
 
         self.locations = []
         self.type = None
@@ -131,7 +131,7 @@ class Ripper:
     def find_yt_url(self, song=None, artist=None, additional_search=None):
         if additional_search is None:
             additional_search = Config.parse_search_terms(self)
-            print(self.args["hook-text"].get("youtube"))
+            print(str(self.args["hook-text"].get("youtube")))
 
         try:
             if not song:
@@ -142,7 +142,8 @@ class Ripper:
             raise ValueError("Must specify song_title/artist in `args` with \
 init, or in method arguments.")
 
-        search_terms = song + " " + artist + " " + additional_search
+        search_terms = str(song) + " " + str(artist
+                                             ) + " " + str(additional_search)
         query_string = urlencode({"search_query": (
                                  search_terms.encode('utf-8'))})
         link = "http://www.youtube.com/results?" + query_string
@@ -370,7 +371,6 @@ init, or in method arguments.")
         if data == {}:
             data = self.parse_song_data(song, artist)
             if data != {}:
-                data = ObjManip.set_utf8_encoding(data)
                 song = data["name"]
                 artist = data["artist"]
 
@@ -379,11 +379,9 @@ init, or in method arguments.")
 
         video_url, video_title = self.find_yt_url(song, artist)
 
-        print(self.args["hook-text"].get("song")
-              .encode('utf-8').format(song, artist))
+        print(self.args["hook-text"].get("song").format(song, artist))
 
-        file_name = str(data["file_prefix"] + ObjManip.blank(song, False) +
-                        ".mp3")
+        file_name = data["file_prefix"] + ObjManip.blank(song, False) + ".mp3"
 
         ydl_opts = {
             'format': 'bestaudio/best',

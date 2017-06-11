@@ -15,8 +15,11 @@ from time import sleep
 import pkg_resources
 
 # Config File and Flags
-import config
-CONFIG = config.CONFIG
+if sys.version_info[0] == 2:
+    import config
+    CONFIG = config.CONFIG
+else:
+    from irs.config import CONFIG
 
 
 # ==================
@@ -57,17 +60,19 @@ class YdlUtils:
 # Object Manipulation and Checking
 # ================================
 
-def set_utf8_encoding(ld):  # ld => a list or dictionary with strings in it
+def set_encoding(ld, encoding):  # ld => list or dictionary with strings in it
     if type(ld) == dict:
         for k in ld:
             if type(ld[k]) == dict or type(ld[k]) == list:
-                ld[k] = set_utf8_encoding(ld[k])
+                ld[k] = set_encoding(ld[k], encoding)
             elif type(ld[k]) == str:
-                ld[k] = ld[k].encode('utf-8')
+                ld[k] = encoding(ld[k])
     elif type(ld) == list:
         for index, datum in enumerate(ld):
             if type(datum) == str:
-                ld[index] = datum.encode('utf-8')
+                ld[index] = encoding(datum)
+            elif type(ld[k]) == dict or type(ld[k]) == list:
+                ld[k] = set_encoding(ld[k], encoding)
     return ld
 
 
@@ -92,7 +97,7 @@ class ObjManip:  # Object Manipulation
     def blank(string, downcase=True):
         import re
         regex = re.compile('[^a-zA-Z0-9\ ]')
-        string = regex.sub('', string)
+        string = regex.sub('', str(string))
         if downcase:
             string = string.lower()
         return ' '.join(string.split())
@@ -133,8 +138,12 @@ class ObjManip:  # Object Manipulation
                 del new_d[x]
         return new_d
 
-    def set_utf8_encoding(ld):  # ld => a list or dictionary with strings in it
-        return set_utf8_encoding(ld)
+    # ld => a list or dictionary with strings in it
+    def set_utf8_encoding(ld):
+        return set_encoding(ld, lambda x: x.encode('utf-8'))
+
+    def set_encoding(*args):
+        return set_encoding(*args)
 
 # ========================================
 # Download Log Reading/Updating/Formatting
