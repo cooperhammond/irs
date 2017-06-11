@@ -378,7 +378,11 @@ init, or in method arguments.")
 
         video_url, video_title = self.find_yt_url(song, artist)
 
-        print(self.args["hook-text"].get("song").decode().format(song, artist))
+        if sys.version_info[0] == 2:
+            print(self.args["hook-text"].get("song").decode().format(song,
+                                                                     artist))
+        else:
+            print(self.args["hook-text"].get("song").format(song, artist))
 
         file_name = data["file_prefix"] + ObjManip.blank(song, False) + ".mp3"
 
