@@ -98,7 +98,10 @@ class ObjManip:  # Object Manipulation
     def blank(string, downcase=True):
         import re
         regex = re.compile('[^a-zA-Z0-9\ ]')
-        string = regex.sub('', string.decode("utf8"))
+        if sys.version_info == 2:
+            string = regex.sub('', string.decode("utf8"))
+        else:
+            string = regex.sub('', string)
         if downcase:
             string = string.lower()
         return ' '.join(string.decode().split())
