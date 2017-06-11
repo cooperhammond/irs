@@ -16,12 +16,14 @@ A tool to download your music with metadata. It uses [Spotify](https://www.spoti
 
 Works with Python 2 and 3.
 
-## Install
+## Install and Setup
 ```
 $ sudo pip install irs
+$ irs --setup
 ```
 
 **You will need to have some Spotify tokens, the instructions to set them up are [here](https://github.com/kepoorhampond/irs#spotify-tokens).**
+
 
 ## Demo and Usages
 
