@@ -1,7 +1,0 @@
---index-url https://pypi.python.org/simple/
-
-bs4
-mutagen
-requests
-spotipy
-ydl-binaries

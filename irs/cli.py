@@ -13,6 +13,10 @@ from .utils import Config, console
 def main():
     parser = argparse.ArgumentParser()
 
+    # Setup
+    parser.add_argument("-S", "--setup", dest="setup", help="Setup IRS",
+                        action="store_true")
+
     # Single Song
     parser.add_argument("-a", "--artist", dest="artist", help="Specify artist \
 name. Must be used with -s/--song or -A/--album")
