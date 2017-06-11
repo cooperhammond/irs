@@ -53,7 +53,7 @@ directory to place files in.")
         }
     }
 
-    # Combiner args from argparse and the ripper_args as above and then
+    # Combine args from argparse and the ripper_args as above and then
     # remove all keys with the value of "None"
     ripper_args.update(vars(args))
 

@@ -1,13 +1,18 @@
-# Powered by:
-import youtube_dl
-import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
-
 # System
 import sys
 import os
 import glob
 import shutil
+
+
+# Add youtube-dl binary to path
+sys.path.append(os.path.expanduser("~/.irs/bin/youtube-dl"))
+
+# Powered by:
+import youtube_dl  # Locally imported from the binary
+import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
+
 
 # Local utilities
 from .utils import YdlUtils, ObjManip, Config
@@ -80,7 +85,7 @@ class Ripper:
             # those flaws for being exclusive to them.
             # And if those flaws are really enough to turn you off of them,
             # then you *probably* don't really want to be with them anyways.
-            # Either way, it's up to you.
+            # Either way, it's up to you. (I'd just ignore this)
 
             if Config.parse_organize(self):
                 if self.type in ("album", "song"):
@@ -125,7 +130,7 @@ class Ripper:
     def find_yt_url(self, song=None, artist=None, additional_search=None):
         if additional_search is None:
             additional_search = Config.parse_search_terms(self)
-            print(self.args["hook-text"].get("youtube"))
+            print(str(self.args["hook-text"].get("youtube")))
 
         try:
             if not song:
@@ -136,7 +141,8 @@ class Ripper:
             raise ValueError("Must specify song_title/artist in `args` with \
 init, or in method arguments.")
 
-        search_terms = song + " " + artist + " " + additional_search
+        search_terms = str(song) + " " + str(artist
+                                             ) + " " + str(additional_search)
         query_string = urlencode({"search_query": (
                                  search_terms.encode('utf-8'))})
         link = "http://www.youtube.com/results?" + query_string
@@ -194,7 +200,7 @@ album".split("  ")
 
         return ("https://youtube.com" + self.code["href"], self.code["title"])
 
-    def album(self, title, artist=None):  # Alias for `spotify_list("album", ...)`
+    def album(self, title, artist=None):  # Alias for spotify_list("album", ..)
         return self.spotify_list("album", title=title, artist=artist)
 
     def playlist(self, title, username):
@@ -321,7 +327,7 @@ with init, or in method arguments.")
         return locations
 
     def parse_song_data(self, song, artist):
-        album, track = find_album_and_track(song, artist)
+        album, track = find_album_and_track(song, artist, self.spotify)
         if album is False:
             return {}
 
@@ -372,8 +378,7 @@ init, or in method arguments.")
 
         print(self.args["hook-text"].get("song").format(song, artist))
 
-        file_name = str(data["file_prefix"] + ObjManip.blank(song, False) +
-                        ".mp3")
+        file_name = data["file_prefix"] + ObjManip.blank(song, False) + ".mp3"
 
         ydl_opts = {
             'format': 'bestaudio/best',
@@ -386,6 +391,7 @@ init, or in method arguments.")
             'progress_hooks': [YdlUtils.my_hook],
             'output': "tmp_file",
             'prefer-ffmpeg': True,
+            'ffmpeg_location': os.path.expanduser("~/.irs/bin/")
         }
 
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
