@@ -1,4 +1,5 @@
-# -*- coding: UTF-8 -*-
+# _*_ coding:utf-8 _*_
+
 
 # =======
 # Imports
@@ -97,10 +98,10 @@ class ObjManip:  # Object Manipulation
     def blank(string, downcase=True):
         import re
         regex = re.compile('[^a-zA-Z0-9\ ]')
-        string = regex.sub('', str(string))
+        string = regex.sub('', string.encode("utf8"))
         if downcase:
             string = string.lower()
-        return ' '.join(string.split())
+        return ' '.join(string.decode().split())
 
     def blank_include(this, includes_this):
         this = ObjManip.blank(this)

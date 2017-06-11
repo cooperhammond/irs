@@ -1,3 +1,5 @@
+# _*_ coding:utf-8 _*_
+
 # System
 import sys
 import os
@@ -141,8 +143,8 @@ class Ripper:
             raise ValueError("Must specify song_title/artist in `args` with \
 init, or in method arguments.")
 
-        search_terms = str(song) + " " + str(artist
-                                             ) + " " + str(additional_search)
+        search_terms = song + " " + artist + " " + additional_search
+
         query_string = urlencode({"search_query": (
                                  search_terms.encode('utf-8'))})
         link = "http://www.youtube.com/results?" + query_string
@@ -376,7 +378,7 @@ init, or in method arguments.")
 
         video_url, video_title = self.find_yt_url(song, artist)
 
-        print(self.args["hook-text"].get("song").format(song, artist))
+        print(self.args["hook-text"].get("song").decode().format(song, artist))
 
         file_name = data["file_prefix"] + ObjManip.blank(song, False) + ".mp3"
 
