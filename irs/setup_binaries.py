@@ -1,6 +1,8 @@
 import ydl_binaries
 from shutil import copyfile
 import os
+import inspect
+import irs
 
 
 def setup():
@@ -9,4 +11,5 @@ def setup():
 
     config_file = os.path.expanduser("~/.irs/config_.py")
     if not os.path.isfile(config_file):
-        copyfile("irs/config_preset", config_file)
+        copyfile(os.path.dirname(inspect.getfile(irs)) + "/config_preset.py",
+                 config_file)
