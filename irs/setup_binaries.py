@@ -11,9 +11,5 @@ def setup():
 
     config_file = os.path.expanduser("~/.irs/config_.py")
     if not os.path.isfile(config_file):
-        print("\n")
-        os.system("ls " + os.path.dirname(inspect.getfile(irs)))
-        print(inspect.getfile(irs))
-        print("\n")
         copyfile(os.path.dirname(inspect.getfile(irs)) + "/config_preset.py",
                  config_file)
