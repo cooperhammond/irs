@@ -18,4 +18,4 @@ ffmpeg binaries.")
     exit(1)
 else:
     from .ripper import Ripper
-    Ripper  # PyLinter reasons
+    Ripper
