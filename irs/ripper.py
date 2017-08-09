@@ -259,8 +259,8 @@ with init, or in method arguments.")
                 YdlUtils.clear_line()
 
                 print(self.args["hook-text"].get("list")
-                      .format(type.title(), the_list["name"],
-                      the_list["artists"][0]["name"]))
+                      .format(type.title(), the_list["name"].encode("utf-8"),
+                      the_list["artists"][0]["name"].encode("utf-8")))
 
                 compilation = ""
                 if type == "album":

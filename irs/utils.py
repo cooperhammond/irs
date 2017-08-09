@@ -95,9 +95,11 @@ class ObjManip:  # Object Manipulation
                     return True
         return False
 
-    def blank(string, downcase=True):
+    def blank(string, downcase=True, remove_and=True):
         if downcase:
             string = string.lower()
+        if remove_and:
+            string = string.replace("and", "")
         import re
         regex = re.compile('[^a-zA-Z0-9\ ]')
         if sys.version_info == 2:
