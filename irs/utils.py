@@ -442,3 +442,30 @@ class Config:
                                  where="post_processors")
         else:
             return True
+
+
+#==============
+# Captcha Cheat
+#==============
+# I basically consider myself a genius for this snippet.
+
+from splinter import Browser
+from time import sleep
+
+
+@staticmethods
+class CaptchaCheat:
+    def cheat_it(url, t=1):
+        executable_path = {'executable_path': '/usr/local/bin/chromedriver'}
+        with Browser('chrome', **executable_path) as b:
+            b.visit(url)
+            sleep(t)
+            while CaptchaCheat.strip_it(b.evaluate_script("document.URL")) != CaptchaCheat.strip_it(url):
+                sleep(t)
+            return b.evaluate_script("document.getElementsByTagName('html')[0].innerHTML")
+
+    def strip_it(s):
+        s = s.encode("utf-8")
+        s = s.strip("http://")
+        s = s.strip("https://")
+        return s
