@@ -159,12 +159,13 @@ init, or in method arguments.")
         else:
             soup = BeautifulSoup(CaptchaCheat.cheat_it(link), 'html.parser')
 
-        # print(soup.prettify())
+        # with open("index.html", "w") as f:
+        #     f.write(soup.prettify().encode('utf-8'))
 
         def find_link(link):
             try:
                 if "yt-simple-endpoint style-scope ytd-video-renderer" in str(" ".join(link["class"])) or \
-                   "yt-uix-tile-link yt-ui-ellipsis yt-ui-ellipsis-2 yt-uix-sessionlink spf-link" in str(" ".join(link["class"])):
+                   "yt-uix-tile-link yt-ui-ellipsis yt-ui-ellipsis-2 yt-uix-sessionlink spf-link " in str(" ".join(link["class"])):
                     if "&list=" not in link["href"]:
                         return link
             except KeyError:
@@ -173,7 +174,7 @@ init, or in method arguments.")
         results = list(filter(None, map(find_link, soup.find_all("a"))))
 
         garbage_phrases = "cover  album  live  clean  rare version  full  full \
-album".split("  ")
+album  row  at  @  session".split("  ")
 
         self.code = None
         counter = 0
@@ -181,11 +182,11 @@ album".split("  ")
         while self.code is None and counter <= 10:
             counter += 1
             for link in results:
+                if ObjManip.check_garbage_phrases(garbage_phrases,
+                                                  link["title"], song):
+                    continue
                 if ObjManip.blank_include(link["title"], song) and \
                         ObjManip.blank_include(link["title"], artist):
-                    if ObjManip.check_garbage_phrases(garbage_phrases,
-                                                      link["title"], song):
-                        continue
                     self.code = link
                     break
 
@@ -201,6 +202,15 @@ album".split("  ")
                         break
 
             if self.code is None:
+                for link in results:
+                    if ObjManip.check_garbage_phrases(garbage_phrases,
+                                                      link["title"], song):
+                        continue
+                    if ObjManip.blank_include(link["title"], song):
+                        self.code = link
+                        break
+
+            if self.code is None:
                 song = ObjManip.limit_song_name(song)
 
         if self.code is None:
@@ -211,6 +221,7 @@ album".split("  ")
             return ("https://youtube.com" + self.code["href"], self.code["title"])
         except TypeError:
             # Assuming Google catches you trying to search youtube for music ;)
+            print("Trying to bypass google captcha.")
             return self.find_yt_url(song=song, artist=artist, additional_search=additional_search, caught_by_google=True)
 
 
@@ -252,20 +263,37 @@ with init, or in method arguments.")
         if len(list_of_lists) > 0:
             the_list = None
             for list_ in list_of_lists:
-                if ObjManip.blank_include(list_["name"], title):
-                    if Config.parse_artist(self):
-                        if ObjManip.blank_include(list_["artists"][0]["name"],
-                                                  Config.parse_artist(self)):
-                            the_list = self.spotify.album(list_["uri"])
-                            break
-                    else:
-                        if type == "album":
-                            the_list = self.spotify.album(list_["uri"])
+                if Config.parse_exact(self) == True:
+                    if list_["name"].encode("utf-8") == title.encode("utf-8"):
+                        if Config.parse_artist(self):
+                            if list_["artists"][0]["name"].encode("utf-8") == \
+                                    Config.parse_artist(self).encode('utf-8'):
+                                the_list = self.spotify.album(list_["uri"])
+                                break
                         else:
-                            the_list = self.spotify.user_playlist(
-                                list_["owner"]["id"], list_["uri"])
-                            the_list["artists"] = [{"name": username}]
-                        break
+                            if type == "album":
+                                the_list = self.spotify.album(list_["uri"])
+                            else:
+                                the_list = self.spotify.user_playlist(
+                                    list_["owner"]["id"], list_["uri"])
+                                the_list["artists"] = [{"name": username}]
+                            break
+
+                else:
+                    if ObjManip.blank_include(list_["name"], title):
+                        if Config.parse_artist(self):
+                            if ObjManip.blank_include(list_["artists"][0]["name"],
+                                    Config.parse_artist(self)):
+                                the_list = self.spotify.album(list_["uri"])
+                                break
+                        else:
+                            if type == "album":
+                                the_list = self.spotify.album(list_["uri"])
+                            else:
+                                the_list = self.spotify.user_playlist(
+                                    list_["owner"]["id"], list_["uri"])
+                                the_list["artists"] = [{"name": username}]
+                            break
             if the_list is not None:
                 YdlUtils.clear_line()
 

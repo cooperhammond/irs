@@ -90,8 +90,8 @@ class ObjManip:  # Object Manipulation
 
     def check_garbage_phrases(phrases, string, title):
         for phrase in phrases:
-            if phrase in ObjManip.blank(string):
-                if phrase not in ObjManip.blank(title):
+            if phrase in string.lower():
+                if phrase not in title.lower():
                     return True
         return False
 
@@ -442,6 +442,12 @@ class Config:
                                  where="post_processors")
         else:
             return True
+
+    def parse_exact(ripper):
+        exact = check_sources(ripper, "exact")
+        if exact in (True, False):
+            return exact
+
 
 
 #==============
