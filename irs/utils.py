@@ -367,25 +367,12 @@ def console(ripper):
             sys.exit(0)
 
 
-"""
-# =====================
-# Config File and Flags
-# =====================
-
-def check_sources(ripper, key, default=None, environment=False, where=None):
-    if where is not None:
-        tmp_args = ripper.args.get(where)
-    else:
-        tmp_args = ripper.args
-
-    if tmp_args.get(key):
-        return tmp_args.get(key)
-"""
-
-
 # ===========
 # CONFIG FILE
 # ===========
+
+import subprocess
+
 
 def check_sources(ripper, key, default=None, environment=False, where=None):
     # tmp_args = ripper.args
@@ -447,6 +434,19 @@ class Config:
         exact = check_sources(ripper, "exact")
         if exact in (True, False):
             return exact
+
+    def check_ffmpeg():
+        for c in ["ffmpeg", "ffprobe"]:
+            try:
+                with open(os.devnull, 'w') as shutup:
+                    subprocess.call([c], stdout=shutup, stderr=shutup)
+            except OSError as e:
+                if e.errno == os.errno.ENOENT:
+                    return False
+                else:
+                    # Something else went wrong while trying to run `wget`
+                    raise
+        return True
 
 
 
