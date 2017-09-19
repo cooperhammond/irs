@@ -18,7 +18,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
 
 
 # Local utilities
-from .utils import YdlUtils, ObjManip, Config
+from .utils import YdlUtils, ObjManip, Config, CaptchaCheat
 from .metadata import Metadata
 from .metadata import find_album_and_track, parse_genre
 
@@ -58,6 +58,9 @@ class Ripper:
             client_credentials_manager = SpotifyClientCredentials(CLIENT_ID,
                                                                   CLIENT_SECRET
                                                                   # Stupid lint
+                                                                  # and stupid
+                                                                  # long var
+                                                                  # names
                                                                   )
 
             self.spotify = spotipy.Spotify(
@@ -130,7 +133,7 @@ class Ripper:
 
         return locations
 
-    def find_yt_url(self, song=None, artist=None, additional_search=None):
+    def find_yt_url(self, song=None, artist=None, additional_search=None, caught_by_google=False, first=False):
         if additional_search is None:
             additional_search = Config.parse_search_terms(self)
             print(str(self.args["hook-text"].get("youtube")))
@@ -150,22 +153,28 @@ init, or in method arguments.")
                                  search_terms.encode('utf-8'))})
         link = "http://www.youtube.com/results?" + query_string
 
-        html_content = urlopen(link).read()
-        soup = BeautifulSoup(html_content, 'html.parser')  # .prettify()
+        if not caught_by_google:
+            html_content = urlopen(link).read()
+            soup = BeautifulSoup(html_content, 'html.parser')
+        else:
+            soup = BeautifulSoup(CaptchaCheat.cheat_it(link), 'html.parser')
+
+        # with open("index.html", "w") as f:
+        #     f.write(soup.prettify().encode('utf-8'))
 
         def find_link(link):
             try:
-                if "yt-uix-tile-link yt-ui-ellipsis yt-ui-ellipsis-2 yt-uix-\
-sessionlink spf-link" in str(" ".join(link["class"])):
+                if "yt-simple-endpoint style-scope ytd-video-renderer" in str(" ".join(link["class"])) or \
+                   "yt-uix-tile-link yt-ui-ellipsis yt-ui-ellipsis-2 yt-uix-sessionlink spf-link " in str(" ".join(link["class"])):
                     if "&list=" not in link["href"]:
                         return link
             except KeyError:
                 pass
 
-        results = list(filter(None, (map(find_link, soup.find_all("a")))))
+        results = list(filter(None, map(find_link, soup.find_all("a"))))
 
         garbage_phrases = "cover  album  live  clean  rare version  full  full \
-album".split("  ")
+album  row  at  @  session".split("  ")
 
         self.code = None
         counter = 0
@@ -173,11 +182,14 @@ album".split("  ")
         while self.code is None and counter <= 10:
             counter += 1
             for link in results:
+                if first == True:
+                    self.code = link
+                    break
+                if ObjManip.check_garbage_phrases(garbage_phrases,
+                                                  link["title"], song):
+                    continue
                 if ObjManip.blank_include(link["title"], song) and \
                         ObjManip.blank_include(link["title"], artist):
-                    if ObjManip.check_garbage_phrases(garbage_phrases,
-                                                      link["title"], song):
-                        continue
                     self.code = link
                     break
 
@@ -193,15 +205,31 @@ album".split("  ")
                         break
 
             if self.code is None:
+                for link in results:
+                    if ObjManip.check_garbage_phrases(garbage_phrases,
+                                                      link["title"], song):
+                        continue
+                    if ObjManip.blank_include(link["title"], song):
+                        self.code = link
+                        break
+
+            if self.code is None:
                 song = ObjManip.limit_song_name(song)
 
-        if self.code is None:
+        if self.code is None and first is not True:
             if additional_search == "lyrics":
-                return self.find_yt_url(song, artist, "")
-            else:
-                self.code = results[0]
+                return self.find_yt_url(song, artist, additional_search, caught_by_google, first)
 
-        return ("https://youtube.com" + self.code["href"], self.code["title"])
+        try:
+            return ("https://youtube.com" + self.code["href"], self.code["title"])
+        except TypeError:
+            if first is not True:
+                return self.find_yt_url(song, artist, additional_search, caught_by_google, first=True)
+
+        #    # Assuming Google catches you trying to search youtube for music ;)
+        #    print("Trying to bypass google captcha.")
+        #    return self.find_yt_url(song=song, artist=artist, additional_search=additional_search, caught_by_google=True)
+
 
     def album(self, title, artist=None):  # Alias for spotify_list("album", ..)
         return self.spotify_list("album", title=title, artist=artist)
@@ -241,20 +269,37 @@ with init, or in method arguments.")
         if len(list_of_lists) > 0:
             the_list = None
             for list_ in list_of_lists:
-                if ObjManip.blank_include(list_["name"], title):
-                    if Config.parse_artist(self):
-                        if ObjManip.blank_include(list_["artists"][0]["name"],
-                                                  Config.parse_artist(self)):
-                            the_list = self.spotify.album(list_["uri"])
-                            break
-                    else:
-                        if type == "album":
-                            the_list = self.spotify.album(list_["uri"])
+                if Config.parse_exact(self) == True:
+                    if list_["name"].encode("utf-8") == title.encode("utf-8"):
+                        if Config.parse_artist(self):
+                            if list_["artists"][0]["name"].encode("utf-8") == \
+                                    Config.parse_artist(self).encode('utf-8'):
+                                the_list = self.spotify.album(list_["uri"])
+                                break
                         else:
-                            the_list = self.spotify.user_playlist(
-                                list_["owner"]["id"], list_["uri"])
-                            the_list["artists"] = [{"name": username}]
-                        break
+                            if type == "album":
+                                the_list = self.spotify.album(list_["uri"])
+                            else:
+                                the_list = self.spotify.user_playlist(
+                                    list_["owner"]["id"], list_["uri"])
+                                the_list["artists"] = [{"name": username}]
+                            break
+
+                else:
+                    if ObjManip.blank_include(list_["name"], title):
+                        if Config.parse_artist(self):
+                            if ObjManip.blank_include(list_["artists"][0]["name"],
+                                    Config.parse_artist(self)):
+                                the_list = self.spotify.album(list_["uri"])
+                                break
+                        else:
+                            if type == "album":
+                                the_list = self.spotify.album(list_["uri"])
+                            else:
+                                the_list = self.spotify.user_playlist(
+                                    list_["owner"]["id"], list_["uri"])
+                                the_list["artists"] = [{"name": username}]
+                            break
             if the_list is not None:
                 YdlUtils.clear_line()
 
@@ -386,7 +431,6 @@ init, or in method arguments.")
             print(self.args["hook-text"].get("song").format(song, artist))
 
         file_name = data["file_prefix"] + ObjManip.blank(song, False) + ".mp3"
-
         ydl_opts = {
             'format': 'bestaudio/best',
             'postprocessors': [{
@@ -398,8 +442,10 @@ init, or in method arguments.")
             'progress_hooks': [YdlUtils.my_hook],
             'output': "tmp_file",
             'prefer-ffmpeg': True,
-            'ffmpeg_location': os.path.expanduser("~/.irs/bin/")
         }
+
+        if Config.check_ffmpeg() is False:
+            ydl_opts.update({'ffmpeg_location': os.path.expanduser("~/.irs/bin/")})
 
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             ydl.download([video_url])
