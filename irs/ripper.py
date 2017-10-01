@@ -159,6 +159,7 @@ init, or in method arguments.")
         else:
             soup = BeautifulSoup(CaptchaCheat.cheat_it(link), 'html.parser')
 
+        # print(soup.prettify())
         # with open("index.html", "w") as f:
         #     f.write(soup.prettify().encode('utf-8'))
 
@@ -166,6 +167,7 @@ init, or in method arguments.")
             try:
                 if "yt-simple-endpoint style-scope ytd-video-renderer" in str(" ".join(link["class"])) or \
                    "yt-uix-tile-link yt-ui-ellipsis yt-ui-ellipsis-2 yt-uix-sessionlink spf-link " in str(" ".join(link["class"])):
+                    
                     if "&list=" not in link["href"]:
                         return link
             except KeyError:
@@ -223,14 +225,14 @@ album  row  at  @  session".split("  ")
         try:
             return ("https://youtube.com" + self.code["href"], self.code["title"])
         except TypeError:
-            if first is not True:
+            if caught_by_google is not True:
+                # Assuming Google catches you trying to search youtube for music ;)
+                print("Trying to bypass google captcha.")
+                return self.find_yt_url(song=song, artist=artist, additional_search=additional_search, caught_by_google=True)
+            elif caught_by_google is True and first is not True: 
                 return self.find_yt_url(song, artist, additional_search, caught_by_google, first=True)
-
-        #    # Assuming Google catches you trying to search youtube for music ;)
-        #    print("Trying to bypass google captcha.")
-        #    return self.find_yt_url(song=song, artist=artist, additional_search=additional_search, caught_by_google=True)
-
-
+            
+          
     def album(self, title, artist=None):  # Alias for spotify_list("album", ..)
         return self.spotify_list("album", title=title, artist=artist)
 
