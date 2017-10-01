@@ -133,7 +133,7 @@ class Ripper:
 
         return locations
 
-    def find_yt_url(self, song=None, artist=None, additional_search=None, caught_by_google=False):
+    def find_yt_url(self, song=None, artist=None, additional_search=None, caught_by_google=False, first=False):
         if additional_search is None:
             additional_search = Config.parse_search_terms(self)
             print(str(self.args["hook-text"].get("youtube")))
@@ -159,6 +159,7 @@ init, or in method arguments.")
         else:
             soup = BeautifulSoup(CaptchaCheat.cheat_it(link), 'html.parser')
 
+        # print(soup.prettify())
         # with open("index.html", "w") as f:
         #     f.write(soup.prettify().encode('utf-8'))
 
@@ -182,6 +183,9 @@ album  row  at  @  session".split("  ")
         while self.code is None and counter <= 10:
             counter += 1
             for link in results:
+                if first == True:
+                    self.code = link
+                    break
                 if ObjManip.check_garbage_phrases(garbage_phrases,
                                                   link["title"], song):
                     continue
@@ -213,18 +217,20 @@ album  row  at  @  session".split("  ")
             if self.code is None:
                 song = ObjManip.limit_song_name(song)
 
-        if self.code is None:
+        if self.code is None and first is not True:
             if additional_search == "lyrics":
-                return self.find_yt_url(song, artist, "")
+                return self.find_yt_url(song, artist, additional_search, caught_by_google, first)
 
         try:
             return ("https://youtube.com" + self.code["href"], self.code["title"])
         except TypeError:
-            # Assuming Google catches you trying to search youtube for music ;)
-            print("Trying to bypass google captcha.")
-            return self.find_yt_url(song=song, artist=artist, additional_search=additional_search, caught_by_google=True)
-
-
+            if caught_by_google is not True:
+                # Assuming Google catches you trying to search youtube for music ;)
+                print("Trying to bypass google captcha.")
+                return self.find_yt_url(song=song, artist=artist, additional_search=additional_search, caught_by_google=True)
+            elif caught_by_google is True and first is not True: 
+                return self.find_yt_url(song, artist, additional_search, caught_by_google, first=True)
+                      
     def album(self, title, artist=None):  # Alias for spotify_list("album", ..)
         return self.spotify_list("album", title=title, artist=artist)
 
@@ -425,7 +431,6 @@ init, or in method arguments.")
             print(self.args["hook-text"].get("song").format(song, artist))
 
         file_name = data["file_prefix"] + ObjManip.blank(song, False) + ".mp3"
-
         ydl_opts = {
             'format': 'bestaudio/best',
             'postprocessors': [{
@@ -437,8 +442,10 @@ init, or in method arguments.")
             'progress_hooks': [YdlUtils.my_hook],
             'output': "tmp_file",
             'prefer-ffmpeg': True,
-            'ffmpeg_location': os.path.expanduser("~/.irs/bin/")
         }
+
+        if Config.check_ffmpeg() is False:
+            ydl_opts.update({'ffmpeg_location': os.path.expanduser("~/.irs/bin/")})
 
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             ydl.download([video_url])
