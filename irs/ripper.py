@@ -127,13 +127,12 @@ class Ripper:
                         if not os.path.exists(new_loc):
                             os.makedirs(new_loc)
                         loc = loc.replace("//", "/")
-                        new_loc = (new_loc + "/" + file_name)\
-                            .replace("//", "/")
+                        new_loc = (new_loc + "/" + file_name).replace("//", "/")
                         shutil.move(loc, new_loc)
 
         return locations
 
-    def find_yt_url(self, song=None, artist=None, additional_search=None, caught_by_google=False, first=False):
+    def find_yt_url(self, song=None, artist=None, additional_search=None, caught_by_google=False, first=False, tries=0):
         if additional_search is None:
             additional_search = Config.parse_search_terms(self)
             print(str(self.args["hook-text"].get("youtube")))
@@ -219,7 +218,7 @@ album  row  at  @  session".split("  ")
 
         if self.code is None and first is not True:
             if additional_search == "lyrics":
-                return self.find_yt_url(song, artist, additional_search, caught_by_google, first)
+                return self.find_yt_url(song, artist, additional_search, caught_by_google, first, tries=tries + 1)
 
         try:
             return ("https://youtube.com" + self.code["href"], self.code["title"])
@@ -227,10 +226,10 @@ album  row  at  @  session".split("  ")
             if caught_by_google is not True:
                 # Assuming Google catches you trying to search youtube for music ;)
                 print("Trying to bypass google captcha.")
-                return self.find_yt_url(song=song, artist=artist, additional_search=additional_search, caught_by_google=True)
-            elif caught_by_google is True and first is not True: 
-                return self.find_yt_url(song, artist, additional_search, caught_by_google, first=True)
-                      
+                return self.find_yt_url(song=song, artist=artist, additional_search=additional_search, caught_by_google=True, tries=tries + 1)
+            elif caught_by_google is True and first is not True:
+                return self.find_yt_url(song, artist, additional_search, caught_by_google, first=True, tries=tries + 1)
+
     def album(self, title, artist=None):  # Alias for spotify_list("album", ..)
         return self.spotify_list("album", title=title, artist=artist)
 
@@ -442,10 +441,8 @@ init, or in method arguments.")
             'progress_hooks': [YdlUtils.my_hook],
             'output': "tmp_file",
             'prefer-ffmpeg': True,
+            'ffmpeg_location': os.path.expanduser("~/.irs/bin/"),
         }
-
-        if Config.check_ffmpeg() is False:
-            ydl_opts.update({'ffmpeg_location': os.path.expanduser("~/.irs/bin/")})
 
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             ydl.download([video_url])
