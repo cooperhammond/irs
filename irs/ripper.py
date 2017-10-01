@@ -167,7 +167,6 @@ init, or in method arguments.")
             try:
                 if "yt-simple-endpoint style-scope ytd-video-renderer" in str(" ".join(link["class"])) or \
                    "yt-uix-tile-link yt-ui-ellipsis yt-ui-ellipsis-2 yt-uix-sessionlink spf-link " in str(" ".join(link["class"])):
-                    
                     if "&list=" not in link["href"]:
                         return link
             except KeyError:
@@ -231,8 +230,7 @@ album  row  at  @  session".split("  ")
                 return self.find_yt_url(song=song, artist=artist, additional_search=additional_search, caught_by_google=True)
             elif caught_by_google is True and first is not True: 
                 return self.find_yt_url(song, artist, additional_search, caught_by_google, first=True)
-            
-          
+                      
     def album(self, title, artist=None):  # Alias for spotify_list("album", ..)
         return self.spotify_list("album", title=title, artist=artist)
 

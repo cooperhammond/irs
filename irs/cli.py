@@ -26,6 +26,9 @@ name. Must be used with -s/--song or -A/--album")
     # Album
     parser.add_argument("-A", "--album", dest="album", help="Specify album \
 name")
+    parser.add_argument("-e", "--exact", dest="exact", action="store_true",
+                        help="The list will only be chosen if it equals the \
+user input.")
 
     # Playlist
     parser.add_argument("-u", "--username", dest="username", help="Specify \
