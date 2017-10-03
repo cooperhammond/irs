@@ -8,6 +8,8 @@ import os
 # Powered by:
 from .ripper import Ripper
 from .utils import Config, console
+from colorama import init
+init()
 
 
 def main():
