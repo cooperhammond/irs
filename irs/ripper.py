@@ -441,7 +441,6 @@ init, or in method arguments.")
             'progress_hooks': [YdlUtils.my_hook],
             'output': "tmp_file",
             'prefer-ffmpeg': True,
-            'ffmpeg_location': os.path.expanduser("~/.irs/bin/"),
         }
 
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
