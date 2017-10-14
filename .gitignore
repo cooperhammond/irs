@@ -17,6 +17,8 @@ update_pypi_and_github.py
 # Temporarily downloaded files
 *.mp3
 *.zip
+*.part
+*.webm
 
 # Coverage files
 .coverage
