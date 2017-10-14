@@ -14,7 +14,8 @@ setup(
         'mutagen',
         'requests',
         'spotipy',
-        'ydl-binaries'
+        'ydl-binaries',
+        'splinter'
     ],
     entry_points = {
         'console_scripts': ['irs = irs.cli:main'],
