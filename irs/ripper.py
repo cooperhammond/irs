@@ -174,7 +174,7 @@ init, or in method arguments.")
         results = list(filter(None, map(find_link, soup.find_all("a"))))
 
         garbage_phrases = "cover  album  live  clean  rare version  full  full \
-album  row  at  @  session".split("  ")
+album  row  at  @  session  how to  npr music  reimagined  hr version".split("  ")
 
         self.code = None
         counter = 0
@@ -182,12 +182,15 @@ album  row  at  @  session".split("  ")
         while self.code is None and counter <= 10:
             counter += 1
             for link in results:
-                if first == True:
+                if first == True and tries >= 10:
                     self.code = link
                     break
                 if ObjManip.check_garbage_phrases(garbage_phrases,
                                                   link["title"], song):
                     continue
+                if first == True:
+                    self.code = link
+                    break
                 if ObjManip.blank_include(link["title"], song) and \
                         ObjManip.blank_include(link["title"], artist):
                     self.code = link
@@ -217,7 +220,9 @@ album  row  at  @  session".split("  ")
                 song = ObjManip.limit_song_name(song)
 
         if self.code is None and first is not True:
-            if additional_search == "lyrics":
+            if tries >= 5:
+                return self.find_yt_url(song, artist, additional_search, caught_by_google, first=True, tries=tries + 1)
+            elif additional_search == "lyrics":
                 return self.find_yt_url(song, artist, additional_search, caught_by_google, first, tries=tries + 1)
 
         try:
