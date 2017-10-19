@@ -311,14 +311,24 @@ def banner():
                pkg_resources.get_distribution("irs").version, COLS))
 
 
-def menu(unicode, time=0.01):
+def mark_check(unicode, success):
+    if len(unicode) > 1:
+        return success
+    else:
+        return unicode[0]
+
+def menu(u, time=0.01):
     flush_puts("Choose option from menu:", time)
-    flush_puts("\t[{0}song{1}] Download Song".format(BGREEN, END), time)
-    flush_puts("\t[{0}album{1}] Download Album".format(BGREEN, END), time)
+    flush_puts("\t[{0}{1}{2}] Download Song"
+               .format(BGREEN, mark_check(u, "song"), END), time)
+    flush_puts("\t[{0}{1}{2}] Download Album"
+               .format(BGREEN, mark_check(u, "album"), END), time)
     flush_puts("\t[{0}{1}{2}] Download Playlist"
-               .format(BGREEN, unicode[-1], END), time)
-    flush_puts("\t[{0}help{1}] Print This Menu".format(BGREEN, END), time)
-    flush_puts("\t[{0}exit{1}] Exit IRS".format(BGREEN, END), time)
+               .format(BGREEN, mark_check(u, "list"), END), time)
+    flush_puts("\t[{0}{1}{2}] Print This Menu"
+               .format(BGREEN, mark_check(u, "help"), END), time)
+    flush_puts("\t[{0}{1}{2}] Exit IRS"
+               .format(BGREEN, mark_check(u, "exit"), END), time)
     print("")
 
 
@@ -326,7 +336,7 @@ def console(ripper):
     banner()
     print(END)
     if ripper.authorized is True:
-        unicode = [BGREEN + "✔" + END, "list"]
+        unicode = [BGREEN + "✔" + END, ""]
     elif ripper.authorized is False:
         unicode = [BRED + "✘" + END]
     flush_puts("[{0}] Authenticated with Spotify".format(unicode[0]))

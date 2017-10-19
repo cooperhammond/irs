@@ -91,7 +91,8 @@ class Ripper:
             # those flaws for being exclusive to them.
             # And if those flaws are really enough to turn you off of them,
             # then you *probably* don't really want to be with them anyways.
-            # Either way, it's up to you. (I'd just ignore this)
+            # Either way, it's up to you. (I'd just ignore this code.
+            # It's so terrible and it doesn't even work for playlists)
 
             if Config.parse_organize(self):
                 if self.type in ("album", "song"):
