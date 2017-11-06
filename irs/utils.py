@@ -204,7 +204,10 @@ class DLog:
 # ===========================================
 #              (It's for the CLI)
 
-COLS = int(os.popen('tput cols').read().strip("\n"))
+try:
+    COLS = int(os.popen('tput cols').read().strip("\n"))
+except:
+    COLS = 80
 
 if sys.version_info[0] == 2:
     def input(string):
