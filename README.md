@@ -20,6 +20,7 @@ Works with Python 2 and 3.
 ```
 $ sudo pip install irs
 $ irs --setup
+$ pip install youtube_dl # Only if on windows
 ```
 
 **You will need to have some Spotify tokens, the instructions to set them up are [here](https://github.com/kepoorhampond/irs#spotify-tokens).**
