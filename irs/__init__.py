@@ -1,5 +1,6 @@
 import os
 import argparse
+import colorama
 from .setup_binaries import setup
 
 parser = argparse.ArgumentParser()

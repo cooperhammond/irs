@@ -42,9 +42,6 @@ directory to place files in.")
     parser.add_argument("-o", "--organize", dest="organize",
                         action="store_true", help="Organize downloaded files.")
 
-    # Config
-    parser.add_argument("-c", "--config", dest="config", action="store_true",
-                        help="Display path to config file.")
 
     args = parser.parse_args(Config.parse_default_flags())
 

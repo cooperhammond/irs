@@ -59,7 +59,8 @@ class Ripper:
                                                                   CLIENT_SECRET
                                                                   # Stupid lint
                                                                   # and stupid
-                                                                  # long var
+                                                                  # long
+                                                                  # variable
                                                                   # names
                                                                   )
 

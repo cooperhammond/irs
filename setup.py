@@ -15,7 +15,9 @@ setup(
         'requests',
         'spotipy',
         'ydl-binaries',
-        'splinter'
+        'splinter',
+        'colorama',
+        'draftlog',
     ],
     entry_points = {
         'console_scripts': ['irs = irs.cli:main'],
