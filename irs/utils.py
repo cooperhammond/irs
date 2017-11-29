@@ -393,46 +393,47 @@ class FancyPrinting:
 
         if self.media.type == "song":
             song = self.media.contents[0]
-            self.title = (BYELLOW + "{0}  " + DIM + "{1}  ")
-                          .format(song["artist"], song["album"])
+            self.title = (BYELLOW + "{0}  " + DIM + "{1}  "
+                          ).format(song["artist"], song["album"])
         elif self.media.type in ("playlist", "album"):
             data = self.media["list_data"]
-            self.title = (YELLOW + "Playlist: " + BOLD + "{0}  " + DIM + "{2}  ")
-                          .format(data["list_title"], data["user-or-artist"])
+            self.title = (YELLOW + "Playlist: " + BOLD + "{0}  " + DIM + "{2}  "
+                          ).format(data["list_title"], data["user-or-artist"])
 
     def start(self):
         loader_draft = self.draft.log()
         loader_draft.set_interval(self.loader_interval, 0.05, loader=True)
 
-        # TODO: Get the logs to start w/ diff content depending on media type
         for song in self.media["contents"]:
             if self.media.type == "song":
                 self.media_drafts.append(self.draft.log(
-                    BYELLOW + song["title"] + "\t"
+                    self.format_song(song["title"], "Queued")
                 ))
             elif self.media.type == "playlist":
                 self.media_drafts.append(self.draft.log(
-
+                    self.format_song(song["title"], "Queued")
                 ))
             elif self.media.type == "album":
                 self.media_drafts.append(self.draft.log(
-
+            
                 ))
 
     def loader_interval(self):
         if self.frame > len(self.frames) - 2:
             self.frame = -1
         self.frame += 1
-        return (BCYAN + "{0} " + END + self.title + END + BCYAN + " {0}" + END)
-                .format(self.frames[self.frame])
+        return (BCYAN + "{0} " + END + self.title + END + BCYAN + " {0}" + END
+                ).format(self.frames[self.frame])
 
-    # TODO:
-    # def install_progress(package, step, finished=False):
-    # spaces = " " * (15 - len(package))
-    # if finished:
-    #    return DIM + BBLUE + " > " + BYELLOW + package + spaces + BGREEN + "Installed" + END
-    # else:
-    #    return BBLUE + " > " + BYELLOW + package + spaces + BLUE + step + END
+    def format_song(self, s, step, finished=False): # s = song name/song data
+        if type(s) is list:
+            if sum(s, key=len) # Make sure this works
+
+        spaces = " " * (20 - len(s))
+        if finished:
+            return DIM + BBLUE + " > " + BYELLOW + s + spaces + BGREEN + step + END
+        else:
+            return BBLUE + " > " + BYELLOW + s + spaces + BLUE + step + END
 
 
 # ===========
