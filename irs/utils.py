@@ -22,6 +22,8 @@ if sys.version_info[0] == 2:
 else:
     from irs.config import CONFIG
 
+# CLI
+import draftlog
 
 # ==================
 # Static Method Hook
@@ -269,8 +271,9 @@ def flush_puts(msg, time=0.01):
     print("")
 
 
-BOLD = code(1)
 END = code(0)
+BOLD = code(1)
+DIM = code(2)
 RED = code(31)
 GREEN = code(32)
 YELLOW = code(33)
@@ -370,20 +373,48 @@ def console(ripper):
             sys.exit(0)
 
 
-"""
-# =====================
-# Config File and Flags
-# =====================
+class FancyPrinting:
+    def __init__(self, media):
+        # `media` takes a dict:
+        # {
+        #   "type": <song,playlist,album>,
+        #   "list-data": {"list_title": <x>, "user-or-artist": <x>},
+        #   "contents": [{"title": <x>, "artist": <x>, "album": <x>}, {...}, ...]
+        # }
+        self.draft = draftlog.inject()
+        self.frames = "⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏".split(" ")
+        self.frame = -1
 
-def check_sources(ripper, key, default=None, environment=False, where=None):
-    if where is not None:
-        tmp_args = ripper.args.get(where)
-    else:
-        tmp_args = ripper.args
+        self.media_drafts = []
 
-    if tmp_args.get(key):
-        return tmp_args.get(key)
-"""
+        self.songs = []
+        self.phrases = []
+        self.media = media
+
+        if self.media.type == "song":
+            song = self.media.contents[0]
+            self.title = (BYELLOW + "{0}  " + END + YELLOW + "{1}  " + DIM + "{2}  ")
+                          .format(song["title"], song["artist"], song["album"])
+        elif self.media.type in ("playlist", "album"):
+            data = self.media["list_data"]
+            self.title = (YELLOW + "Playlist: " + BOLD + "{0}  " + DIM + "{2}  ")
+                          .format(data["list_title"], data["user-or-artist"])
+
+    def start(self):
+        loader_draft = self.draft.log()
+        loader_draft.set_interval(self.loader_interval, 0.05, loader=True)
+
+        # TODO: Get the logs to start w/ diff content depending on media type
+        # for song in self.media["contents"]:
+        #    self.media_drafts.append(self.draft.log(song["title"]))
+
+
+    def loader_interval(self):
+        if self.frame > len(self.frames) - 2:
+            self.frame = -1
+        self.frame += 1
+        return (BCYAN + "{0} " + END + self.title + END + BCYAN + " {0}" + END)
+                .format(self.frames[self.frame])
 
 
 # ===========
@@ -451,6 +482,9 @@ class Config:
         if exact in (True, False):
             return exact
 
+    def parse_fprint(ripper): # fprint: fancy print
+        fprint = check_sources(ripper, "fancy_print")
+        return fprint
 
 
 #==============

@@ -47,6 +47,10 @@ class Ripper:
                 "list": '{0}: "{1}" by "{2}"',
                 "song": 'Downloading "{0}" by "{1}"',
                 "converting": "Converting to mp3 ...",
+                "list-fail": "Could not find any lists.",
+                "bypass-captcha": "Trying to bypass google captcha",
+                "list-no-user-found": "No user was found by that name",
+                "metadata-fail": "Could not find any metadata."
             }
         if self.args["hook-text"].get("converting") is not None:
             CONFIG["converting"] = self.args["hook-text"]["converting"]
@@ -136,7 +140,8 @@ class Ripper:
     def find_yt_url(self, song=None, artist=None, additional_search=None, caught_by_google=False, first=False, tries=0):
         if additional_search is None:
             additional_search = Config.parse_search_terms(self)
-            print(str(self.args["hook-text"].get("youtube")))
+            if Config.parse_fprint(self) == False:
+                print(str(self.args["hook-text"].get("youtube")))
 
         try:
             if not song:
@@ -231,7 +236,7 @@ album  row  at  @  session  how to  npr music  reimagined  hr version".split("  
         except TypeError:
             if caught_by_google is not True:
                 # Assuming Google catches you trying to search youtube for music ;)
-                print("Trying to bypass google captcha.")
+                print(self.args["hook-text"]["bypass-captcha"])
                 return self.find_yt_url(song=song, artist=artist, additional_search=additional_search, caught_by_google=True, tries=tries + 1)
             elif caught_by_google is True and first is not True:
                 return self.find_yt_url(song, artist, additional_search, caught_by_google, first=True, tries=tries + 1)
@@ -268,7 +273,7 @@ with init, or in method arguments.")
             try:
                 list_of_lists = self.spotify.user_playlists(username)["items"]
             except spotipy.client.SpotifyException:
-                print("No user was found by that name.")
+                print(self.args["hook-text"]["list-no-user-found"])
                 return False
 
         if len(list_of_lists) > 0:
@@ -308,9 +313,10 @@ with init, or in method arguments.")
             if the_list is not None:
                 YdlUtils.clear_line()
 
-                print(self.args["hook-text"].get("list")
-                      .format(type.title(), the_list["name"].encode("utf-8"),
-                      the_list["artists"][0]["name"].encode("utf-8")))
+                if Config.parse_fprint(self) == False:
+                    print(self.args["hook-text"].get("list")
+                          .format(type.title(), the_list["name"].encode("utf-8"),
+                          the_list["artists"][0]["name"].encode("utf-8")))
 
                 compilation = ""
                 if type == "album":
@@ -358,7 +364,7 @@ with init, or in method arguments.")
                 return locations
                 # return self.post_processing(locations)
 
-        print("Could not find any lists.")
+        print(self.args["hook-text"]["list-fail"])
         return False
 
     def list(self, list_data):
@@ -475,7 +481,7 @@ init, or in method arguments.")
             m.add_tag("compilation",    data["compilation"])
             m.add_album_art(str(data["album_art"]))
         else:
-            print("Could not find metadata.")
+            print(self.args["hook-text"]["metadata-fail"])
             m.add_tag("title",          song)
             m.add_tag("artist",         artist)
 
