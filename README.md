@@ -68,7 +68,7 @@ $ irs -p "Best Nirvana"
 
 ## Spotify Tokens
 
-To download metadata through spotify, you'll want to head to their Dev Apps page, [here](https://developer.spotify.com/my-applications/). After doing that you'll want to create a new app. Name it whatever you want and then once you've done that, find the `Client ID` and `Client Secret` keys. You'll want to take those keys and paste them into your system's environment variables as `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET`, correspondingly. Viola! You can now download metadata with IRS!
+To download metadata through spotify, you'll want to head to their Dev Apps page, [here](https://developer.spotify.com/my-applications/). After doing that you'll want to create a new app. Name it whatever you want and then once you've done that, find the `Client ID` and `Client Secret` keys. You'll want to take those keys and paste them into your system's environment variables as `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET`, correspondingly. Voilà! You can now download metadata with IRS!
 
 ## Metadata
 
