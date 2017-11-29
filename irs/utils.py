@@ -393,8 +393,8 @@ class FancyPrinting:
 
         if self.media.type == "song":
             song = self.media.contents[0]
-            self.title = (BYELLOW + "{0}  " + END + YELLOW + "{1}  " + DIM + "{2}  ")
-                          .format(song["title"], song["artist"], song["album"])
+            self.title = (BYELLOW + "{0}  " + DIM + "{1}  ")
+                          .format(song["artist"], song["album"])
         elif self.media.type in ("playlist", "album"):
             data = self.media["list_data"]
             self.title = (YELLOW + "Playlist: " + BOLD + "{0}  " + DIM + "{2}  ")
@@ -405,9 +405,19 @@ class FancyPrinting:
         loader_draft.set_interval(self.loader_interval, 0.05, loader=True)
 
         # TODO: Get the logs to start w/ diff content depending on media type
-        # for song in self.media["contents"]:
-        #    self.media_drafts.append(self.draft.log(song["title"]))
+        for song in self.media["contents"]:
+            if self.media.type == "song":
+                self.media_drafts.append(self.draft.log(
+                    BYELLOW + song["title"] + "\t"
+                ))
+            elif self.media.type == "playlist":
+                self.media_drafts.append(self.draft.log(
 
+                ))
+            elif self.media.type == "album":
+                self.media_drafts.append(self.draft.log(
+
+                ))
 
     def loader_interval(self):
         if self.frame > len(self.frames) - 2:
@@ -415,6 +425,14 @@ class FancyPrinting:
         self.frame += 1
         return (BCYAN + "{0} " + END + self.title + END + BCYAN + " {0}" + END)
                 .format(self.frames[self.frame])
+
+    # TODO:
+    # def install_progress(package, step, finished=False):
+    # spaces = " " * (15 - len(package))
+    # if finished:
+    #    return DIM + BBLUE + " > " + BYELLOW + package + spaces + BGREEN + "Installed" + END
+    # else:
+    #    return BBLUE + " > " + BYELLOW + package + spaces + BLUE + step + END
 
 
 # ===========
