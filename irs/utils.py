@@ -415,7 +415,7 @@ class FancyPrinting:
                 ))
             elif self.media.type == "album":
                 self.media_drafts.append(self.draft.log(
-            
+
                 ))
 
     def loader_interval(self):
@@ -427,7 +427,11 @@ class FancyPrinting:
 
     def format_song(self, s, step, finished=False): # s = song name/song data
         if type(s) is list:
-            if sum(s, key=len) # Make sure this works
+            if sum(len(no_colors(s_)) for s_ in s) >= int(COLS * 0.6):
+                allowed_length = int((COLS * 0.6) / len(s))
+                for i, s_ in enumerate(s):
+                    # TODO: replace total contents without color with ones with color and `...`
+
 
         spaces = " " * (20 - len(s))
         if finished:
