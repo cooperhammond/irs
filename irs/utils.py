@@ -430,8 +430,8 @@ class FancyPrinting:
             if sum(len(no_colors(s_)) for s_ in s) >= int(COLS * 0.6):
                 allowed_length = int((COLS * 0.6) / len(s))
                 for i, s_ in enumerate(s):
-                    # TODO: replace total contents without color with ones with color and `...`
-
+                    s[i] = s_.replace(no_colors(s_), no_colors(s_)[allowed_length:] + "...")
+        elif type(s) is str:
 
         spaces = " " * (20 - len(s))
         if finished:
