@@ -405,18 +405,19 @@ class FancyPrinting:
         loader_draft.set_interval(self.loader_interval, 0.05, loader=True)
 
         for song in self.media["contents"]:
-            if self.media.type == "song":
+            if self.media.type in ("song", "album"):
                 self.media_drafts.append(self.draft.log(
                     self.format_song(song["title"], "Queued")
                 ))
             elif self.media.type == "playlist":
                 self.media_drafts.append(self.draft.log(
-                    self.format_song(song["title"], "Queued")
+                    self.format_song(
+                        [song["title"], DIM + song["artist"]], "Queued"
+                    )
                 ))
-            elif self.media.type == "album":
-                self.media_drafts.append(self.draft.log(
-
-                ))
+                
+    def update_line(self, line_index, new_status):
+        pass
 
     def loader_interval(self):
         if self.frame > len(self.frames) - 2:
@@ -426,18 +427,22 @@ class FancyPrinting:
                 ).format(self.frames[self.frame])
 
     def format_song(self, s, step, finished=False): # s = song name/song data
+        allowed_length = int((COLS * 0.6) / len(s))
         if type(s) is list:
             if sum(len(no_colors(s_)) for s_ in s) >= int(COLS * 0.6):
-                allowed_length = int((COLS * 0.6) / len(s))
                 for i, s_ in enumerate(s):
-                    s[i] = s_.replace(no_colors(s_), no_colors(s_)[allowed_length:] + "...")
+                    if len(s_) > allowed_length:
+                        s[i] = s_.replace(no_colors(s_), no_colors(s_)[allowed_length:] + "...")
+            s = "  ".join(s)
         elif type(s) is str:
+            if len(s) > allowed_length:
+                s = s.replace(no_colors(s), no_colors(s)[allowed_length:] + "...")
 
-        spaces = " " * (20 - len(s))
+        spaces = " " * ((COLS * 0.7) - len(no_colors(s)))
         if finished:
-            return DIM + BBLUE + " > " + BYELLOW + s + spaces + BGREEN + step + END
+            return DIM + BBLUE + " > " + BYELLOW + s + END + spaces + DIM + BGREEN + step + END
         else:
-            return BBLUE + " > " + BYELLOW + s + spaces + BLUE + step + END
+            return BBLUE + " > " + BYELLOW + s + END + spaces + BLUE + step + END
 
 
 # ===========
