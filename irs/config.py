@@ -8,6 +8,5 @@ if path.isfile(path.expanduser("~/.irs/config_.py")):
 
     CONFIG = config_.CONFIG
 else:
-    config = open("irs/config_preset", "r").read()
-    print(config)
+    config = open("irs/config_preset.py", "r").read()
     CONFIG = eval(config)
