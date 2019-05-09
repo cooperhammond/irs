@@ -121,7 +121,9 @@ def _simplify(string):
     :param string: a string to be modified
     :rtype: the modified string
     """
-    return re.sub(r'[^a-zA-Z0-9]+', '', string)
+    if type(string) == bytes:
+        string = string.decode()
+    return re.sub(r'[^a-zA-Z0-9]+', '', string.lower())
 
 
 def _count_garbage_phrases(video_title, song_title):
