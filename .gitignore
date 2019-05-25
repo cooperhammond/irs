@@ -25,3 +25,6 @@ update_pypi_and_github.py
 
 # Temporarily built binaries
 ffmpeg binaries/
+
+# vscode work space
+.vscode/

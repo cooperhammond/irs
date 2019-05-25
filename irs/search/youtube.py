@@ -14,36 +14,22 @@ else:
 from bs4 import BeautifulSoup
 
 
-def find_url(args):
+def find_url(song_title, artist_name, search_terms=None, caught_by_google=False, download_first=False):
     """Finds the youtube video url for the requested song. The youtube 
         query is constructed like this:
         "<song> <artist> <search terms>"
         so plugging in "Bohemian Rhapsody", "Queen", and "lyrics" would end
         up with a search for "Bohemian Rhapsody Queen lyrics" on youtube
-    :param args: A dictionary with the following possible arguments
-        :param-required song: song name
-        :param-required artist: artist name
-        :param search_terms: any additional search terms you may want to
-            add to the search query
-        :param first: a boolean, if true, just returns the first youtube 
-            search result
-        :param caught_by_google: a boolean, if not false or none, turns on
-            the captcha catcher
-        :param download_first: a boolean, if true, downloads first video
-            that youtube returnssearch query
+    :param-required song: song name
+    :param-required artist: artist name
+    :param search_terms: any additional search terms you may want to
+        add to the search query
+    :param caught_by_google: a boolean, if not false or none, turns on
+        the captcha catcher
+    :param download_first: a boolean, if true, downloads first video
+        that youtube returns
     :rtype: A string of the youtube url for the song
     """
-    args = args if type(args) == dict else {}
-
-    song_title = args.get("song")
-    artist_name = args.get("artist")
-    search_terms = args.get("search_terms")
-
-    first = args.get("first")
-    caught_by_google = args.get("caught_by_google")
-    download_first = args.get("download_first")
-
-    total_search_tries = args.get("total_search_tries")
 
     query = artist_name + " " + song_title
     if search_terms:
@@ -74,7 +60,7 @@ def find_url(args):
     if len(results) <= 0:
         raise Exception('There were no search results for "{}"'.format(query))
 
-    if first == True:
+    if download_first == True:
         return "https://youtube.com" + results[0]["href"]
 
     scores = []

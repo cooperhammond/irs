@@ -2,13 +2,13 @@ from setuptools import setup
 
 setup(
     name =         'irs',
-    version =      '6.7.7',
-    description =  'A music downloader that just gets metadata.',
+    version =      '7.0.0',
+    description =  'A music downloader that gets metadata too.',
     url =          'https://github.com/kepoorhampond/irs',
     author =       'Kepoor Hampond',
     author_email = 'kepoorh@gmail.com',
     license =      'GPL',
-    packages =     ['irs'],
+    packages =     ['irs', 'irs.search', 'irs.interact', 'irs.glue'],
     install_requires = [
         'bs4',
         'mutagen',
@@ -18,6 +18,6 @@ setup(
         'splinter'
     ],
     entry_points = {
-        'console_scripts': ['irs = irs.cli:main'],
+        'console_scripts': ['irs = irs.glue.cli:main'],
     },
 )
