@@ -27,6 +27,7 @@ class SpotifyList(object):
             song = Song(s["name"], s["artists"][0]["name"])
             song.provide_spotify(self.spotify_searcher)
             song.provide_metadata(self.spotify_searcher.song(s["uri"]))
+            song.get_relevant_tags()
             self.__set_organization(index, song)
             song.grab_it()
 

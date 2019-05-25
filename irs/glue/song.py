@@ -18,6 +18,7 @@ class Song(object):
 
         self.metadata = None
         self.tags = {}
+        self.parsed_tags = False
 
         self.file_name = song_title + ".mp3"
         self.end_file_name = None
@@ -35,7 +36,7 @@ class Song(object):
 
         self.metadata = self.__parse_data()
 
-        self.tags = self.__get_relevant_tags(self.tags, self.metadata)
+        self.tags = self.get_relevant_tags()
 
         print("Searching youtube ...")
         song_url = youtube.find_url(self.tags["title"], self.tags["artist"])
@@ -109,6 +110,11 @@ class Song(object):
         return self
 
     def set_standard_organization(self):
+        """Sets standard organization for the file, which is
+        root-music-dir>artist-folder>album-folder>song
+        """
+        if not self.parsed_tags:
+            self.tags = self.get_relevant_tags()
         self.end_location = os.path.join(
             os.environ.get("irs_music_dir"), self.tags["artist"],
             self.tags["album"]
@@ -116,6 +122,36 @@ class Song(object):
         self.end_file_name = "{} - {}.mp3".format(
             self.tags["tracknumber"], self.tags["title"]
         )
+
+    def get_relevant_tags(self):
+        """Sorts relevant info from the spotipy metadata. Merges with any 
+            provided tags from provide_tags method.
+        :rtype: a dict, parsed tags
+        """
+        # TODO: come up with fallback solution if there's no metadata found
+        # follows this pattern:
+        # if this does not exist:
+        #   set the thing that doesn't exist to a
+        #   specific value from the metadata dict
+        tags = self.tags
+        metadata = self.metadata
+
+        if not tags.get("title"):
+            tags["title"] = metadata["name"]
+        if not tags.get("artist"):
+            tags["artist"] = metadata["artists"][0]["name"]
+        if not tags.get("album"):
+            tags["album"] = metadata["album"]["name"]
+        if not tags.get("tracknumber"):
+            tags["tracknumber"] = str(metadata["track_number"])
+        if not tags.get("albumart"):
+            tags["albumart"] = metadata["album"]["images"][0]["url"]
+        if not tags.get("genre") and self.spotify_searcher:
+            tags["genre"] = string.capwords(self.spotify_searcher.artist(
+                metadata["artists"][0]["uri"])["genres"][0])
+
+        self.tags = tags
+        return self.tags
 
     def __organize(self):
         """Based off of self.current_location, self.end_location, and self.
@@ -138,34 +174,6 @@ class Song(object):
             self.current_location + "/" + self.file_name,
             self.end_location + "/" + self.end_file_name,
         )
-
-    def __get_relevant_tags(self, tags, metadata):
-        """Sorts relevant info from the spotipy metadata. Merges with any 
-            provided tags from provide_tags method.
-        :param tags: any tags that have been already provided
-        :param metadata: a spotipy dict of info about the song
-        :rtype: a dict, parsed tags
-        """
-        # TODO: come up with fallback solution if there's no metadata found
-        # follows this pattern:
-        # if this does not exist:
-        #   set the thing that doesn't exist to a 
-        #   specific value from the metadata dict
-        if not tags.get("title"):
-            tags["title"] = metadata["name"]
-        if not tags.get("artist"):
-            tags["artist"] = metadata["artists"][0]["name"]
-        if not tags.get("album"):
-            tags["album"] = metadata["album"]["name"]
-        if not tags.get("tracknumber"):
-            tags["tracknumber"] = str(metadata["track_number"])
-        if not tags.get("albumart"):
-            tags["albumart"] = metadata["album"]["images"][0]["url"]
-        if not tags.get("genre") and self.spotify_searcher:
-            tags["genre"] = string.capwords(self.spotify_searcher.artist(
-                metadata["artists"][0]["uri"])["genres"][0])
-
-        return tags
 
     def __parse_data(self):
         """If a spotify searcher has not been provided, create one."""
