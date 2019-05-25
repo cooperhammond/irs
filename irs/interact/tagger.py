@@ -11,7 +11,7 @@ from mutagen.easyid3 import EasyID3, EasyID3KeyError
 from mutagen.id3 import APIC, ID3
 
 
-class Tagger:
+class Tagger(object):
     """Attaches ID3 tags to MP3 files."""
 
     def __init__(self, location):
