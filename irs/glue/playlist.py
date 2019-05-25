@@ -32,7 +32,7 @@ class Playlist(SpotifyList):
         elif self.organization == "single-folder":
             # reindex the file names in order to keep them in alphabetical order
             song.provide_new_file_name("{} - {}.mp3".format(
-                song_index, song.tags["title"]
+                song_index + 1, song.tags["title"]
             ))
             song.provide_new_location(os.path.join(
                 os.getcwd(), self.list_title
