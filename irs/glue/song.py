@@ -38,6 +38,8 @@ class Song(object):
 
         self.tags = self.get_relevant_tags()
 
+        print("'{}' by {}:".format(self.tags["title"], self.tags["artist"]))
+
         print("Searching youtube ...")
         song_url = youtube.find_url(self.tags["title"], self.tags["artist"])
 
