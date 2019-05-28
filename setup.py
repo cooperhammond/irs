@@ -12,10 +12,9 @@ setup(
     install_requires = [
         'bs4',
         'mutagen',
-        'requests',
+        'argparse'
         'spotipy',
         'ydl-binaries',
-        'splinter'
     ],
     entry_points = {
         'console_scripts': ['irs = irs.glue.cli:main'],
