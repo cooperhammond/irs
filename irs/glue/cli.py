@@ -28,7 +28,7 @@ def main():
         help="Specify user name for playlist. Must be used with -A/--album")
 
     parser.add_argument("-o", "--organization", dest="organization", 
-        default="standard", help="Specify type of organization for list."
+        default="single-folder", help="Specify type of organization for list."
         "Used when downloading spotify playlist/album")
 
     args = parser.parse_args()
