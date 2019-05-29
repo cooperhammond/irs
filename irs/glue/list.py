@@ -1,3 +1,4 @@
+import sys
 import abc
 
 from ..search import spotify

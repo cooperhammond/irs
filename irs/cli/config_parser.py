@@ -9,7 +9,7 @@ def parse_config():
 
     home = os.environ.get("HOME") or os.path.expanduser("~/")
 
-    check_for_and_set("irs_config_dir", home + "/.irs", None)
+    check_for_and_set("irs_config_dir", home + "/.irs", ".irs/")
 
     check_for = [home + "/.irs/config.yml", home + "/.irs/bin/ffmpeg", 
         home + "/.irs/bin/ffprobe"]
