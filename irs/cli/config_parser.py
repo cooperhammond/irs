@@ -7,9 +7,10 @@ import yaml
 def parse_config():
     """Parses config using environment variables."""
 
-    check_for_and_set("irs_config_dir", os.environ["HOME"] + "/.irs", None)
+    home = os.environ.get("HOME") or os.path.expanduser("~/")
 
-    home = os.environ["HOME"]
+    check_for_and_set("irs_config_dir", home + "/.irs", None)
+
     check_for = [home + "/.irs/config.yml", home + "/.irs/bin/ffmpeg", 
         home + "/.irs/bin/ffprobe"]
 
@@ -33,7 +34,7 @@ def parse_config():
         "SPOTIFY_KEYS").get("CLIENT_SECRET"), None)
 
     check_for_and_set("irs_music_dir", os.path.expanduser(config.get("music_directory")), 
-        os.environ["HOME"] + "/Music")
+        home + "/Music")
     check_for_and_set("irs_ffmpeg_dir", os.environ["irs_config_dir"] + "/bin", None)
 
 
