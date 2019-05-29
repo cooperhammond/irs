@@ -1,4 +1,5 @@
 import os
+import sys
 import re
 
 import spotipy
@@ -46,7 +47,8 @@ class SpotifySearcher(object):
             return self.find_song(song_title, artist_name, 
                 offset=offset + limit)
         else:
-            print("There were no songs found by that name with that artist")
+            print("There were no songs found by that name with that artist.")
+            sys.exit(1)
 
     def find_album(self, album_title, artist_name=None, limit=50, offset=0):
         """Searches spotify for an album and grabs its contents and metadata
@@ -67,7 +69,8 @@ class SpotifySearcher(object):
             return self.find_album(album_title, artist_name, 
                 offset=offset + limit)
         else:
-            print("There were no albums found by that name with that artist")
+            print("There were no albums found by that name with that artist.")
+            sys.exit(1)
 
     def find_playlist(self, playlist_title, username, limit=50, offset=0):
         """Searches spotify for a playlist and grabs its contents and metadata
@@ -87,6 +90,7 @@ class SpotifySearcher(object):
                 offset=offset + limit)
         else:
             print("There were no playlists by that name found.")
+            sys.exit(1)
 
     def artist(self, artist_uri):
         """Gets artist metadata from uri
