@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name =         'irs',
-    version =      '7.0.0',
+    version =      '7.0.1',
     description =  'A music downloader that gets metadata too.',
     url =          'https://github.com/kepoorhampond/irs',
     author =       'Kepoor Hampond',
@@ -16,7 +16,8 @@ setup(
         'argparse',     # CLI arg parsing
         'spotipy',      # Interfacing w/ Spotify API
         'ydl-binaries', # Downloading ffmpeg/ffprobe binaries
-        'pyyaml'        # Config files done simply
+        'pyyaml',       # Config files done simply
+        'youtube-dl'    # Download youtube videos
     ],
     entry_points = {
         'console_scripts': ['irs = irs.cli.cli:main'],
