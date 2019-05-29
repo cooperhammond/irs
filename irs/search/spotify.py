@@ -1,11 +1,8 @@
+import os
 import re
 
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
-
-
-CLIENT_ID = 'e4198f6a3f7b48029366f22528b5dc66'
-CLIENT_SECRET = 'ba057d0621a5496bbb64edccf758bde5'
 
 
 class SpotifySearcher(object):
@@ -18,9 +15,9 @@ class SpotifySearcher(object):
 
         # TODO: remove these when you finish config files
         if not client_id:
-            client_id = 'e4198f6a3f7b48029366f22528b5dc66'
+            client_id = os.environ["SPOTIFY_CLIENT_ID"]
         if not client_secret:
-            client_secret = 'ba057d0621a5496bbb64edccf758bde5'
+            client_secret = os.environ["SPOTIFY_CLIENT_SECRET"]
 
         try:
             creds = SpotifyClientCredentials(client_id, client_secret)
