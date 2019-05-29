@@ -8,15 +8,17 @@ setup(
     author =       'Kepoor Hampond',
     author_email = 'kepoorh@gmail.com',
     license =      'GPL',
-    packages =     ['irs', 'irs.search', 'irs.interact', 'irs.glue'],
+    packages =     ['irs', 'irs.search', 'irs.interact', 'irs.glue', 
+        'irs.install', 'irs.cli'],
     install_requires = [
-        'bs4',
-        'mutagen',
-        'argparse'
-        'spotipy',
-        'ydl-binaries',
+        'bs4',          # HTML parsing
+        'mutagen',      # MP3 tags
+        'argparse',     # CLI arg parsing
+        'spotipy',      # Interfacing w/ Spotify API
+        'ydl-binaries', # Downloading ffmpeg/ffprobe binaries
+        'pyyaml'        # Config files done simply
     ],
     entry_points = {
-        'console_scripts': ['irs = irs.glue.cli:main'],
+        'console_scripts': ['irs = irs.cli.cli:main'],
     },
 )

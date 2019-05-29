@@ -185,7 +185,6 @@ class Song(object):
 
         """If metadata has not been provided, search for it."""
         if not self.metadata:
-            print("Searching for metadata ...")
             self.metadata = self.spotify_searcher.find_song(
                 self.song_title, self.artist_name
             )

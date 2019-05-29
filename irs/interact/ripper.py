@@ -1,3 +1,4 @@
+import os
 import sys
 import glob
 import shutil
@@ -22,7 +23,7 @@ def rip_from_url(video_url, output_name):
         'progress_hooks': [_download_hook],
         'output': "tmp_file",
         'prefer-ffmpeg': True,
-        #'ffmpeg_location': os.path.expanduser("~/.irs/bin/"),
+        'ffmpeg_location': os.environ["irs_ffmpeg_dir"],
     }
 
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
@@ -43,6 +44,7 @@ class _DownloadLogger(object):
         print(msg)
 
 
+# TODO: update the download log
 def _download_hook(d):
     if d['status'] == 'finished':
         print("Done!")
