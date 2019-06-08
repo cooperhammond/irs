@@ -1,0 +1,17 @@
+name: irs
+version: 0.1.0
+
+authors:
+  - Cooper Hammond <kepoorh@gmail.com>
+
+targets:
+  irs:
+    main: src/irs.cr
+
+crystal: 0.28.0
+
+license: MIT
+
+dependencies:
+  spotify:
+    github: marceloboeira/spotify.cr

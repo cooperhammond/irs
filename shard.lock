@@ -1,0 +1,6 @@
+version: 1.0
+shards:
+  spotify:
+    github: marceloboeira/spotify.cr
+    commit: 347727a4ebe4f3f4e55f6032de17cdd554a676bd
+
