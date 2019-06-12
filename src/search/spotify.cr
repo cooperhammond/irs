@@ -1,6 +1,6 @@
+require "http"
+require "json"
 require "base64"
-
-require "spotify"
 
 
 class SpotifySearcher
@@ -74,7 +74,8 @@ class SpotifySearcher
 
   end
   
-  # Generates url to run a GET request against
+  # Generates url to run a GET request against to the Spotify open API
+  # Returns a `String.`
   private def __generate_query(item_type : String, item_parameters : Hash,
   offset : Int32, limit : Int32)
     query = ""
@@ -106,6 +107,7 @@ class SpotifySearcher
 
   # Ranks the given items based off of the info from parameters.
   # Meant to find the item that the user desires.
+  # Returns an `Array` of `Array(Int32)` or [[3, 1], [...], ...]
   private def __rank_items(items : Array, parameters : Hash)
     points = [] of Array(Int32)
     index = 0
@@ -163,7 +165,7 @@ class SpotifySearcher
     end
   end
 
-  # Returns a parameter encoded for the spotify api
+  # Returns a `String` encoded for the spotify api
   #
   # ```
   # __query_encode("album", "A Night At The Opera")
@@ -176,10 +178,10 @@ class SpotifySearcher
 end
 
 
-puts SpotifySearcher.new()
-  .authorize("e4198f6a3f7b48029366f22528b5dc66", 
-             "ba057d0621a5496bbb64edccf758bde5")
-  .find_item("track", {
-    "name" => "Bohemian Rhapsody",
-    "artist" => "Queen"
-  })
+# puts SpotifySearcher.new()
+#   .authorize("e4198f6a3f7b48029366f22528b5dc66", 
+#              "ba057d0621a5496bbb64edccf758bde5")
+#   .find_item("album", {
+#     "name" => "A Night At The Opera",
+#     "artist" => "Queen"
+#   })
