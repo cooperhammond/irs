@@ -13,5 +13,5 @@ crystal: 0.28.0
 license: MIT
 
 dependencies:
-  spotify:
-    github: marceloboeira/spotify.cr
+     ydl_binaries:
+       github: cooperhammond/ydl-binaries
