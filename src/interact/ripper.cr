@@ -17,6 +17,8 @@ module Ripper
     # remove the extension that will be added on by ydl
     output_filename = output_filename.split(".")[..-2].join(".")
 
+    # TODO: update the logger for this. Explore overwriting stdout and 
+    # injecting/removing text
     options = {
       "--output" => %("#{output_filename}.%(ext)s"), # auto-add correct ext
       # "--quiet" => "",

@@ -11,6 +11,16 @@ module Youtube
     "yt-uix-tile-link yt-ui-ellipsis yt-ui-ellipsis-2 yt-uix-sessionlink      spf-link "
   ]
 
+  GARBAGE_PHRASES = [
+    "cover", "album", "live", "clean", "version", "full", "full album", "row",
+    "at", "@", "session", "how to", "npr music", "reimagined", "hr version",
+    "trailer"
+  ]
+
+  GOLDEN_PHRASES = [
+    "official video", "official music video"
+  ]
+
   # Finds a youtube url based off of the given information.
   # The query to youtube is constructed like this:
   #   "<song_name> <artist_name> <search terms>"
@@ -38,16 +48,16 @@ module Youtube
 
     return root + valid_nodes[0]["href"] if download_first
 
-    ranked = __rank_videos(song_name, artist_name, valid_nodes)
+    ranked = __rank_videos(song_name, artist_name, query, valid_nodes)
 
-    return root + valid_nodes[ranked[0][1]]["href"]
+    return root + valid_nodes[ranked[0]["index"]]["href"]
   end
 
   # Will rank videos according to their title and the user input
   # Returns an `Array` of Arrays each layed out like 
   # [<points>, <original index>].
-  private def __rank_videos(song_name, artist_name, nodes : Array(XML::Node))
-    points = [] of Array(Int32)
+  private def __rank_videos(song_name : String, artist_name : String, query : String, nodes : Array(XML::Node))
+    points = [] of Hash(String, Int32)
     index = 0
 
     nodes.each do |node|
@@ -55,12 +65,24 @@ module Youtube
 
       pts += __points_compare(song_name, node["title"])
       pts += __points_compare(artist_name, node["title"])
+      pts += __count_buzzphrases(query, node["title"])
 
-      points.push([pts, index])
+      points.push({
+        "points" => pts,
+        "index" => index
+      })
       index += 1
+
     end
 
-    points.sort!{ |a, b| b[0] <=> a[0] }
+    # Sort first by points and then by original index of the song
+    points.sort!{ |a, b| 
+      if b["points"] == a["points"]
+        a["index"] <=> b["index"]
+      else
+        b["points"] <=> a["points"]
+      end
+    }
 
     return points
   end
@@ -73,18 +95,50 @@ module Youtube
   #   return 1 pts.
   # Else, return 0 pts.
   private def __points_compare(item1 : String, item2 : String)
-    if item1.includes?(item2)
+    if item2.includes?(item1)
       return 3
     end
 
     item1 = item1.downcase.gsub(/[^a-z0-9]/, "")
     item2 = item2.downcase.gsub(/[^a-z0-9]/, "")
 
-    if item1.includes?(item2)
+    if item2.includes?(item1)
       return 1
     else
       return 0
     end
+  end
+
+  # Checks if there are any phrases in the title of the video that would 
+  # indicate audio having what we want.
+  # *video_name* is the title of the video, and *query* is what the user the
+  # program searched for. *query* is needed in order to make sure we're not 
+  # subtracting points from something that's naturally in the title
+  private def __count_buzzphrases(query : String, video_name : String)
+    good_phrases = 0
+    bad_phrases = 0
+
+    GOLDEN_PHRASES.each do |gold_phrase|
+      gold_phrase = gold_phrase.downcase.gsub(/[^a-z0-9]/, "")
+  
+      if query.downcase.gsub(/[^a-z0-9]/, "").includes?(gold_phrase)
+        next
+      elsif video_name.downcase.gsub(/[^a-z0-9]/, "").includes?(gold_phrase)
+        bad_phrases += 1
+      end
+    end
+
+    GARBAGE_PHRASES.each do |garbage_phrase|
+      garbage_phrase = garbage_phrase.downcase.gsub(/[^a-z0-9]/, "")
+
+      if query.downcase.gsub(/[^a-z0-9]/, "").includes?(garbage_phrase)
+        next
+      elsif video_name.downcase.gsub(/[^a-z0-9]/, "").includes?(garbage_phrase)
+        bad_phrases += 1
+      end
+    end
+
+    return good_phrases - bad_phrases
   end
 
   # Finds valid video links from a `HTTP::Client.get` request
