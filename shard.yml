@@ -13,5 +13,5 @@ crystal: 0.28.0
 license: MIT
 
 dependencies:
-     ydl_binaries:
-       github: cooperhammond/ydl-binaries
+  ydl_binaries:
+    github: cooperhammond/ydl-binaries
