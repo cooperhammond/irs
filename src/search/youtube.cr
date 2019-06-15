@@ -30,7 +30,8 @@ module Youtube
   # Youtube.find_url("Bohemian Rhapsody", "Queen")
   # => "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
   # ```
-  def find_url(song_name : String, artist_name : String, search_terms = "", download_first = false)
+  def find_url(song_name : String, artist_name : String, search_terms = "", 
+  download_first = false) : Nil
     query = (song_name + " " + artist_name + " " + search_terms).strip.gsub(" ", "+")
 
     url = "https://www.youtube.com/results?search_query=" + query 
@@ -56,7 +57,8 @@ module Youtube
   # Will rank videos according to their title and the user input
   # Returns an `Array` of Arrays each layed out like 
   # [<points>, <original index>].
-  private def __rank_videos(song_name : String, artist_name : String, query : String, nodes : Array(XML::Node))
+  private def __rank_videos(song_name : String, artist_name : String, 
+  query : String, nodes : Array(XML::Node)) : Array(Array(Int32))
     points = [] of Hash(String, Int32)
     index = 0
 
@@ -94,7 +96,7 @@ module Youtube
   # If after the items have been blanked, *item1* includes *item2*, 
   #   return 1 pts.
   # Else, return 0 pts.
-  private def __points_compare(item1 : String, item2 : String)
+  private def __points_compare(item1 : String, item2 : String) : Int32
     if item2.includes?(item1)
       return 3
     end
@@ -114,7 +116,7 @@ module Youtube
   # *video_name* is the title of the video, and *query* is what the user the
   # program searched for. *query* is needed in order to make sure we're not 
   # subtracting points from something that's naturally in the title
-  private def __count_buzzphrases(query : String, video_name : String)
+  private def __count_buzzphrases(query : String, video_name : String) : Int32
     good_phrases = 0
     bad_phrases = 0
 
@@ -124,7 +126,7 @@ module Youtube
       if query.downcase.gsub(/[^a-z0-9]/, "").includes?(gold_phrase)
         next
       elsif video_name.downcase.gsub(/[^a-z0-9]/, "").includes?(gold_phrase)
-        bad_phrases += 1
+        good_phrases += 1
       end
     end
 
@@ -143,7 +145,7 @@ module Youtube
 
   # Finds valid video links from a `HTTP::Client.get` request
   # Returns an `Array` of `XML::Node`
-  private def __get_video_link_nodes(doc : String)
+  private def __get_video_link_nodes(doc : String) : Array(XML::Node)
     nodes = XML.parse(doc).xpath_nodes("//a")
     valid_nodes = [] of XML::Node
 
@@ -158,7 +160,7 @@ module Youtube
 
   # Tests if the provided `XML::Node` has a valid link to a video
   # Returns a `Bool`
-  private def __video_link_node?(node : XML::Node)
+  private def __video_link_node?(node : XML::Node) : Bool
     # If this passes, then the node links to a playlist, not a video
     if node["href"]?
       return false if node["href"].includes?("&list=")

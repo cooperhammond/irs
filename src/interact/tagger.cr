@@ -15,11 +15,11 @@ class Tags
 
   end
 
-  def add_text_tag(key : String, value : String)
+  def add_text_tag(key : String, value : String) : Nil
     @query_args.push(%(-metadata #{key}="#{value}"))
   end
 
-  def add_album_art(image_location : String)
+  def add_album_art(image_location : String) : Nil
     if !File.exists?(image_location)
       raise "Image file not found at location: #{image_location}"
     end
@@ -33,10 +33,13 @@ class Tags
     @query_args.push(%(-metadata:s:v title="Album cover"))
   end
 
-  def save
-    @query_args.push(%("#{@filename}"))
+  def save : Nil
+    @query_args.push(%("_#{@filename}"))
     command = @BIN_LOC.to_s + "/ffmpeg " + @query_args.join(" ")
-    puts command
+    system command
+
+    File.delete(@filename)
+    File.rename("_" + @filename, @filename)
   end
 end
 

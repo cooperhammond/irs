@@ -16,7 +16,7 @@ class SpotifySearcher
   # ```
   # SpotifySearcher.new().authorize("XXXXXXXXXX", "XXXXXXXXXX")
   # ```
-  def authorize(client_id : String, client_secret : String)
+  def authorize(client_id : String, client_secret : String) : self
     auth_url = "https://accounts.spotify.com/api/token"
 
     headers = HTTP::Headers{
@@ -51,7 +51,8 @@ class SpotifySearcher
   # })
   # => {track metadata}
   # ```
-  def find_item(item_type : String, item_parameters : Hash, offset=0, limit=20)
+  def find_item(item_type : String, item_parameters : Hash, offset=0, 
+  limit=20) : JSON::Any?
 
     query = __generate_query(item_type, item_parameters, offset, limit)
 
@@ -70,14 +71,17 @@ class SpotifySearcher
 
     points = __rank_items(items, item_parameters)
 
-    return items[points[0][1]]
-
+    begin
+      return items[points[0][1]]
+    rescue IndexException
+      return nil
+    end
   end
   
   # Generates url to run a GET request against to the Spotify open API
   # Returns a `String.`
   private def __generate_query(item_type : String, item_parameters : Hash,
-  offset : Int32, limit : Int32)
+  offset : Int32, limit : Int32) : String
     query = ""
 
     # parameter keys to exclude in the api request. These values will be put
@@ -108,7 +112,8 @@ class SpotifySearcher
   # Ranks the given items based off of the info from parameters.
   # Meant to find the item that the user desires.
   # Returns an `Array` of `Array(Int32)` or [[3, 1], [...], ...]
-  private def __rank_items(items : Array, parameters : Hash)
+  private def __rank_items(items : Array, 
+  parameters : Hash) : Array(Array(Int32))
     points = [] of Array(Int32)
     index = 0
 
@@ -152,7 +157,7 @@ class SpotifySearcher
   # If the strings are the exact same, return 3 pts.
   # If *item1* includes *item2*, return 1 pt.
   # Else, return 0 pts.
-  private def __points_compare(item1 : String, item2 : String)
+  private def __points_compare(item1 : String, item2 : String) : Int32
     item1 = item1.downcase.gsub(/[^a-z0-9]/, "")
     item2 = item2.downcase.gsub(/[^a-z0-9]/, "")
 
@@ -171,7 +176,7 @@ class SpotifySearcher
   # __query_encode("album", "A Night At The Opera")
   # => "album:A+Night+At+The+Opera"
   # ```
-  private def __param_encode(key : String, value : String)
+  private def __param_encode(key : String, value : String) : String
     return key.gsub(" ", "+") + ":" + value.gsub(" ", "+") + "+"
   end
 

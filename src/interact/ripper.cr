@@ -11,7 +11,7 @@ module Ripper
   # Ripper.download_mp3("https://youtube.com/watch?v=0xnciFWAqa0", 
   #   "Queen/A Night At The Opera/Bohemian Rhapsody.mp3")
   # ```
-  def download_mp3(video_url : String, output_filename : String)
+  def download_mp3(video_url : String, output_filename : String) : Nil
     ydl_loc = BIN_LOC.join("youtube-dl")
     
     # remove the extension that will be added on by ydl
@@ -32,7 +32,7 @@ module Ripper
     options.keys.each do |option|
       command += " #{option} #{options[option]}"
     end
-    
+
     system(command)
   end
 
