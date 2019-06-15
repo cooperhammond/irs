@@ -32,7 +32,7 @@ module Ripper
     options.keys.each do |option|
       command += " #{option} #{options[option]}"
     end
-    
+
     system(command)
   end
 

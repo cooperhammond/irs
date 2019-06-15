@@ -1,9 +1,5 @@
 version: 1.0
 shards:
-  cr-taglib:
-    github: teknomunk/cr-taglib
-    commit: 5bfca75aaac31c0e4eee4c6e0d72c624af773c09
-
   ydl_binaries:
     github: cooperhammond/ydl-binaries
     commit: 8a622bf9d2c0b848db8d8db2f46f09334a1f03f8
