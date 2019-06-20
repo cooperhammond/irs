@@ -27,19 +27,22 @@ class SpotifySearcher
     payload = "grant_type=client_credentials"
 
     response = HTTP::Client.post(auth_url, headers: headers, form: payload)
+    __error_check(response)
 
-    if response.status_code == 200
-      access_token = JSON.parse(response.body)["access_token"]
-      
-      @access_header = HTTP::Headers{
-        "Authorization" => "Bearer #{access_token}"
-      }
+    access_token = JSON.parse(response.body)["access_token"]
+    
+    @access_header = HTTP::Headers{
+      "Authorization" => "Bearer #{access_token}"
+    }
 
-      @authorized = true
-
-    end
+    @authorized = true
 
     return self
+  end
+
+  # Check if the class is authorized or not
+  def authorized? : Bool
+    return @authorized
   end
 
   # Searches spotify with the specified parameters for the specified items
@@ -59,13 +62,7 @@ class SpotifySearcher
     url = @root_url.join("search?q=#{query}").to_s()
 
     response = HTTP::Client.get(url, headers: @access_header)
-
-    if response.status_code != 200
-      puts "There was an error with your request."
-      puts "Status code: #{response.status_code}"
-      puts "Reponse: \n#{response.body}"
-      return nil
-    end
+    __error_check(response)
 
     items = JSON.parse(response.body)[item_type + "s"]["items"].as_a
 
@@ -73,8 +70,34 @@ class SpotifySearcher
 
     begin
       return items[points[0][1]]
-    rescue IndexException
+    rescue IndexError
       return nil
+    end
+  end
+
+  # Find the genre of an artist based off of their id
+  #
+  # ```
+  # SpotifySearcher.new().authorize(...).find_genre("1dfeR4HaWDbWqFHLkxsg1d")
+  # ```
+  def find_genre(id : String) : String
+    url = @root_url.join("artists/#{id}").to_s()
+
+    response = HTTP::Client.get(url, headers: @access_header)
+    __error_check(response)
+
+    genre = JSON.parse(response.body)["genres"][0].to_s
+    genre = genre.split(" ").map { |x| x.capitalize }.join(" ")
+
+    return genre
+  end
+
+  # Checks for errors in HTTP requests and raises one if found
+  private def __error_check(response : HTTP::Client::Response) : Nil
+    if response.status_code != 200
+      raise("There was an error with your request.\n" +
+            "Status code: #{response.status_code}\n" + 
+            "Response: \n#{response.body}")
     end
   end
   
