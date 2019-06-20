@@ -27,7 +27,7 @@ class SpotifySearcher
     payload = "grant_type=client_credentials"
 
     response = HTTP::Client.post(auth_url, headers: headers, form: payload)
-    __error_check(response)
+    error_check(response)
 
     access_token = JSON.parse(response.body)["access_token"]
     
@@ -57,16 +57,16 @@ class SpotifySearcher
   def find_item(item_type : String, item_parameters : Hash, offset=0, 
   limit=20) : JSON::Any?
 
-    query = __generate_query(item_type, item_parameters, offset, limit)
+    query = generate_query(item_type, item_parameters, offset, limit)
 
     url = @root_url.join("search?q=#{query}").to_s()
 
     response = HTTP::Client.get(url, headers: @access_header)
-    __error_check(response)
+    error_check(response)
 
     items = JSON.parse(response.body)[item_type + "s"]["items"].as_a
 
-    points = __rank_items(items, item_parameters)
+    points = rank_items(items, item_parameters)
 
     begin
       return items[points[0][1]]
@@ -84,7 +84,7 @@ class SpotifySearcher
     url = @root_url.join("artists/#{id}").to_s()
 
     response = HTTP::Client.get(url, headers: @access_header)
-    __error_check(response)
+    error_check(response)
 
     genre = JSON.parse(response.body)["genres"][0].to_s
     genre = genre.split(" ").map { |x| x.capitalize }.join(" ")
@@ -93,7 +93,7 @@ class SpotifySearcher
   end
 
   # Checks for errors in HTTP requests and raises one if found
-  private def __error_check(response : HTTP::Client::Response) : Nil
+  private def error_check(response : HTTP::Client::Response) : Nil
     if response.status_code != 200
       raise("There was an error with your request.\n" +
             "Status code: #{response.status_code}\n" + 
@@ -103,7 +103,7 @@ class SpotifySearcher
   
   # Generates url to run a GET request against to the Spotify open API
   # Returns a `String.`
-  private def __generate_query(item_type : String, item_parameters : Hash,
+  private def generate_query(item_type : String, item_parameters : Hash,
   offset : Int32, limit : Int32) : String
     query = ""
 
@@ -114,7 +114,7 @@ class SpotifySearcher
     item_parameters.keys.each do |k|
       # This will map album, playlist, and track from the name key to the query
       if k == "name"
-        query += __param_encode(item_type, item_parameters[k])
+        query += param_encode(item_type, item_parameters[k])
 
       # check if the key is to be excluded
       elsif !query_exclude.includes?(k)
@@ -122,7 +122,7 @@ class SpotifySearcher
 
       # if it's none of the above, treat it normally
       else
-        query += __param_encode(k, item_parameters[k])
+        query += param_encode(k, item_parameters[k])
       end
     end
 
@@ -135,7 +135,7 @@ class SpotifySearcher
   # Ranks the given items based off of the info from parameters.
   # Meant to find the item that the user desires.
   # Returns an `Array` of `Array(Int32)` or [[3, 1], [...], ...]
-  private def __rank_items(items : Array, 
+  private def rank_items(items : Array,
   parameters : Hash) : Array(Array(Int32))
     points = [] of Array(Int32)
     index = 0
@@ -151,17 +151,17 @@ class SpotifySearcher
 
         # The key to compare to for artist
         if k == "artist"
-          pts += __points_compare(item["artists"][0]["name"].to_s, val)
+          pts += points_compare(item["artists"][0]["name"].to_s, val)
         end
 
         # The key to compare to for playlists
         if k == "username"
-          pts += __points_compare(item["owner"]["display_name"].to_s, val)
+          pts += points_compare(item["owner"]["display_name"].to_s, val)
         end
 
         # The key regardless of whether item is track, album,or playlist
         if k == "name"
-          pts += __points_compare(item["name"].to_s, val)
+          pts += points_compare(item["name"].to_s, val)
         end
       end
 
@@ -180,7 +180,7 @@ class SpotifySearcher
   # If the strings are the exact same, return 3 pts.
   # If *item1* includes *item2*, return 1 pt.
   # Else, return 0 pts.
-  private def __points_compare(item1 : String, item2 : String) : Int32
+  private def points_compare(item1 : String, item2 : String) : Int32
     item1 = item1.downcase.gsub(/[^a-z0-9]/, "")
     item2 = item2.downcase.gsub(/[^a-z0-9]/, "")
 
@@ -196,10 +196,10 @@ class SpotifySearcher
   # Returns a `String` encoded for the spotify api
   #
   # ```
-  # __query_encode("album", "A Night At The Opera")
+  # query_encode("album", "A Night At The Opera")
   # => "album:A+Night+At+The+Opera"
   # ```
-  private def __param_encode(key : String, value : String) : String
+  private def param_encode(key : String, value : String) : String
     return key.gsub(" ", "+") + ":" + value.gsub(" ", "+") + "+"
   end
 

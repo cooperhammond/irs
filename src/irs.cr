@@ -1,6 +1,8 @@
-# TODO: Write documentation for `IRS`
-module IRS
-  VERSION = "0.1.0"
+require "./bottle/cli"
 
-  # TODO: Put your code here
+def main
+  cli = CLI.new(ARGV)
+  cli.act_on_args()
 end
+
+main()
