@@ -38,7 +38,7 @@ module Youtube
 
     response = HTTP::Client.get(url)
 
-    valid_nodes = __get_video_link_nodes(response.body)
+    valid_nodes = get_video_link_nodes(response.body)
 
     if valid_nodes.size == 0
       puts "There were no results for that query."
@@ -49,7 +49,7 @@ module Youtube
 
     return root + valid_nodes[0]["href"] if download_first
 
-    ranked = __rank_videos(song_name, artist_name, query, valid_nodes)
+    ranked = rank_videos(song_name, artist_name, query, valid_nodes)
 
     begin
       return root + valid_nodes[ranked[0]["index"]]["href"]
@@ -64,7 +64,7 @@ module Youtube
   #   {"points" => x, "index" => x}, 
   #   ...  
   # ]
-  private def __rank_videos(song_name : String, artist_name : String, 
+  private def rank_videos(song_name : String, artist_name : String, 
   query : String, nodes : Array(XML::Node)) : Array(Hash(String, Int32))
     points = [] of Hash(String, Int32)
     index = 0
@@ -72,9 +72,9 @@ module Youtube
     nodes.each do |node|
       pts = 0
 
-      pts += __points_compare(song_name, node["title"])
-      pts += __points_compare(artist_name, node["title"])
-      pts += __count_buzzphrases(query, node["title"])
+      pts += points_compare(song_name, node["title"])
+      pts += points_compare(artist_name, node["title"])
+      pts += count_buzzphrases(query, node["title"])
 
       points.push({
         "points" => pts,
@@ -103,7 +103,7 @@ module Youtube
   # If after the items have been blanked, *item1* includes *item2*, 
   #   return 1 pts.
   # Else, return 0 pts.
-  private def __points_compare(item1 : String, item2 : String) : Int32
+  private def points_compare(item1 : String, item2 : String) : Int32
     if item2.includes?(item1)
       return 3
     end
@@ -123,7 +123,7 @@ module Youtube
   # *video_name* is the title of the video, and *query* is what the user the
   # program searched for. *query* is needed in order to make sure we're not 
   # subtracting points from something that's naturally in the title
-  private def __count_buzzphrases(query : String, video_name : String) : Int32
+  private def count_buzzphrases(query : String, video_name : String) : Int32
     good_phrases = 0
     bad_phrases = 0
 
@@ -152,12 +152,12 @@ module Youtube
 
   # Finds valid video links from a `HTTP::Client.get` request
   # Returns an `Array` of `XML::Node`
-  private def __get_video_link_nodes(doc : String) : Array(XML::Node)
+  private def get_video_link_nodes(doc : String) : Array(XML::Node)
     nodes = XML.parse(doc).xpath_nodes("//a")
     valid_nodes = [] of XML::Node
 
     nodes.each do |node|
-      if __video_link_node?(node)
+      if video_link_node?(node)
         valid_nodes.push(node)
       end
     end
@@ -167,7 +167,7 @@ module Youtube
 
   # Tests if the provided `XML::Node` has a valid link to a video
   # Returns a `Bool`
-  private def __video_link_node?(node : XML::Node) : Bool
+  private def video_link_node?(node : XML::Node) : Bool
     # If this passes, then the node links to a playlist, not a video
     if node["href"]?
       return false if node["href"].includes?("&list=")
