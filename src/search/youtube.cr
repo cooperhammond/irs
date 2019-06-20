@@ -31,7 +31,7 @@ module Youtube
   # => "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
   # ```
   def find_url(song_name : String, artist_name : String, search_terms = "", 
-  download_first = false) : Nil
+  download_first = false) : String?
     query = (song_name + " " + artist_name + " " + search_terms).strip.gsub(" ", "+")
 
     url = "https://www.youtube.com/results?search_query=" + query 
@@ -51,14 +51,21 @@ module Youtube
 
     ranked = __rank_videos(song_name, artist_name, query, valid_nodes)
 
-    return root + valid_nodes[ranked[0]["index"]]["href"]
+    begin
+      return root + valid_nodes[ranked[0]["index"]]["href"]
+    rescue IndexError
+      return nil
+    end
   end
 
   # Will rank videos according to their title and the user input
-  # Returns an `Array` of Arrays each layed out like 
-  # [<points>, <original index>].
+  # Return:
+  # [
+  #   {"points" => x, "index" => x}, 
+  #   ...  
+  # ]
   private def __rank_videos(song_name : String, artist_name : String, 
-  query : String, nodes : Array(XML::Node)) : Array(Array(Int32))
+  query : String, nodes : Array(XML::Node)) : Array(Hash(String, Int32))
     points = [] of Hash(String, Int32)
     index = 0
 
@@ -171,5 +178,6 @@ module Youtube
         return true if node["class"].includes?(valid_class)
       end
     end
+    return false
   end
 end
