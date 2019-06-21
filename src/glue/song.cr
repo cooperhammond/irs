@@ -33,6 +33,7 @@ class Song
     end
 
     if !@metadata
+      puts "Searching for metadata ..."
       @metadata = @spotify_searcher.find_item("track", {
         "name" => @song_name,
         "artist" => @artist_name
@@ -48,34 +49,35 @@ class Song
     data = @metadata.as(JSON::Any)
     filename = data["track_number"].to_s + " - #{data["name"].to_s}.mp3"
 
+    puts "Searching for url ..."
     url = Youtube.find_url(@song_name, @artist_name, search_terms: "lyrics")
 
     if !url 
-      raise("There was no link found on youtube for\n" + 
+      raise("There was no url found on youtube for\n" + 
           %("#{@song_name}" by "#{@artist_name}\n) +
           "Check your input and try again.")
     end
     
-
+    puts "Downloading video ..."
     Ripper.download_mp3(url.as(String), filename)
 
-    temp_albumart_filename = ".tempalbumart.jpg"
-    HTTP::Client.get(data["album"]["images"][0]["url"].to_s) do |response|
-      File.write(temp_albumart_filename, response.body_io)
-    end
+    # temp_albumart_filename = ".tempalbumart.jpg"
+    # HTTP::Client.get(data["album"]["images"][0]["url"].to_s) do |response|
+    #   File.write(temp_albumart_filename, response.body_io)
+    # end
 
-    tagger = Tags.new(filename)
-    tagger.add_album_art(temp_albumart_filename)
-    tagger.add_text_tag("title", data["name"].to_s)
-    tagger.add_text_tag("artist", data["artists"][0]["name"].to_s)
-    tagger.add_text_tag("album", data["album"]["name"].to_s)
-    tagger.add_text_tag("genre", 
-      @spotify_searcher.find_genre(data["artists"][0]["id"].to_s))
-    tagger.add_text_tag("track", data["track_number"].to_s)
-    tagger.add_text_tag("disc", data["disc_number"].to_s)
+    # tagger = Tags.new(filename)
+    # tagger.add_album_art(temp_albumart_filename)
+    # tagger.add_text_tag("title", data["name"].to_s)
+    # tagger.add_text_tag("artist", data["artists"][0]["name"].to_s)
+    # tagger.add_text_tag("album", data["album"]["name"].to_s)
+    # tagger.add_text_tag("genre", 
+    #   @spotify_searcher.find_genre(data["artists"][0]["id"].to_s))
+    # tagger.add_text_tag("track", data["track_number"].to_s)
+    # tagger.add_text_tag("disc", data["disc_number"].to_s)
 
-    tagger.save()
-    File.delete(temp_albumart_filename)
+    # tagger.save()
+    # File.delete(temp_albumart_filename)
 
   end
 

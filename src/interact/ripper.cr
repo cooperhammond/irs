@@ -1,3 +1,5 @@
+require "./logger"
+
 module Ripper
 
   extend self
@@ -11,7 +13,7 @@ module Ripper
   # Ripper.download_mp3("https://youtube.com/watch?v=0xnciFWAqa0", 
   #   "Queen/A Night At The Opera/Bohemian Rhapsody.mp3")
   # ```
-  def download_mp3(video_url : String, output_filename : String) : Bool
+  def download_mp3(video_url : String, output_filename : String)
     ydl_loc = BIN_LOC.join("youtube-dl")
     
     # remove the extension that will be added on by ydl
@@ -22,6 +24,7 @@ module Ripper
     options = {
       "--output" => %("#{output_filename}.%(ext)s"), # auto-add correct ext
       # "--quiet" => "",
+      "--verbose" => "",
       "--ffmpeg-location" => BIN_LOC,
       "--extract-audio" => "",
       "--audio-format" => "mp3",
@@ -33,11 +36,29 @@ module Ripper
       command += " #{option} #{options[option]}"
     end
 
-    if system(command)
-      return true
-    else
-      return false
+
+    l = Logger.new(command, ".ripper.log")
+    o = RipperOutputCensor.new
+
+    return l.start do |line, index|
+      o.censor_output(line, index)
     end
   end
 
+  private class RipperOutputCensor
+    @dl_status_index = 0
+
+    def censor_output(line : String, index : Int32)
+      case line
+      when .includes? "[download]"
+        if @dl_status_index != 0
+          print "\e[1A"
+          print "\e[0K\r"
+        end
+        puts line
+        @dl_status_index += 1
+      end
+    end
+
+  end
 end

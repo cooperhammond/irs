@@ -50,7 +50,7 @@ class CLI
   end
 
   def act_on_args
-    if @args["help"]?
+    if @args["help"]? || @args.keys.size == 0
       help
       exit
     elsif @args["version"]?
