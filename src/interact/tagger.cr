@@ -36,8 +36,10 @@ class Tags
   def save : Nil
     @query_args.push(%("_#{@filename}"))
     command = @BIN_LOC.to_s + "/ffmpeg " + @query_args.join(" ")
-    system(command)
 
+    l = Logger.new(command, ".tagger.log")
+    l.start { |line, start| }
+  
     File.delete(@filename)
     File.rename("_" + @filename, @filename)
   end
