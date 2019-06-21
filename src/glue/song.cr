@@ -58,26 +58,29 @@ class Song
           "Check your input and try again.")
     end
     
-    puts "Downloading video ..."
+    puts "Downloading video:"
     Ripper.download_mp3(url.as(String), filename)
 
-    # temp_albumart_filename = ".tempalbumart.jpg"
-    # HTTP::Client.get(data["album"]["images"][0]["url"].to_s) do |response|
-    #   File.write(temp_albumart_filename, response.body_io)
-    # end
+    temp_albumart_filename = ".tempalbumart.jpg"
+    HTTP::Client.get(data["album"]["images"][0]["url"].to_s) do |response|
+      File.write(temp_albumart_filename, response.body_io)
+    end
 
-    # tagger = Tags.new(filename)
-    # tagger.add_album_art(temp_albumart_filename)
-    # tagger.add_text_tag("title", data["name"].to_s)
-    # tagger.add_text_tag("artist", data["artists"][0]["name"].to_s)
-    # tagger.add_text_tag("album", data["album"]["name"].to_s)
-    # tagger.add_text_tag("genre", 
-    #   @spotify_searcher.find_genre(data["artists"][0]["id"].to_s))
-    # tagger.add_text_tag("track", data["track_number"].to_s)
-    # tagger.add_text_tag("disc", data["disc_number"].to_s)
+    tagger = Tags.new(filename)
+    tagger.add_album_art(temp_albumart_filename)
+    tagger.add_text_tag("title", data["name"].to_s)
+    tagger.add_text_tag("artist", data["artists"][0]["name"].to_s)
+    tagger.add_text_tag("album", data["album"]["name"].to_s)
+    tagger.add_text_tag("genre", 
+      @spotify_searcher.find_genre(data["artists"][0]["id"].to_s))
+    tagger.add_text_tag("track", data["track_number"].to_s)
+    tagger.add_text_tag("disc", data["disc_number"].to_s)
 
-    # tagger.save()
-    # File.delete(temp_albumart_filename)
+    puts "Tagging metadata ..."
+    tagger.save()
+    File.delete(temp_albumart_filename)
+
+    puts %("#{data["name"].to_s}" by "#{data["artists"][0]["name"].to_s}" downloaded.)
 
   end
 
