@@ -69,10 +69,24 @@ class SpotifySearcher
     points = rank_items(items, item_parameters)
 
     begin
-      return items[points[0][1]]
+      return get_item(item_type, items[points[0][1]]["id"].to_s)
     rescue IndexError
       return nil
     end
+  end
+
+  # Get the complete metadata of an item based off of its id
+  #
+  # ```
+  # SpotifySearcher.new().authorize(...).get_item("artist", "1dfeR4HaWDbWqFHLkxsg1d")
+  # ```
+  def get_item(item_type : String, id : String) : JSON::Any?
+    url = @root_url.join("#{item_type}s/#{id}").to_s()
+
+    response = HTTP::Client.get(url, headers: @access_header)
+    error_check(response)
+
+    return JSON.parse(response.body)
   end
 
   # Find the genre of an artist based off of their id
@@ -81,12 +95,8 @@ class SpotifySearcher
   # SpotifySearcher.new().authorize(...).find_genre("1dfeR4HaWDbWqFHLkxsg1d")
   # ```
   def find_genre(id : String) : String
-    url = @root_url.join("artists/#{id}").to_s()
 
-    response = HTTP::Client.get(url, headers: @access_header)
-    error_check(response)
-
-    genre = JSON.parse(response.body)["genres"][0].to_s
+    genre = get_item("artist", id)["genres"][0].to_s
     genre = genre.split(" ").map { |x| x.capitalize }.join(" ")
 
     return genre
@@ -117,8 +127,9 @@ class SpotifySearcher
         query += param_encode(item_type, item_parameters[k])
 
       # check if the key is to be excluded
-      elsif !query_exclude.includes?(k)
-        query += item_parameters[k].gsub(" ", "+") + "+"
+      elsif query_exclude.includes?(k)
+        next
+        # query += item_parameters[k].gsub(" ", "+") + "+"
 
       # if it's none of the above, treat it normally
       else
@@ -206,10 +217,14 @@ class SpotifySearcher
 end
 
 
-# puts SpotifySearcher.new()
-#   .authorize("e4198f6a3f7b48029366f22528b5dc66", 
-#              "ba057d0621a5496bbb64edccf758bde5")
-#   .find_item("album", {
-#     "name" => "A Night At The Opera",
-#     "artist" => "Queen"
-#   })
+puts SpotifySearcher.new()
+  .authorize("e4198f6a3f7b48029366f22528b5dc66", 
+             "ba057d0621a5496bbb64edccf758bde5")
+  .find_item("playlist", {
+    "name" => "Brain Food", 
+    "username" => "spotify" 
+    # "name " => "A Night At The Opera",
+    # "artist" => "Queen"
+    # "track" => "Bohemian Rhapsody",
+    # "artist" => "Queen"
+  })
