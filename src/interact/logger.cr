@@ -4,6 +4,10 @@ class Logger
 
   @command : String
 
+  # *command* is the bash command that you want to run and capture the output
+  # of. *@log_name* is the name of the log file you want to temporarily create.
+  # *@sleept* is the time you want to wait before rechecking if the command has
+  # started yet, probably something you don't want to worry about
   def initialize(command : String, @log_name : String, @sleept = 0.01)
     # Have the command output its information to a log and after the command is
     # finished, append an end signal to the document
