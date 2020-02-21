@@ -1,5 +1,8 @@
-require "./version"
+require "ydl_binaries"
+
+require "./config"
 require "./styles"
+require "./version"
 
 require "../glue/song"
 
@@ -11,6 +14,7 @@ class CLI
   @options = [
     [["-h", "--help"], "help", "bool"],
     [["-v", "--version"], "version", "bool"],
+    [["-i", "--install"], "install", "bool"],
     [["-s", "--song"], "song", "string"],
     [["-a", "--artist"], "artist", "string"]
   ]
@@ -28,22 +32,23 @@ class CLI
 
   def help
     msg = <<-EOP
-    #{Style.bold "Usage: irs [-h] [-v] [-s <song> -a <artist>]"}
+    #{Style.bold "Usage: irs [-h] [-v] [-i] [-s <song> -a <artist>]"}
 
-    Arguments:
+    #{Style.bold "Arguments:"}
         #{Style.blue "-h, --help"}              Show this help message and exit
         #{Style.blue "-v, --version"}           Show the program version and exit
+        #{Style.blue "-i, --install"}           Download ffmpeg and youtube_dl binaries to #{Style.green Config.binary_location}
         #{Style.blue "-s, --song <song>"}       Specify song name for downloading
         #{Style.blue "-a, --artist <artist>"}   Specify artist name for downloading
 
-    Examples:
+    #{Style.bold "Examples:"}
         $ #{Style.green %(irs --song "Bohemian Rhapsody" --artist "Queen")}
         #{Style.dim %(# => downloads the song "Bohemian Rhapsody" by "Queen")}
         $ #{Style.green %(irs --album "Demon Days" --artist "Gorillaz")}
         #{Style.dim %(# => downloads the album "Demon Days" by "Gorillaz")}
 
-    This project is licensed under the GNU GPL.
-    Project page: <github.com/cooperhammond/irs>
+    #{Style.bold "This project is licensed under the MIT license."}
+    #{Style.bold "Project page: <github.com/cooperhammond/irs>"}
     EOP
 
     puts msg
@@ -56,10 +61,14 @@ class CLI
     elsif @args["version"]?
       version
       exit
+    elsif @args["install"]?
+      YdlBinaries.get_both(Config.binary_location)
+      exit
     elsif @args["song"]? && @args["artist"]?
       s = Song.new(@args["song"], @args["artist"])
       s.provide_client_keys("e4198f6a3f7b48029366f22528b5dc66", "ba057d0621a5496bbb64edccf758bde5")
       s.grab_it()
+      exit
     end
   end
 

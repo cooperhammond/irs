@@ -1,5 +1,5 @@
 name: irs
-version: 0.1.0
+version: 1.0.0
 
 authors:
   - Cooper Hammond <kepoorh@gmail.com>
@@ -7,8 +7,6 @@ authors:
 targets:
   irs:
     main: src/irs.cr
-
-crystal: 0.28.0
 
 license: MIT
 

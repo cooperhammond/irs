@@ -1,10 +1,11 @@
 require "./logger"
+require "../bottle/config"
 
 module Ripper
 
   extend self
 
-  BIN_LOC = Path["~/.irs/bin".sub("~", Path.home)]
+  BIN_LOC = Path[Config.binary_location]
 
   # Downloads the video from the given *video_url* using the youtube-dl binary
   # Will create any directories that don't exist specified in *output_filename*
