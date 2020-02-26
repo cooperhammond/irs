@@ -2,13 +2,19 @@
 
 TODO: Write a description here
 
+## Usage
+
+<p align="center">
+    <img src="https://i.imgur.com/G783tKA.png" height="450" />
+</p>
+
+TODO: Write usage instructions here
+
 ## Installation
 
 TODO: Write installation instructions here
 
-## Usage
 
-TODO: Write usage instructions here
 
 ## Development
 

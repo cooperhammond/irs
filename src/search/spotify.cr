@@ -217,14 +217,14 @@ class SpotifySearcher
 end
 
 
-puts SpotifySearcher.new()
-  .authorize("e4198f6a3f7b48029366f22528b5dc66", 
-             "ba057d0621a5496bbb64edccf758bde5")
-  .find_item("playlist", {
-    "name" => "Brain Food", 
-    "username" => "spotify" 
-    # "name " => "A Night At The Opera",
-    # "artist" => "Queen"
-    # "track" => "Bohemian Rhapsody",
-    # "artist" => "Queen"
-  })
+# puts SpotifySearcher.new()
+#   .authorize("e4198f6a3f7b48029366f22528b5dc66", 
+#              "ba057d0621a5496bbb64edccf758bde5")
+#   .find_item("playlist", {
+#     "name" => "Brain Food", 
+#     "username" => "spotify" 
+#     # "name " => "A Night At The Opera",
+#     # "artist" => "Queen"
+#     # "track" => "Bohemian Rhapsody",
+#     # "artist" => "Queen"
+#   })

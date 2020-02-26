@@ -5,3 +5,7 @@
 *.dwarf
 
 *.mp3
+.ripper.log
+ffmpeg
+ffprobe
+youtube-dl
