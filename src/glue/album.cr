@@ -21,5 +21,3 @@ class Album < SpotifyList
     # pass
   end
 end
-
-puts Album.new("A Night At The Opera", "Queen").find_it()
