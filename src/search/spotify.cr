@@ -218,8 +218,8 @@ end
 
 
 # puts SpotifySearcher.new()
-#   .authorize("e4198f6a3f7b48029366f22528b5dc66", 
-#              "ba057d0621a5496bbb64edccf758bde5")
+#   .authorize("XXXXXXXXXXXXXXX", 
+#              "XXXXXXXXXXXXXXX")
 #   .find_item("playlist", {
 #     "name" => "Brain Food", 
 #     "username" => "spotify" 

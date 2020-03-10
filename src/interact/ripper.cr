@@ -44,6 +44,8 @@ module Ripper
     end
   end
 
+  # An internal class that will keep track of what to output to the user or
+  # what should be hidden.
   private class RipperOutputCensor
     @dl_status_index = 0
 

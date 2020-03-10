@@ -5,6 +5,7 @@ require "./styles"
 require "./version"
 
 require "../glue/song"
+require "../glue/album"
 
 
 class CLI
@@ -15,8 +16,9 @@ class CLI
     [["-h", "--help"], "help", "bool"],
     [["-v", "--version"], "version", "bool"],
     [["-i", "--install"], "install", "bool"],
+    [["-a", "--artist"], "artist", "string"],
     [["-s", "--song"], "song", "string"],
-    [["-a", "--artist"], "artist", "string"]
+    [["-A", "--album"], "album", "string"]
   ]
 
 
@@ -38,8 +40,9 @@ class CLI
         #{Style.blue "-h, --help"}              Show this help message and exit
         #{Style.blue "-v, --version"}           Show the program version and exit
         #{Style.blue "-i, --install"}           Download ffmpeg and youtube_dl binaries to #{Style.green Config.binary_location}
-        #{Style.blue "-s, --song <song>"}       Specify song name for downloading
         #{Style.blue "-a, --artist <artist>"}   Specify artist name for downloading
+        #{Style.blue "-s, --song <song>"}       Specify song name to download
+        #{Style.blue "-A, --album <album"}      Specify the album name to download
 
     #{Style.bold "Examples:"}
         $ #{Style.green %(irs --song "Bohemian Rhapsody" --artist "Queen")}
@@ -66,9 +69,14 @@ class CLI
       exit
     elsif @args["song"]? && @args["artist"]?
       s = Song.new(@args["song"], @args["artist"])
-      s.provide_client_keys("e4198f6a3f7b48029366f22528b5dc66", "ba057d0621a5496bbb64edccf758bde5")
+      s.provide_client_keys(Config.client_key, Config.client_secret)
       s.grab_it()
+      s.organize_it(Config.music_directory)
       exit
+    elsif @args["album"]? && @args["artist"]?
+      a = Album.new(@args["album"], @args["artist"])
+      a.provide_client_keys(Config.client_key, Config.client_secret)
+      a.grab_it()
     end
   end
 
@@ -124,9 +132,15 @@ class CLI
   end
 
   private def arg_error(argv : Array(String), arg : Int32, msg : String) : Nil
-    precursor = "irs "
+    precursor = "irs"
 
-    start = argv[..arg - 1]
+    precursor += " " if arg != 0
+
+    if arg == 0
+      start = [] of String
+    else
+      start = argv[..arg - 1]
+    end
     last = argv[arg + 1..]
 
     distance = (precursor + start.join(" ")).size
