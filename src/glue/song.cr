@@ -11,18 +11,19 @@ class Song
   @client_secret = ""
 
   @metadata : JSON::Any?
-  @filename : String?
+  @filename = ""
+  @artist = ""
+  @album = ""
 
   def initialize(@song_name : String, @artist_name : String)
   end
 
   # Find, downloads, and tags the mp3 song that this class represents.
-  # Will return true on complete success and false on failure.
   #
   # ```
   # Song.new("Bohemian Rhapsody", "Queen").grab_it()
   # ```   
-  def grab_it : Nil
+  def grab_it
     if !@spotify_searcher.authorized? && !@metadata
       if @client_id != "" && @client_secret != ""
         @spotify_searcher.authorize(@client_id, @client_secret)
@@ -47,9 +48,10 @@ class Song
     end
 
     data = @metadata.as(JSON::Any)
-    filename = data["track_number"].to_s + " - #{data["name"].to_s}.mp3"
+    @filename = data["track_number"].to_s + " - #{data["name"].to_s}.mp3"
 
     puts "Searching for url ..."
+    # TODO: should this search_term be here?
     url = Youtube.find_url(@song_name, @artist_name, search_terms: "lyrics")
 
     if !url 
@@ -59,18 +61,21 @@ class Song
     end
     
     puts "Downloading video:"
-    Ripper.download_mp3(url.as(String), filename)
+    Ripper.download_mp3(url.as(String), @filename)
 
     temp_albumart_filename = ".tempalbumart.jpg"
     HTTP::Client.get(data["album"]["images"][0]["url"].to_s) do |response|
       File.write(temp_albumart_filename, response.body_io)
     end
 
-    tagger = Tags.new(filename)
+    @artist = data["artists"][0]["name"].to_s
+    @album = data["album"]["name"].to_s
+
+    tagger = Tags.new(@filename)
     tagger.add_album_art(temp_albumart_filename)
     tagger.add_text_tag("title", data["name"].to_s)
-    tagger.add_text_tag("artist", data["artists"][0]["name"].to_s)
-    tagger.add_text_tag("album", data["album"]["name"].to_s)
+    tagger.add_text_tag("artist", @artist)
+    tagger.add_text_tag("album", @album)
     tagger.add_text_tag("genre", 
       @spotify_searcher.find_genre(data["artists"][0]["id"].to_s))
     tagger.add_text_tag("track", data["track_number"].to_s)
@@ -82,6 +87,28 @@ class Song
 
     puts %("#{data["name"].to_s}" by "#{data["artists"][0]["name"].to_s}" downloaded.)
 
+  end
+
+  # Will organize the song into the user's provided music directory as 
+  # music_directory > artist_name > album_name > song
+  # Must be called AFTER the song has been downloaded.
+  #
+  # ```
+  # s = Song.new("Bohemian Rhapsody", "Queen").grab_it()
+  # s.organize_it("/home/cooper/Music")
+  # # Will move the mp3 file to 
+  # # /home/cooper/Music/Queen/A Night At The Opera/1 - Bohemian Rhapsody.mp3
+  # ```
+  def organize_it(music_directory : String)
+    path = Path[music_directory].expand(home: true)
+    path = path / @artist_name.gsub(/[\/]/, "").gsub("  ", " ")
+    path = path / @album.gsub(/[\/]/, "").gsub("  ", " ")
+    strpath = path.to_s
+    if !File.directory?(strpath)
+      FileUtils.mkdir_p(strpath)
+    end
+    safe_filename = @filename.gsub(/[\/]/, "").gsub("  ", " ")
+    File.rename("./" + @filename, (path / safe_filename).to_s)
   end
 
   # Provide metadata so that it doesn't have to find it. Useful for overwriting
@@ -105,7 +132,7 @@ class Song
   #  .authenticate("XXXXXXXXXX", "XXXXXXXXXXX")).grab_it()
   # ```
   def provide_spotify(spotify : SpotifySearcher) : self
-    @spotify = spotify
+    @spotify_searcher = spotify
     return self
   end
 
@@ -121,7 +148,3 @@ class Song
     return self
   end
 end
-
-# s = Song.new("Bohemian Rhapsody", "Queen")
-# s.provide_client_keys("e4198f6a3f7b48029366f22528b5dc66", "ba057d0621a5496bbb64edccf758bde5")
-# s.grab_it()
