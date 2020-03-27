@@ -34,21 +34,27 @@ class CLI
 
   def help
     msg = <<-EOP
-    #{Style.bold "Usage: irs [-h] [-v] [-i] [-s <song> -a <artist>]"}
+    #{Style.bold "Usage: irs [--help] [--version] [--install]"}
+    #{Style.bold "           [-s <song> -a <artist>]"}
+    #{Style.bold "           [-A <album> -a <artist>]"}
+    #{Style.bold "           [-p <playlist> -a <username>]"}
 
     #{Style.bold "Arguments:"}
-        #{Style.blue "-h, --help"}              Show this help message and exit
-        #{Style.blue "-v, --version"}           Show the program version and exit
-        #{Style.blue "-i, --install"}           Download ffmpeg and youtube_dl binaries to #{Style.green Config.binary_location}
-        #{Style.blue "-a, --artist <artist>"}   Specify artist name for downloading
-        #{Style.blue "-s, --song <song>"}       Specify song name to download
-        #{Style.blue "-A, --album <album"}      Specify the album name to download
+        #{Style.blue "-h, --help"}                  Show this help message and exit
+        #{Style.blue "-v, --version"}               Show the program version and exit
+        #{Style.blue "-i, --install"}               Download necessary binaries to #{Style.green "~/.irs/bin"}
+        #{Style.blue "-a, --artist <artist>"}       Specify artist name for downloading
+        #{Style.blue "-s, --song <song>"}           Specify song name to download
+        #{Style.blue "-A, --album <album>"}         Specify the album name to download
+        #{Style.blue "-p, --playlist <playlist>"}   Specify the playlist name to download
 
     #{Style.bold "Examples:"}
         $ #{Style.green %(irs --song "Bohemian Rhapsody" --artist "Queen")}
         #{Style.dim %(# => downloads the song "Bohemian Rhapsody" by "Queen")}
         $ #{Style.green %(irs --album "Demon Days" --artist "Gorillaz")}
         #{Style.dim %(# => downloads the album "Demon Days" by "Gorillaz")}
+        $ #{Style.green %(irs --playlist "a different drummer" --artist "prakkillian")}
+        #{Style.dim %(# => downloads the playlist "a different drummer" by the user prakkillian)}
 
     #{Style.bold "This project is licensed under the MIT license."}
     #{Style.bold "Project page: <github.com/cooperhammond/irs>"}
