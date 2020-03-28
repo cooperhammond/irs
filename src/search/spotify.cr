@@ -2,7 +2,6 @@ require "http"
 require "json"
 require "base64"
 
-
 class SpotifySearcher
   @root_url = Path["https://api.spotify.com/v1/"]
 
@@ -68,8 +67,61 @@ class SpotifySearcher
 
     points = rank_items(items, item_parameters)
 
+    to_return = nil
+
     begin
-      return get_item(item_type, items[points[0][1]]["id"].to_s)
+      # this means no points were assigned so don't return the "best guess"
+      if points[0][0] <= 0
+        to_return = nil 
+      else
+        to_return = get_item(item_type, items[points[0][1]]["id"].to_s)
+      end
+    rescue IndexError
+      to_return = nil
+    end
+
+    # if this triggers, it means that a playlist has failed to be found, so 
+    # the search will be bootstrapped into find_user_playlist
+    if to_return == nil && item_type == "playlist"
+      return self.find_user_playlist(
+        item_parameters["username"], 
+        item_parameters["name"]
+      )
+    end
+  
+    return to_return
+  end
+
+  # Grabs a users playlists and searches through it for the specified playlist
+  #
+  # ```
+  # spotify_searcher.find_user_playlist("prakkillian", "the little man")
+  # => {playlist metadata}
+  # ```
+  def find_user_playlist(username : String, name : String, offset=0,
+  limit=20) : JSON::Any?
+
+    url = "users/#{username}/playlists?offset=#{offset}&limit=#{limit}"
+    url = @root_url.join(url).to_s
+
+    response = HTTP::Client.get(url, headers: @access_header)
+    error_check(response)
+    body = JSON.parse(response.body)
+
+    items = body["items"]
+    points = [] of Array(Int32)
+
+    items.as_a.each_index do |i|
+      points.push([points_compare(items[i]["name"].to_s, name), i])
+    end
+    points.sort!{ |a, b| b[0] <=> a[0] }
+
+    begin
+      if points[0][0] < 3
+        return self.find_user_playlist(username, name, offset + limit, limit)
+      else
+        return items[points[0][1]]
+      end 
     rescue IndexError
       return nil
     end
@@ -122,16 +174,23 @@ class SpotifySearcher
     query_exclude = ["username"]
 
     item_parameters.keys.each do |k|
-      # This will map album, playlist, and track from the name key to the query
+      # This will map album and track names from the name key to the query
       if k == "name"
-        query += param_encode(item_type, item_parameters[k])
+
+        # will remove the "name:<title>" param from the query
+        if item_type == "playlist" 
+          query += item_parameters[k].gsub(" ", "+") + "+"
+        else
+          query += param_encode(item_type, item_parameters[k])
+        end
 
       # check if the key is to be excluded
       elsif query_exclude.includes?(k)
         next
-        # query += item_parameters[k].gsub(" ", "+") + "+"
-
+  
       # if it's none of the above, treat it normally
+      # NOTE: playlist names will be inserted into the query normally, without
+      # a parameter.
       else
         query += param_encode(k, item_parameters[k])
       end
@@ -167,7 +226,9 @@ class SpotifySearcher
 
         # The key to compare to for playlists
         if k == "username"
-          pts += points_compare(item["owner"]["display_name"].to_s, val)
+          pts_to_add = points_compare(item["owner"]["display_name"].to_s, val)
+          pts += pts_to_add
+          pts += -10 if pts_to_add == 0 
         end
 
         # The key regardless of whether item is track, album,or playlist
