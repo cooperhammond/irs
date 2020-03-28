@@ -1,3 +1,5 @@
+require "../bottle/config"
+
 # Uses FFMPEG binary to add metadata to mp3 files
 # ```
 # t = Tags.new("bohem rap.mp3")
@@ -8,7 +10,7 @@
 class Tags
 
   # TODO: export this path to a config file
-  @BIN_LOC = Path["~/.irs/bin".sub("~", Path.home)]
+  @BIN_LOC = Config.binary_location
   @query_args = [] of String
 
   # initialize the class with an already created MP3
@@ -46,7 +48,7 @@ class Tags
   # Run the necessary commands to attach album art to the mp3
   def save : Nil
     @query_args.push(%("_#{@filename}"))
-    command = @BIN_LOC.to_s + "/ffmpeg " + @query_args.join(" ")
+    command = @BIN_LOC + "/ffmpeg " + @query_args.join(" ")
 
     l = Logger.new(command, ".tagger.log")
     l.start { |line, start| }
