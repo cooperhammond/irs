@@ -2,6 +2,8 @@ require "http"
 require "json"
 require "base64"
 
+require "../glue/mapper"
+
 class SpotifySearcher
   @root_url = Path["https://api.spotify.com/v1/"]
 
@@ -83,7 +85,7 @@ class SpotifySearcher
     # if this triggers, it means that a playlist has failed to be found, so 
     # the search will be bootstrapped into find_user_playlist
     if to_return == nil && item_type == "playlist"
-      return self.find_user_playlist(
+      return find_user_playlist(
         item_parameters["username"], 
         item_parameters["name"]
       )
@@ -101,7 +103,7 @@ class SpotifySearcher
   def find_user_playlist(username : String, name : String, offset=0,
   limit=20) : JSON::Any?
 
-    url = "users/#{username}/playlists?offset=#{offset}&limit=#{limit}"
+    url = "users/#{username}/playlists?limit=#{limit}&offset=#{offset}"
     url = @root_url.join(url).to_s
 
     response = HTTP::Client.get(url, headers: @access_header)
@@ -118,9 +120,9 @@ class SpotifySearcher
 
     begin
       if points[0][0] < 3
-        return self.find_user_playlist(username, name, offset + limit, limit)
+        return find_user_playlist(username, name, offset + limit, limit)
       else
-        return items[points[0][1]]
+        return get_item("playlist", items[points[0][1]]["id"].to_s)
       end 
     rescue IndexError
       return nil
@@ -132,13 +134,69 @@ class SpotifySearcher
   # ```
   # SpotifySearcher.new().authorize(...).get_item("artist", "1dfeR4HaWDbWqFHLkxsg1d")
   # ```
-  def get_item(item_type : String, id : String) : JSON::Any?
-    url = @root_url.join("#{item_type}s/#{id}").to_s()
+  def get_item(item_type : String, id : String, offset=0, 
+  limit=100) : JSON::Any
 
+    if item_type == "playlist"
+      return get_playlist(id, offset, limit)
+    end
+
+    url = "#{item_type}s/#{id}?limit=#{limit}&offset=#{offset}"
+    url = @root_url.join(url).to_s()
+  
     response = HTTP::Client.get(url, headers: @access_header)
     error_check(response)
 
-    return JSON.parse(response.body)
+    body = JSON.parse(response.body)
+
+    return body
+  end
+
+  # The only way this method differs from `get_item` is that it makes sure to
+  # insert ALL tracks from the playlist into the `JSON::Any`
+  #
+  # ```
+  # SpotifySearcher.new().authorize(...).get_playlist("122Fc9gVuSZoksEjKEx7L0")
+  # ```
+  def get_playlist(id, offset=0, limit=100) : JSON::Any
+    url = "playlists/#{id}?limit=#{limit}&offset=#{offset}"
+    url = @root_url.join(url).to_s()
+  
+    response = HTTP::Client.get(url, headers: @access_header)
+    error_check(response)
+    body = JSON.parse(response.body)
+    parent = PlaylistExtensionMapper.from_json(response.body)
+
+    more_tracks = body["tracks"]["total"].as_i > offset + limit
+    if more_tracks
+      return playlist_extension(parent, id, offset=offset + limit)
+    end
+
+    return body
+  end
+
+  # This method exists to loop through spotify API requests and combine all
+  # tracks that may not be captured by the limit of 100.
+  private def playlist_extension(parent : PlaylistExtensionMapper, 
+  id : String, offset=0, limit=100) : JSON::Any
+    url = "playlists/#{id}/tracks?limit=#{limit}&offset=#{offset}"
+    url = @root_url.join(url).to_s()
+
+    response = HTTP::Client.get(url, headers: @access_header)
+    error_check(response)
+    body = JSON.parse(response.body)
+    new_tracks = PlaylistTracksMapper.from_json(response.body)
+
+    new_tracks.items.each do |track|
+      parent.tracks.items.push(track)
+    end
+
+    more_tracks = body["total"].as_i > offset + limit
+    if more_tracks
+      return playlist_extension(parent, id, offset=offset + limit)
+    end
+
+    return JSON.parse(parent.to_json)
   end
 
   # Find the genre of an artist based off of their id
@@ -197,7 +255,7 @@ class SpotifySearcher
     end
 
     # extra api info
-    query += "&type=#{item_type}&offset=#{offset}&limit=#{limit}"
+    query += "&type=#{item_type}&limit=#{limit}&offset=#{offset}"
 
     return query
   end

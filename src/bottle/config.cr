@@ -13,10 +13,10 @@ module Config
   end
 
   def client_key : String
-    return "e4198f6a3f7b48029366f22528b5dc66"
+    return "362f75b91aeb471bb392945f93eba842"
   end
 
   def client_secret : String
-    return "ba057d0621a5496bbb64edccf758bde5"
+    return "013556dd71e14e1da9443dee73e23a91"
   end
 end

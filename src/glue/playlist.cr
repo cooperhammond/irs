@@ -1,27 +1,23 @@
 require "../bottle/config"
 
-require "./mapper"
 require "./song"
 require "./list"
 
-
-
-
-class Album < SpotifyList
+class Playlist < SpotifyList
 
   @home_music_directory = Config.music_directory
 
   # Uses the `spotify_searcher` defined in parent `SpotifyList` to find the
   # correct metadata of the list 
   def find_it
-    album = @spotify_searcher.find_item("album", {
+    @playlist = @spotify_searcher.find_item("playlist", {
       "name" => @list_name.as(String),
-      "artist" => @list_author.as(String)
+      "username" => @list_author.as(String)
     })
-    if album
-      return album.as(JSON::Any)
+    if playlist
+      return playlist.as(JSON::Any)
     else
-      puts "No album was found by that name and artist."
+      puts "No playlists were found by that name and user."
       exit 1
     end
   end
@@ -30,17 +26,11 @@ class Album < SpotifyList
   # of spotify's album json. Moves the title of the album and the album art
   # to the json of the single song
   def organize_song_metadata(list : JSON::Any, datum : JSON::Any) : JSON::Any
-    album_metadata = parse_to_json(%(
-      {
-        "name": "#{list["name"]}",
-        "images": [{"url": "#{list["images"][0]["url"]}"}]
-      }
-    ))
+    puts datum
+    puts "THIS"
 
-    prepped_data = AlbumTrackMetadataMapper.from_json(datum.to_json)
-    prepped_data.album = album_metadata
-
-    data = parse_to_json(prepped_data.to_json)
+    exit 0
+    data = datum
 
     return data
   end
