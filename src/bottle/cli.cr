@@ -6,6 +6,7 @@ require "./version"
 
 require "../glue/song"
 require "../glue/album"
+require "../glue/playlist"
 
 
 class CLI
@@ -18,7 +19,8 @@ class CLI
     [["-i", "--install"], "install", "bool"],
     [["-a", "--artist"], "artist", "string"],
     [["-s", "--song"], "song", "string"],
-    [["-A", "--album"], "album", "string"]
+    [["-A", "--album"], "album", "string"],
+    [["-p", "--playlist"], "playlist", "string"]
   ]
 
 
@@ -83,6 +85,10 @@ class CLI
       a = Album.new(@args["album"], @args["artist"])
       a.provide_client_keys(Config.client_key, Config.client_secret)
       a.grab_it()
+    elsif @args["playlist"]? && @args["artist"]?
+      p = Playlist.new(@args["playlist"], @args["artist"])
+      p.provide_client_keys(Config.client_key, Config.client_secret)
+      p.grab_it()
     end
   end
 
