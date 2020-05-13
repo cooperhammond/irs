@@ -24,7 +24,7 @@ class PlaylistTracksMapper
   )
 end
 
-class AlbumTrackMetadataMapper
+class AlbumTracksMapper
   JSON.mapping(
     album: { 
       type: JSON::Any,

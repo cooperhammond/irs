@@ -17,6 +17,7 @@ class CLI
     [["-h", "--help"], "help", "bool"],
     [["-v", "--version"], "version", "bool"],
     [["-i", "--install"], "install", "bool"],
+    [["-c", "--config"], "config", "bool"],
     [["-a", "--artist"], "artist", "string"],
     [["-s", "--song"], "song", "string"],
     [["-A", "--album"], "album", "string"],
@@ -44,7 +45,8 @@ class CLI
     #{Style.bold "Arguments:"}
         #{Style.blue "-h, --help"}                  Show this help message and exit
         #{Style.blue "-v, --version"}               Show the program version and exit
-        #{Style.blue "-i, --install"}               Download necessary binaries to #{Style.green "~/.irs/bin"}
+        #{Style.blue "-i, --install"}               Download binaries to config location
+        #{Style.blue "-c, --config"}                Show config file location
         #{Style.blue "-a, --artist <artist>"}       Specify artist name for downloading
         #{Style.blue "-s, --song <song>"}           Specify song name to download
         #{Style.blue "-A, --album <album>"}         Specify the album name to download
@@ -59,13 +61,16 @@ class CLI
         #{Style.dim %(# => downloads the playlist "a different drummer" by the user prakkillian)}
 
     #{Style.bold "This project is licensed under the MIT license."}
-    #{Style.bold "Project page: <github.com/cooperhammond/irs>"}
+    #{Style.bold "Project page: <https://github.com/cooperhammond/irs>"}
     EOP
 
     puts msg
   end
 
   def act_on_args
+    
+    Config.check_necessities()
+
     if @args["help"]? || @args.keys.size == 0
       help
       exit
@@ -74,6 +79,9 @@ class CLI
       exit
     elsif @args["install"]?
       YdlBinaries.get_both(Config.binary_location)
+      exit
+    elsif @args["config"]?
+      puts ENV["IRS_CONFIG_LOCATION"]?
       exit
     elsif @args["song"]? && @args["artist"]?
       s = Song.new(@args["song"], @args["artist"])
@@ -89,6 +97,10 @@ class CLI
       p = Playlist.new(@args["playlist"], @args["artist"])
       p.provide_client_keys(Config.client_key, Config.client_secret)
       p.grab_it()
+    else
+      puts Style.red("Those arguments don't do anything when used that way.")
+      puts "Type `irs -h` to see usage."
+      exit 1
     end
   end
 
@@ -124,7 +136,7 @@ class CLI
       end
 
       # ensure there's an argument if the program needs one
-      if flag[2] == "string" && i + 1 > argv.size
+      if flag[2] == "string" && i + 1 >= argv.size
         arg_error argv, i, %("#{arg}" needs an argument.)
       end
 
