@@ -11,18 +11,18 @@ class SpotifySearcher
   @authorized = false
 
   # Saves an access token for future program use with spotify using client IDs.
-  # Specs defined on spotify's developer api: 
+  # Specs defined on spotify's developer api:
   # https://developer.spotify.com/documentation/general/guides/authorization-guide/#client-credentials-flow
   #
   # ```
-  # SpotifySearcher.new().authorize("XXXXXXXXXX", "XXXXXXXXXX")
+  # SpotifySearcher.new.authorize("XXXXXXXXXX", "XXXXXXXXXX")
   # ```
   def authorize(client_id : String, client_secret : String) : self
     auth_url = "https://accounts.spotify.com/api/token"
 
     headers = HTTP::Headers{
-      "Authorization" => "Basic " + 
-        Base64.strict_encode "#{client_id}:#{client_secret}"
+      "Authorization" => "Basic " +
+                         Base64.strict_encode "#{client_id}:#{client_secret}",
     }
 
     payload = "grant_type=client_credentials"
@@ -31,9 +31,9 @@ class SpotifySearcher
     error_check(response)
 
     access_token = JSON.parse(response.body)["access_token"]
-    
+
     @access_header = HTTP::Headers{
-      "Authorization" => "Bearer #{access_token}"
+      "Authorization" => "Bearer #{access_token}",
     }
 
     @authorized = true
@@ -55,12 +55,11 @@ class SpotifySearcher
   # })
   # => {track metadata}
   # ```
-  def find_item(item_type : String, item_parameters : Hash, offset=0, 
-  limit=20) : JSON::Any?
-
+  def find_item(item_type : String, item_parameters : Hash, offset = 0,
+                limit = 20) : JSON::Any?
     query = generate_query(item_type, item_parameters, offset, limit)
 
-    url = @root_url.join("search?q=#{query}").to_s()
+    url = @root_url.join("search?q=#{query}").to_s
 
     response = HTTP::Client.get(url, headers: @access_header)
     error_check(response)
@@ -74,7 +73,7 @@ class SpotifySearcher
     begin
       # this means no points were assigned so don't return the "best guess"
       if points[0][0] <= 0
-        to_return = nil 
+        to_return = nil
       else
         to_return = get_item(item_type, items[points[0][1]]["id"].to_s)
       end
@@ -82,15 +81,15 @@ class SpotifySearcher
       to_return = nil
     end
 
-    # if this triggers, it means that a playlist has failed to be found, so 
+    # if this triggers, it means that a playlist has failed to be found, so
     # the search will be bootstrapped into find_user_playlist
     if to_return == nil && item_type == "playlist"
       return find_user_playlist(
-        item_parameters["username"], 
+        item_parameters["username"],
         item_parameters["name"]
       )
     end
-  
+
     return to_return
   end
 
@@ -100,9 +99,8 @@ class SpotifySearcher
   # spotify_searcher.find_user_playlist("prakkillian", "the little man")
   # => {playlist metadata}
   # ```
-  def find_user_playlist(username : String, name : String, offset=0,
-  limit=20) : JSON::Any?
-
+  def find_user_playlist(username : String, name : String, offset = 0,
+                         limit = 20) : JSON::Any?
     url = "users/#{username}/playlists?limit=#{limit}&offset=#{offset}"
     url = @root_url.join(url).to_s
 
@@ -116,14 +114,14 @@ class SpotifySearcher
     items.as_a.each_index do |i|
       points.push([points_compare(items[i]["name"].to_s, name), i])
     end
-    points.sort!{ |a, b| b[0] <=> a[0] }
+    points.sort! { |a, b| b[0] <=> a[0] }
 
     begin
       if points[0][0] < 3
         return find_user_playlist(username, name, offset + limit, limit)
       else
         return get_item("playlist", items[points[0][1]]["id"].to_s)
-      end 
+      end
     rescue IndexError
       return nil
     end
@@ -132,18 +130,17 @@ class SpotifySearcher
   # Get the complete metadata of an item based off of its id
   #
   # ```
-  # SpotifySearcher.new().authorize(...).get_item("artist", "1dfeR4HaWDbWqFHLkxsg1d")
+  # SpotifySearcher.new.authorize(...).get_item("artist", "1dfeR4HaWDbWqFHLkxsg1d")
   # ```
-  def get_item(item_type : String, id : String, offset=0, 
-  limit=100) : JSON::Any
-
+  def get_item(item_type : String, id : String, offset = 0,
+               limit = 100) : JSON::Any
     if item_type == "playlist"
       return get_playlist(id, offset, limit)
     end
 
     url = "#{item_type}s/#{id}?limit=#{limit}&offset=#{offset}"
-    url = @root_url.join(url).to_s()
-  
+    url = @root_url.join(url).to_s
+
     response = HTTP::Client.get(url, headers: @access_header)
     error_check(response)
 
@@ -156,12 +153,12 @@ class SpotifySearcher
   # insert ALL tracks from the playlist into the `JSON::Any`
   #
   # ```
-  # SpotifySearcher.new().authorize(...).get_playlist("122Fc9gVuSZoksEjKEx7L0")
+  # SpotifySearcher.new.authorize(...).get_playlist("122Fc9gVuSZoksEjKEx7L0")
   # ```
-  def get_playlist(id, offset=0, limit=100) : JSON::Any
+  def get_playlist(id, offset = 0, limit = 100) : JSON::Any
     url = "playlists/#{id}?limit=#{limit}&offset=#{offset}"
-    url = @root_url.join(url).to_s()
-  
+    url = @root_url.join(url).to_s
+
     response = HTTP::Client.get(url, headers: @access_header)
     error_check(response)
     body = JSON.parse(response.body)
@@ -169,7 +166,7 @@ class SpotifySearcher
 
     more_tracks = body["tracks"]["total"].as_i > offset + limit
     if more_tracks
-      return playlist_extension(parent, id, offset=offset + limit)
+      return playlist_extension(parent, id, offset = offset + limit)
     end
 
     return body
@@ -177,10 +174,10 @@ class SpotifySearcher
 
   # This method exists to loop through spotify API requests and combine all
   # tracks that may not be captured by the limit of 100.
-  private def playlist_extension(parent : PlaylistExtensionMapper, 
-  id : String, offset=0, limit=100) : JSON::Any
+  private def playlist_extension(parent : PlaylistExtensionMapper,
+                                 id : String, offset = 0, limit = 100) : JSON::Any
     url = "playlists/#{id}/tracks?limit=#{limit}&offset=#{offset}"
-    url = @root_url.join(url).to_s()
+    url = @root_url.join(url).to_s
 
     response = HTTP::Client.get(url, headers: @access_header)
     error_check(response)
@@ -193,7 +190,7 @@ class SpotifySearcher
 
     more_tracks = body["total"].as_i > offset + limit
     if more_tracks
-      return playlist_extension(parent, id, offset=offset + limit)
+      return playlist_extension(parent, id, offset = offset + limit)
     end
 
     return JSON.parse(parent.to_json)
@@ -202,10 +199,9 @@ class SpotifySearcher
   # Find the genre of an artist based off of their id
   #
   # ```
-  # SpotifySearcher.new().authorize(...).find_genre("1dfeR4HaWDbWqFHLkxsg1d")
+  # SpotifySearcher.new.authorize(...).find_genre("1dfeR4HaWDbWqFHLkxsg1d")
   # ```
   def find_genre(id : String) : String
-
     genre = get_item("artist", id)["genres"][0].to_s
     genre = genre.split(" ").map { |x| x.capitalize }.join(" ")
 
@@ -216,15 +212,15 @@ class SpotifySearcher
   private def error_check(response : HTTP::Client::Response) : Nil
     if response.status_code != 200
       raise("There was an error with your request.\n" +
-            "Status code: #{response.status_code}\n" + 
+            "Status code: #{response.status_code}\n" +
             "Response: \n#{response.body}")
     end
   end
-  
+
   # Generates url to run a GET request against to the Spotify open API
   # Returns a `String.`
   private def generate_query(item_type : String, item_parameters : Hash,
-  offset : Int32, limit : Int32) : String
+                             offset : Int32, limit : Int32) : String
     query = ""
 
     # parameter keys to exclude in the api request. These values will be put
@@ -234,21 +230,20 @@ class SpotifySearcher
     item_parameters.keys.each do |k|
       # This will map album and track names from the name key to the query
       if k == "name"
-
         # will remove the "name:<title>" param from the query
-        if item_type == "playlist" 
+        if item_type == "playlist"
           query += item_parameters[k].gsub(" ", "+") + "+"
         else
           query += param_encode(item_type, item_parameters[k])
         end
 
-      # check if the key is to be excluded
+        # check if the key is to be excluded
       elsif query_exclude.includes?(k)
         next
-  
-      # if it's none of the above, treat it normally
-      # NOTE: playlist names will be inserted into the query normally, without
-      # a parameter.
+
+        # if it's none of the above, treat it normally
+        # NOTE: playlist names will be inserted into the query normally, without
+        # a parameter.
       else
         query += param_encode(k, item_parameters[k])
       end
@@ -264,7 +259,7 @@ class SpotifySearcher
   # Meant to find the item that the user desires.
   # Returns an `Array` of `Array(Int32)` or [[3, 1], [...], ...]
   private def rank_items(items : Array,
-  parameters : Hash) : Array(Array(Int32))
+                         parameters : Hash) : Array(Array(Int32))
     points = [] of Array(Int32)
     index = 0
 
@@ -274,7 +269,7 @@ class SpotifySearcher
       # Think about whether this following logic is worth having in one method.
       # Is it nice to have a single method that handles it all or having a few
       # methods for each of the item types? (track, album, playlist)
-      parameters.keys.each do |k| 
+      parameters.keys.each do |k|
         val = parameters[k]
 
         # The key to compare to for artist
@@ -286,7 +281,7 @@ class SpotifySearcher
         if k == "username"
           pts_to_add = points_compare(item["owner"]["display_name"].to_s, val)
           pts += pts_to_add
-          pts += -10 if pts_to_add == 0 
+          pts += -10 if pts_to_add == 0
         end
 
         # The key regardless of whether item is track, album,or playlist
@@ -299,12 +294,12 @@ class SpotifySearcher
       index += 1
     end
 
-    points.sort!{ |a, b| b[0] <=> a[0] }
+    points.sort! { |a, b| b[0] <=> a[0] }
 
     return points
   end
 
-  # Returns an `Int` based off the number of points worth assigning to the 
+  # Returns an `Int` based off the number of points worth assigning to the
   # matchiness of the string. First the strings are downcased and then all
   # nonalphanumeric characters are stripped.
   # If the strings are the exact same, return 3 pts.
@@ -332,16 +327,14 @@ class SpotifySearcher
   private def param_encode(key : String, value : String) : String
     return key.gsub(" ", "+") + ":" + value.gsub(" ", "+") + "+"
   end
-
 end
 
-
 # puts SpotifySearcher.new()
-#   .authorize("XXXXXXXXXXXXXXX", 
+#   .authorize("XXXXXXXXXXXXXXX",
 #              "XXXXXXXXXXXXXXX")
 #   .find_item("playlist", {
-#     "name" => "Brain Food", 
-#     "username" => "spotify" 
+#     "name" => "Brain Food",
+#     "username" => "spotify"
 #     # "name " => "A Night At The Opera",
 #     # "artist" => "Queen"
 #     # "track" => "Bohemian Rhapsody",

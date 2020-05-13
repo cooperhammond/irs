@@ -4,9 +4,8 @@ require "../search/youtube"
 require "../interact/ripper"
 require "../interact/tagger"
 
-
 class Song
-  @spotify_searcher = SpotifySearcher.new()
+  @spotify_searcher = SpotifySearcher.new
   @client_id = ""
   @client_secret = ""
 
@@ -21,29 +20,29 @@ class Song
   # Find, downloads, and tags the mp3 song that this class represents.
   #
   # ```
-  # Song.new("Bohemian Rhapsody", "Queen").grab_it()
-  # ```   
+  # Song.new("Bohemian Rhapsody", "Queen").grab_it
+  # ```
   def grab_it
     if !@spotify_searcher.authorized? && !@metadata
       if @client_id != "" && @client_secret != ""
         @spotify_searcher.authorize(@client_id, @client_secret)
       else
         raise("Need to call either `provide_metadata`, `provide_spotify`, " +
-          "or `provide_client_keys` so that Spotify can be interfaced with.")
+              "or `provide_client_keys` so that Spotify can be interfaced with.")
       end
     end
 
     if !@metadata
       puts "Searching for metadata ..."
       @metadata = @spotify_searcher.find_item("track", {
-        "name" => @song_name,
-        "artist" => @artist_name
+        "name"   => @song_name,
+        "artist" => @artist_name,
       })
 
       if !@metadata
-        raise("There was no metadata found on Spotify for\n" + 
-          %("#{@song_name}" by "#{@artist_name}\n) +
-          "Check your input and try again.")
+        raise("There was no metadata found on Spotify for\n" +
+              %("#{@song_name}" by "#{@artist_name}\n) +
+              "Check your input and try again.")
       end
     end
 
@@ -54,12 +53,12 @@ class Song
     # TODO: should this search_term be here?
     url = Youtube.find_url(@song_name, @artist_name, search_terms: "lyrics")
 
-    if !url 
-      raise("There was no url found on youtube for\n" + 
-          %("#{@song_name}" by "#{@artist_name}\n) +
-          "Check your input and try again.")
+    if !url
+      raise("There was no url found on youtube for\n" +
+            %("#{@song_name}" by "#{@artist_name}\n) +
+            "Check your input and try again.")
     end
-    
+
     puts "Downloading video:"
     Ripper.download_mp3(url.as(String), @filename)
 
@@ -76,27 +75,26 @@ class Song
     tagger.add_text_tag("title", data["name"].to_s)
     tagger.add_text_tag("artist", @artist)
     tagger.add_text_tag("album", @album)
-    tagger.add_text_tag("genre", 
+    tagger.add_text_tag("genre",
       @spotify_searcher.find_genre(data["artists"][0]["id"].to_s))
     tagger.add_text_tag("track", data["track_number"].to_s)
     tagger.add_text_tag("disc", data["disc_number"].to_s)
 
     puts "Tagging metadata ..."
-    tagger.save()
+    tagger.save
     File.delete(temp_albumart_filename)
 
     puts %("#{data["name"].to_s}" by "#{data["artists"][0]["name"].to_s}" downloaded.)
-
   end
 
-  # Will organize the song into the user's provided music directory as 
+  # Will organize the song into the user's provided music directory as
   # music_directory > artist_name > album_name > song
   # Must be called AFTER the song has been downloaded.
   #
   # ```
-  # s = Song.new("Bohemian Rhapsody", "Queen").grab_it()
+  # s = Song.new("Bohemian Rhapsody", "Queen").grab_it
   # s.organize_it("/home/cooper/Music")
-  # # Will move the mp3 file to 
+  # # Will move the mp3 file to
   # # /home/cooper/Music/Queen/A Night At The Opera/1 - Bohemian Rhapsody.mp3
   # ```
   def organize_it(music_directory : String)
@@ -116,20 +114,20 @@ class Song
   # called.
   #
   # ```
-  # Song.new(...).provide_metadata(...).grab_it()
+  # Song.new(...).provide_metadata(...).grab_it
   # ```
   def provide_metadata(metadata : JSON::Any) : self
     @metadata = metadata
     return self
   end
 
-  # Provide an already authenticated `SpotifySearcher` class. Useful to avoid 
+  # Provide an already authenticated `SpotifySearcher` class. Useful to avoid
   # authenticating over and over again. Must be called if provide_metadata and
   # provide_client_keys are not called.
   #
   # ```
-  # Song.new(...).provide_spotify(SpotifySearcher.new()
-  #  .authenticate("XXXXXXXXXX", "XXXXXXXXXXX")).grab_it()
+  # Song.new(...).provide_spotify(SpotifySearcher.new
+  #   .authenticate("XXXXXXXXXX", "XXXXXXXXXXX")).grab_it
   # ```
   def provide_spotify(spotify : SpotifySearcher) : self
     @spotify_searcher = spotify
@@ -140,7 +138,7 @@ class Song
   # provide_spotify are not called.
   #
   # ```
-  # Song.new(...).provide_client_keys("XXXXXXXXXX", "XXXXXXXXX").grab_it()
+  # Song.new(...).provide_client_keys("XXXXXXXXXX", "XXXXXXXXX").grab_it
   # ```
   def provide_client_keys(client_id : String, client_secret : String) : self
     @client_id = client_id

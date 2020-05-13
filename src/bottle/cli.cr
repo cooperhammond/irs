@@ -8,9 +8,7 @@ require "../glue/song"
 require "../glue/album"
 require "../glue/playlist"
 
-
 class CLI
-
   # layout:
   # [[shortflag, longflag], key, type]
   @options = [
@@ -21,9 +19,8 @@ class CLI
     [["-a", "--artist"], "artist", "string"],
     [["-s", "--song"], "song", "string"],
     [["-A", "--album"], "album", "string"],
-    [["-p", "--playlist"], "playlist", "string"]
+    [["-p", "--playlist"], "playlist", "string"],
   ]
-
 
   @args : Hash(String, String)
 
@@ -68,8 +65,7 @@ class CLI
   end
 
   def act_on_args
-    
-    Config.check_necessities()
+    Config.check_necessities
 
     if @args["help"]? || @args.keys.size == 0
       help
@@ -86,17 +82,17 @@ class CLI
     elsif @args["song"]? && @args["artist"]?
       s = Song.new(@args["song"], @args["artist"])
       s.provide_client_keys(Config.client_key, Config.client_secret)
-      s.grab_it()
+      s.grab_it
       s.organize_it(Config.music_directory)
       exit
     elsif @args["album"]? && @args["artist"]?
       a = Album.new(@args["album"], @args["artist"])
       a.provide_client_keys(Config.client_key, Config.client_secret)
-      a.grab_it()
+      a.grab_it
     elsif @args["playlist"]? && @args["artist"]?
       p = Playlist.new(@args["playlist"], @args["artist"])
       p.provide_client_keys(Config.client_key, Config.client_secret)
-      p.grab_it()
+      p.grab_it
     else
       puts Style.red("Those arguments don't do anything when used that way.")
       puts "Type `irs -h` to see usage."
@@ -111,12 +107,11 @@ class CLI
     current_key = ""
     pass_next_arg = false
     argv.each do |arg|
-
       # If the previous arg was an arg flag, this is an arg, so pass it
-      if pass_next_arg 
+      if pass_next_arg
         pass_next_arg = false
         i += 1
-        next 
+        next
       end
 
       flag = [] of Array(String) | String
@@ -140,7 +135,6 @@ class CLI
         arg_error argv, i, %("#{arg}" needs an argument.)
       end
 
-      
       key = flag[1].as(String)
       if flag[2] == "string"
         arguments[key] = argv[i + 1]
