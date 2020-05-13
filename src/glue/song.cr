@@ -11,7 +11,7 @@ class Song
   @client_secret = ""
 
   @metadata : JSON::Any?
-  @filename = ""
+  getter filename = ""
   @artist = ""
   @album = ""
 

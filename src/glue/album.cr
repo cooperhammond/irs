@@ -5,8 +5,6 @@ require "./song"
 require "./list"
 
 
-
-
 class Album < SpotifyList
 
   @home_music_directory = Config.music_directory
@@ -37,7 +35,7 @@ class Album < SpotifyList
       }
     ))
 
-    prepped_data = AlbumTrackMetadataMapper.from_json(datum.to_json)
+    prepped_data = AlbumTracksMapper.from_json(datum.to_json)
     prepped_data.album = album_metadata
 
     data = parse_to_json(prepped_data.to_json)
