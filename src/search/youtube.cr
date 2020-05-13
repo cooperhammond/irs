@@ -1,24 +1,22 @@
 require "http"
 require "xml"
 
-
 module Youtube
-
   extend self
 
   VALID_LINK_CLASSES = [
     "yt-simple-endpoint style-scope ytd-video-renderer",
-    "yt-uix-tile-link yt-ui-ellipsis yt-ui-ellipsis-2 yt-uix-sessionlink      spf-link "
+    "yt-uix-tile-link yt-ui-ellipsis yt-ui-ellipsis-2 yt-uix-sessionlink      spf-link ",
   ]
 
   GARBAGE_PHRASES = [
     "cover", "album", "live", "clean", "version", "full", "full album", "row",
     "at", "@", "session", "how to", "npr music", "reimagined", "hr version",
-    "trailer"
+    "trailer",
   ]
 
   GOLDEN_PHRASES = [
-    "official video", "official music video"
+    "official video", "official music video",
   ]
 
   # Finds a youtube url based off of the given information.
@@ -30,11 +28,11 @@ module Youtube
   # Youtube.find_url("Bohemian Rhapsody", "Queen")
   # => "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
   # ```
-  def find_url(song_name : String, artist_name : String, search_terms = "", 
-  download_first = false) : String?
+  def find_url(song_name : String, artist_name : String, search_terms = "",
+               download_first = false) : String?
     query = (song_name + " " + artist_name + " " + search_terms).strip.gsub(" ", "+")
 
-    url = "https://www.youtube.com/results?search_query=" + query 
+    url = "https://www.youtube.com/results?search_query=" + query
 
     response = HTTP::Client.get(url)
 
@@ -61,11 +59,11 @@ module Youtube
   # Will rank videos according to their title and the user input
   # Return:
   # [
-  #   {"points" => x, "index" => x}, 
-  #   ...  
+  #   {"points" => x, "index" => x},
+  #   ...
   # ]
-  private def rank_videos(song_name : String, artist_name : String, 
-  query : String, nodes : Array(XML::Node)) : Array(Hash(String, Int32))
+  private def rank_videos(song_name : String, artist_name : String,
+                          query : String, nodes : Array(XML::Node)) : Array(Hash(String, Int32))
     points = [] of Hash(String, Int32)
     index = 0
 
@@ -78,14 +76,13 @@ module Youtube
 
       points.push({
         "points" => pts,
-        "index" => index
+        "index"  => index,
       })
       index += 1
-
     end
 
     # Sort first by points and then by original index of the song
-    points.sort!{ |a, b| 
+    points.sort! { |a, b|
       if b["points"] == a["points"]
         a["index"] <=> b["index"]
       else
@@ -96,11 +93,11 @@ module Youtube
     return points
   end
 
-  # Returns an `Int` based off the number of points worth assigning to the 
+  # Returns an `Int` based off the number of points worth assigning to the
   # matchiness of the string. First the strings are downcased and then all
   # nonalphanumeric characters are stripped.
   # If *item1* includes *item2*, return 3 pts.
-  # If after the items have been blanked, *item1* includes *item2*, 
+  # If after the items have been blanked, *item1* includes *item2*,
   #   return 1 pts.
   # Else, return 0 pts.
   private def points_compare(item1 : String, item2 : String) : Int32
@@ -118,10 +115,10 @@ module Youtube
     end
   end
 
-  # Checks if there are any phrases in the title of the video that would 
+  # Checks if there are any phrases in the title of the video that would
   # indicate audio having what we want.
   # *video_name* is the title of the video, and *query* is what the user the
-  # program searched for. *query* is needed in order to make sure we're not 
+  # program searched for. *query* is needed in order to make sure we're not
   # subtracting points from something that's naturally in the title
   private def count_buzzphrases(query : String, video_name : String) : Int32
     good_phrases = 0
@@ -129,7 +126,7 @@ module Youtube
 
     GOLDEN_PHRASES.each do |gold_phrase|
       gold_phrase = gold_phrase.downcase.gsub(/[^a-z0-9]/, "")
-  
+
       if query.downcase.gsub(/[^a-z0-9]/, "").includes?(gold_phrase)
         next
       elsif video_name.downcase.gsub(/[^a-z0-9]/, "").includes?(gold_phrase)

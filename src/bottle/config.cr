@@ -2,7 +2,6 @@ require "yaml"
 
 require "./styles"
 
-
 EXAMPLE_CONFIG = <<-EOP
 #{Style.dim "exampleconfig.yml"}
 #{Style.dim "===="}
@@ -18,17 +17,16 @@ single_folder_playlist:
 EOP
 
 module Config
-
   extend self
 
   @@arguments = [
-    "binary_directory", 
-    "music_directory", 
-    "client_key", 
+    "binary_directory",
+    "music_directory",
+    "client_key",
     "client_secret",
-    "single_folder_playlist: enabled", 
-    "single_folder_playlist: retain_playlist_order", 
-    "single_folder_playlist: overwrite_album"
+    "single_folder_playlist: enabled",
+    "single_folder_playlist: retain_playlist_order",
+    "single_folder_playlist: overwrite_album",
   ]
 
   @@conf = YAML.parse("")
@@ -69,14 +67,14 @@ module Config
 
   def overwrite_album? : Bool
     return @@conf["single_folder_playlist"]["overwrite_album"].as_bool
-  end 
+  end
 
   def check_necessities
     missing_configs = [] of String
     @@arguments.each do |argument|
       if !check_conf(argument)
         missing_configs.push(argument)
-      end      
+      end
     end
     if missing_configs.size > 0
       puts Style.red("You are missing the following key(s) in your YAML config file:")

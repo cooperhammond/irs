@@ -5,10 +5,9 @@ require "../bottle/config"
 # t = Tags.new("bohem rap.mp3")
 # t.add_album_art("a night at the opera album cover.jpg")
 # t.add_text_tag("title", "Bohemian Rhapsody")
-# t.save()
+# t.save
 # ```
 class Tags
-
   # TODO: export this path to a config file
   @BIN_LOC = Config.binary_location
   @query_args = [] of String
@@ -20,7 +19,6 @@ class Tags
     end
 
     @query_args.push(%(-i "#{@filename}"))
-
   end
 
   # Add album art to the mp3. Album art must be added BEFORE text tags are.
@@ -52,7 +50,7 @@ class Tags
 
     l = Logger.new(command, ".tagger.log")
     l.start { |line, start| }
-  
+
     File.delete(@filename)
     File.rename("_" + @filename, @filename)
   end

@@ -4,17 +4,15 @@ require "./mapper"
 require "./song"
 require "./list"
 
-
 class Album < SpotifyList
-
   @home_music_directory = Config.music_directory
 
   # Uses the `spotify_searcher` defined in parent `SpotifyList` to find the
-  # correct metadata of the list 
+  # correct metadata of the list
   def find_it
     album = @spotify_searcher.find_item("album", {
-      "name" => @list_name.as(String),
-      "artist" => @list_author.as(String)
+      "name"   => @list_name.as(String),
+      "artist" => @list_author.as(String),
     })
     if album
       return album.as(JSON::Any)
@@ -24,7 +22,7 @@ class Album < SpotifyList
     end
   end
 
-  # Will define specific metadata that may not be included in the raw return 
+  # Will define specific metadata that may not be included in the raw return
   # of spotify's album json. Moves the title of the album and the album art
   # to the json of the single song
   def organize_song_metadata(list : JSON::Any, datum : JSON::Any) : JSON::Any

@@ -1,5 +1,4 @@
 class Logger
-
   @done_signal = "---DONE---"
 
   @command : String
@@ -11,16 +10,16 @@ class Logger
   def initialize(command : String, @log_name : String, @sleept = 0.01)
     # Have the command output its information to a log and after the command is
     # finished, append an end signal to the document
-    @command = "#{command} > #{@log_name} " # standard output to log
-    @command += "2> #{@log_name} && " # errors to log
-    @command += "echo #{@done_signal} >> #{@log_name}" # 
+    @command = "#{command} > #{@log_name} "            # standard output to log
+    @command += "2> #{@log_name} && "                  # errors to log
+    @command += "echo #{@done_signal} >> #{@log_name}" #
   end
 
   # Run @command in the background and pipe its output to the log file, with
   # something constantly monitoring the log file and yielding each new line to
-  # the block call. Useful for changing the output of binaries you don't have 
+  # the block call. Useful for changing the output of binaries you don't have
   # much control over.
-  # Note that the created temp log will be deleted unless the command fails 
+  # Note that the created temp log will be deleted unless the command fails
   # its exit or .start is called with delete_file: false
   #
   # ```
@@ -34,7 +33,7 @@ class Logger
   #   end
   # end
   # ```
-  def start(delete_file=true, &block) : Bool
+  def start(delete_file = true, &block) : Bool
     # Delete the log if it already exists
     File.delete(@log_name) if File.exists?(@log_name)
 
@@ -44,7 +43,7 @@ class Logger
     }
 
     # Wait for the log file to be written to
-    while !File.exists?(@log_name) 
+    while !File.exists?(@log_name)
       sleep @sleept
     end
 
@@ -68,12 +67,12 @@ class Logger
       end
     end
 
-    status = called.get()
-    if status == true && delete_file == true 
-      log.delete()
+    status = called.get
+    if status == true && delete_file == true
+      log.delete
     end
 
-    return called.get()
+    return called.get
   end
 
   # Reads each line of the file into an Array of Strings

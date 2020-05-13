@@ -8,10 +8,9 @@ require "../interact/tagger"
 
 require "./song"
 
-
 # A parent class for downloading albums and playlists from spotify
 abstract class SpotifyList
-  @spotify_searcher = SpotifySearcher.new()
+  @spotify_searcher = SpotifySearcher.new
   @file_names = [] of String
 
   def initialize(@list_name : String, @list_author : String?)
@@ -19,7 +18,6 @@ abstract class SpotifyList
 
   # Finds the list, and downloads all of the songs using the `Song` class
   def grab_it
-
     if !@spotify_searcher.authorized?
       raise("Need to call provide_client_keys on Album or Playlist class.")
     end
@@ -38,7 +36,7 @@ abstract class SpotifyList
       song = Song.new(data["name"].to_s, data["artists"][0]["name"].to_s)
       song.provide_spotify(@spotify_searcher)
       song.provide_metadata(data)
-      song.grab_it()
+      song.grab_it
 
       organize(song)
 
@@ -57,12 +55,11 @@ abstract class SpotifyList
 
   # If there's a need to organize the individual song data so that the `Song`
   # class can better handle it, this function will be defined in the subclass
-  private abstract def organize_song_metadata(list : JSON::Any, 
-    datum : JSON::Any) : JSON::Any
+  private abstract def organize_song_metadata(list : JSON::Any,
+                                              datum : JSON::Any) : JSON::Any
 
   # Will define the specific type of organization for a list of songs.
   # Needed because most people want albums sorted by artist, but playlists all
   # in one folder
   private abstract def organize(song : Song)
-
 end
