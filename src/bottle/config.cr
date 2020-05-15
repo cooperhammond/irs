@@ -2,17 +2,19 @@ require "yaml"
 
 require "./styles"
 
+require "../search/spotify"
+
 EXAMPLE_CONFIG = <<-EOP
 #{Style.dim "exampleconfig.yml"}
 #{Style.dim "===="}
-binary_directory: ~/.irs/bin
-music_directory: ~/Music
-client_key: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-client_secret: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-single_folder_playlist: 
-  enabled: true
-  retain_playlist_order: true
-  overwrite_album: false
+#{Style.blue "binary_directory"}: #{Style.green "~/.irs/bin"}
+#{Style.blue "music_directory"}: #{Style.green "~/Music"}
+#{Style.blue "client_key"}: #{Style.green "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"}
+#{Style.blue "client_secret"}: #{Style.green "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"}
+#{Style.blue "single_folder_playlist"}: 
+  #{Style.blue "enabled"}: #{Style.green "true"}
+  #{Style.blue "retain_playlist_order"}: #{Style.green "true"}
+  #{Style.blue "overwrite_album"}: #{Style.green "false"}
 #{Style.dim "===="}
 EOP
 
@@ -82,6 +84,16 @@ module Config
         puts "  " + config
       end
       puts "\nHere's an example of what your config should look like:"
+      puts EXAMPLE_CONFIG
+      puts Style.bold "See https://github.com/cooperhammond/irs for more information on the config file"
+      exit 1
+    end
+    spotify = SpotifySearcher.new
+    spotify.authorize(self.client_key, self.client_secret)
+    if !spotify.authorized?
+      puts Style.red("There's something wrong with your client key and/or client secret")
+      puts "Get your keys from https://developer.spotify.com/dashboard, and enter them in your config file"
+      puts "Your config file is at #{ENV["IRS_CONFIG_LOCATION"]}"
       puts EXAMPLE_CONFIG
       puts Style.bold "See https://github.com/cooperhammond/irs for more information on the config file"
       exit 1

@@ -28,7 +28,10 @@ class SpotifySearcher
     payload = "grant_type=client_credentials"
 
     response = HTTP::Client.post(auth_url, headers: headers, form: payload)
-    error_check(response)
+    if response.status_code != 200
+      @authorized = false
+      return self
+    end
 
     access_token = JSON.parse(response.body)["access_token"]
 
