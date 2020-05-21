@@ -33,7 +33,7 @@ class Album < SpotifyList
       }
     ))
 
-    prepped_data = AlbumTracksMapper.from_json(datum.to_json)
+    prepped_data = TrackMapper.from_json(datum.to_json)
     prepped_data.album = album_metadata
 
     data = parse_to_json(prepped_data.to_json)

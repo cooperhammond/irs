@@ -40,8 +40,8 @@ class Song
       })
 
       if !@metadata
-        raise("There was no metadata found on Spotify for\n" +
-              %("#{@song_name}" by "#{@artist_name}\n) +
+        raise("There was no metadata found on Spotify for " +
+              %("#{@song_name}" by "#{@artist_name}". ) +
               "Check your input and try again.")
       end
     end
@@ -54,8 +54,8 @@ class Song
     url = Youtube.find_url(@song_name, @artist_name, search_terms: "lyrics")
 
     if !url
-      raise("There was no url found on youtube for\n" +
-            %("#{@song_name}" by "#{@artist_name}\n) +
+      raise("There was no url found on youtube for " +
+            %("#{@song_name}" by "#{@artist_name}. ) +
             "Check your input and try again.")
     end
 
@@ -67,7 +67,12 @@ class Song
       File.write(temp_albumart_filename, response.body_io)
     end
 
-    @artist = data["artists"][0]["name"].to_s
+    # check if song's metadata has been modded in playlist, update artist accordingly
+    if data["artists"][-1]["owner"]? 
+      @artist = data["artists"][-1]["name"].to_s
+    else
+      @artist = data["artists"][0]["name"].to_s
+    end
     @album = data["album"]["name"].to_s
 
     tagger = Tags.new(@filename)
@@ -75,7 +80,7 @@ class Song
     tagger.add_text_tag("title", data["name"].to_s)
     tagger.add_text_tag("artist", @artist)
     tagger.add_text_tag("album", @album)
-    tagger.add_text_tag("genre",
+    tagger.add_text_tag("genre", 
       @spotify_searcher.find_genre(data["artists"][0]["id"].to_s))
     tagger.add_text_tag("track", data["track_number"].to_s)
     tagger.add_text_tag("disc", data["disc_number"].to_s)

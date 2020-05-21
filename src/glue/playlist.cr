@@ -1,9 +1,13 @@
+require "json"
+
 require "../bottle/config"
 
 require "./song"
 require "./list"
+require "./mapper"
 
 class Playlist < SpotifyList
+  @song_index = 1
   @home_music_directory = Config.music_directory
   @playlist : JSON::Any?
 
@@ -27,6 +31,28 @@ class Playlist < SpotifyList
   # to the json of the single song
   def organize_song_metadata(list : JSON::Any, datum : JSON::Any) : JSON::Any
     data = datum
+
+    if Config.retain_playlist_order?
+      track = TrackMapper.from_json(data.to_json)
+      track.track_number = @song_index
+      track.disc_number = 1
+      data = JSON.parse(track.to_json)
+    end
+
+    if Config.unify_into_album?
+      track = TrackMapper.from_json(data.to_json)
+      track.album = JSON.parse(%({
+        "name": "#{list["name"]}",
+        "images": [{"url": "#{list["images"][0]["url"]}"}]
+      }))
+      track.artists.push(JSON.parse(%({
+        "name": "#{list["owner"]["display_name"]}",
+        "owner": true
+      })))
+      data = JSON.parse(track.to_json)
+    end
+
+    @song_index += 1
 
     return data
   end
