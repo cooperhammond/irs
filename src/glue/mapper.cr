@@ -24,18 +24,27 @@ class PlaylistTracksMapper
   )
 end
 
-class AlbumTracksMapper
+class TrackMapper
   JSON.mapping(
     album: {
       type:    JSON::Any,
       nilable: true,
       setter:  true,
     },
-    artists: JSON::Any,
-    disc_number: Int32,
+    artists: {
+      type: Array(JSON::Any),
+      setter: true  
+    },
+    disc_number: {
+      type: Int32,
+      setter: true
+    },
     id: String,
     name: String,
-    track_number: Int32,
+    track_number: {
+      type: Int32,
+      setter: true
+    },
     type: String,
     uri: String
   )

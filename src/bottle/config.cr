@@ -14,7 +14,7 @@ EXAMPLE_CONFIG = <<-EOP
 #{Style.blue "single_folder_playlist"}: 
   #{Style.blue "enabled"}: #{Style.green "true"}
   #{Style.blue "retain_playlist_order"}: #{Style.green "true"}
-  #{Style.blue "overwrite_album"}: #{Style.green "false"}
+  #{Style.blue "unify_into_album"}: #{Style.green "false"}
 #{Style.dim "===="}
 EOP
 
@@ -28,7 +28,7 @@ module Config
     "client_secret",
     "single_folder_playlist: enabled",
     "single_folder_playlist: retain_playlist_order",
-    "single_folder_playlist: overwrite_album",
+    "single_folder_playlist: unify_into_album",
   ]
 
   @@conf = YAML.parse("")
@@ -67,8 +67,8 @@ module Config
     return @@conf["single_folder_playlist"]["retain_playlist_order"].as_bool
   end
 
-  def overwrite_album? : Bool
-    return @@conf["single_folder_playlist"]["overwrite_album"].as_bool
+  def unify_into_album? : Bool
+    return @@conf["single_folder_playlist"]["unify_into_album"].as_bool
   end
 
   def check_necessities
