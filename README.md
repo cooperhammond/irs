@@ -75,6 +75,8 @@ Examples:
 Just download the latest release for your platform 
 [here](https://github.com/cooperhammond/irs/releases).
 
+Note that the binaries right now have only been tested on WSL. They *should* run on most linux distros, and OS X, but if they don't please make an issue above.
+
 ### From Source
 
 If you're one of those cool people who compiles from source
