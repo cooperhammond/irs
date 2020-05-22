@@ -1,30 +1,14 @@
-# General stuff to ignore.
-*.pyc
-/dist/
-/*.egg-info/
-/build/
-__pycache__/
-.eggs
+/docs/
+/lib/
+/bin/
+/logs/
+/.shards/
+/Music/
+*.dwarf
 
-# For easy updating of stuff.
-update_pypi_and_github.py
-
-# Currently in progress
-/flexx-app/
-/.idea/
-*test.py
-
-# Temporarily downloaded files
 *.mp3
-*.zip
-*.part
-*.webm
-
-# Coverage files
-.coverage
-
-# Temporarily built binaries
-ffmpeg binaries/
-
-# vscode work space
-.vscode/
+*.webm*
+.ripper.log
+ffmpeg
+ffprobe
+youtube-dl
