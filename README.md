@@ -1,16 +1,93 @@
-# `irs`
-###### AKA `Ironic Repositioning System`
+# irs: The Ironic Repositioning System
 
 [![made-with-crystal](https://img.shields.io/badge/Made%20with-Crystal-1f425f.svg?style=flat-square)](https://crystal-lang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](https://github.com/cooperhammond/irs/blob/master/LICENSE)
-[![Say Thanks](https://img.shields.io/badge/say-thanks-ff69b4.svg?style=flat-square)](https://saythanks.io/to/kepoorhampond)
+[![Say Thanks](https://img.shields.io/badge/say-thanks-ff69b4.svg?style=flat-square)](https://saythanks.io/to/kepoorh%40gmail.com)
 
 > A music scraper that understands your metadata needs.
 
+`irs` is a command-line application that downloads audio and metadata in order
+to package an mp3 with both. Extensible, the user can download individual 
+songs, entire albums, or playlists from Spotify.
+
+<p align="center">
+    <img src="https://i.imgur.com/7QTM6rD.png" height="400" title="#1F816D" />
+</p>
+<p align="center"
+
+[![forthebadge](https://forthebadge.com/images/badges/compatibility-betamax.svg)](https://forthebadge.com)
+[![forthebadge](https://forthebadge.com/images/badges/ages-18.svg)](https://forthebadge.com)
+[![forthebadge](https://forthebadge.com/images/badges/built-by-codebabes.svg)](https://forthebadge.com)
+</p>
+
+---
+
+## Table of Contents
+
+- [Usage](#usage)
+    - [Demo](#demo)
+- [Installation](#installation)
+    - [Pre-built](#pre-built)
+    - [From source](#from-source)
+    - [Set up](#setup)
+- [Config](#config)
+- [How it works](#how-it-works)
+- [Contributing](#contributing)
+
+
+## Usage
+
+```
+~ $ irs -h
+
+Usage: irs [--help] [--version] [--install]
+           [-s <song> -a <artist>]
+           [-A <album> -a <artist>]
+           [-p <playlist> -a <username>]
+
+Arguments:
+    -h, --help                  Show this help message and exit
+    -v, --version               Show the program version and exit
+    -i, --install               Download binaries to config location
+    -c, --config                Show config file location
+    -a, --artist <artist>       Specify artist name for downloading
+    -s, --song <song>           Specify song name to download
+    -A, --album <album>         Specify the album name to download
+    -p, --playlist <playlist>   Specify the playlist name to download
+
+Examples:
+    $ irs --song "Bohemian Rhapsody" --artist "Queen"
+    # => downloads the song "Bohemian Rhapsody" by "Queen"
+    $ irs --album "Demon Days" --artist "Gorillaz"
+    # => downloads the album "Demon Days" by "Gorillaz"
+    $ irs --playlist "a different drummer" --artist "prakkillian"
+    # => downloads the playlist "a different drummer" by the user prakkillian
+```
+
+### Demo
+
+[![asciicast](https://asciinema.org/a/332793.svg)](https://asciinema.org/a/332793)
+
 ## Installation
 
-1. Download the latest release for your platform [here](https://github.com/cooperhammond/irs/releases)
-1. Create a `.yaml` config file somewhere on your system
+### Pre-built 
+
+Just download the latest release for your platform 
+[here](https://github.com/cooperhammond/irs/releases).
+
+### From Source
+
+If you're one of those cool people who compiles from source
+
+1. Install crystal-lang 
+    ([`https://crystal-lang.org/install/`](https://crystal-lang.org/install/))
+1. Clone it (`git clone https://github.com/cooperhammond/irs`)
+1. CD it (`cd irs`)
+1. Build it (`shards build`)
+
+### Setup
+
+1. Create a `.yaml` config file somewhere on your system (usually `~/.irs/`)
 1. Copy the following into it
     ```yaml
     binary_directory: ~/.irs/bin
@@ -20,7 +97,7 @@
     single_folder_playlist:
         enabled: true
         retain_playlist_order: true
-        overwrite_album: false
+        unify_into_album: false
     ```
 1. Set the environment variable `IRS_CONFIG_LOCATION` pointing to that file
 1. Go to [`https://developer.spotify.com/dashboard/`](https://developer.spotify.com/dashboard/)
@@ -28,40 +105,70 @@
 1. Click `CREATE A CLIENT ID`
 1. Enter all necessary info, true or false, continue
 1. Find your client key and client secret
-2. Copy them into where all the X's are in your config file from above
+1. Copy each respectively into the X's in your config file
+1. Run `irs --install` and answer the prompts!
 
-You should be good to go! Run the file from your command line to get help on usage or keep reading!
+You should be good to go! Run the file from your command line to get more help on
+usage or keep reading!
 
-##### Optionally From Source
+# Config
 
-Or if you're one of those cool people who compiles from source
-
-1. Install crystal-lang ([`https://crystal-lang.org/install/`](https://crystal-lang.org/install/))
-1. Clone it (`git clone https://github.com/cooperhammond/irs`)
-1. CD it (`cd irs`)
-1. Build it (`shards build`)
-
-## Usage
-
-<p align="center">
-    <img src="https://i.imgur.com/uYKh101.png" height="600" />
-</p>
+You may have noticed that there's a config file with more than a few options. 
+Here's what they do:
+```yaml
+binary_directory: ~/.irs/bin
+music_directory: ~/Music
+client_key: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+client_secret: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+single_folder_playlist:
+    enabled: true
+    retain_playlist_order: true
+    unify_into_album: false
+```
+ - `binary_directory`: a path specifying where the downloaded binaries should
+    be placed
+ - `music_directory`: a path specifying where downloaded mp3s should be placed.
+    Note that there will be more structure created inside that folder, usually
+    in the format of `music-dir>artist-name>album-name>track`
+ - `client_key`: a client key from your spotify API application
+ - `client_secret`: a client secret key from your spotify API application
+ - `single_folder_playlist/enabled`: if set to true, all mp3s from a downloaded
+    playlist will be placed in the same folder.
+ - `single_folder_playlist/retain_playlist_order`: if set to true, the track 
+    numbers of the mp3s of the playlist will be overwritten to correspond to
+    their place in the playlist
+ - `single_folder_playlist/unify_into_album`: if set to true, will overwrite
+    the album name and album image of the mp3 with the title of your playlist
+    and the image for your playlist respectively
 
 ## How it works
 
-**At it's core** `irs` downloads individual songs. It does this by interfacing with the Spotify API, grabbing metadata, and then searching Youtube for a video containing the song's audio. It will download the video using [`youtube-dl`](https://github.com/ytdl-org/youtube-dl), extract the audio using [`ffmpeg`](https://ffmpeg.org/), and then pack the audio and metadata together into an MP3.
+**At it's core** `irs` downloads individual songs. It does this by interfacing
+with the Spotify API, grabbing metadata, and then searching Youtube for a video
+containing the song's audio. It will download the video using 
+[`youtube-dl`](https://github.com/ytdl-org/youtube-dl), extract the audio using
+[`ffmpeg`](https://ffmpeg.org/), and then pack the audio and metadata together
+into an MP3.
 
-From the core, it has been extended to download the index of albums and playlists through the spotify API, and then iteratively use the method above for downloading each song.
+From the core, it has been extended to download the index of albums and 
+playlists through the spotify API, and then iteratively use the method above
+for downloading each song.
 
-It used to be in `python`, but
+It used to be in python, but
 1. I wasn't a fan of python's limited ability to distribute standalone binaries
-1. It was a clusterfuck of code that I made when I was little and I wanted to refine it
-2. `crystal-lang` made some promises and I was interested in seeing how well it did (verdict: if you're building high-level tools you want to run quickly and distribute, it's a joy to work in)
+1. It was a charlie foxtrot of code that I made when I was little and I wanted
+    to refine it
+1. `crystal-lang` made some promises and I was interested in seeing how well it
+    did (verdict: if you're building high-level tools you want to run quickly 
+    and distribute, it's perfect)
 
 
 ## Contributing
 
-Any and all contributions are welcome. If you think of a cool feature, send a PR or shoot me an [email](mailto:kepoorh@gmail.com). If you think something could be implemented better, _please_ shoot me an email. If you like what I'm doing here, _pretty please_ shoot me an email.
+Any and all contributions are welcome. If you think of a cool feature, send a 
+PR or shoot me an [email](mailto:kepoorh@gmail.com). If you think something 
+could be implemented better, _please_ shoot me an email. If you like what I'm
+doing here, _pretty please_ shoot me an email.
 
 1. Fork it (<https://github.com/your-github-user/irs/fork>)
 2. Create your feature branch (`git checkout -b my-new-feature`)
