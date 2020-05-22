@@ -13,6 +13,13 @@ abstract class SpotifyList
   @spotify_searcher = SpotifySearcher.new
   @file_names = [] of String
 
+  @outputs : Hash(String, Array(String)) = {
+    "searching" => [
+      Style.bold("Searching for %l by %a ... \r"),
+      Style.green("+ ") + Style.bold("%l by %a                                 \n")
+    ]
+  }
+
   def initialize(@list_name : String, @list_author : String?)
   end
 
@@ -22,7 +29,9 @@ abstract class SpotifyList
       raise("Need to call provide_client_keys on Album or Playlist class.")
     end
 
+    outputter("searching", 0)
     list = find_it()
+    outputter("searching", 1)
     contents = list["tracks"]["items"].as_a
 
     i = 0
@@ -36,6 +45,8 @@ abstract class SpotifyList
       song = Song.new(data["name"].to_s, data["artists"][0]["name"].to_s)
       song.provide_spotify(@spotify_searcher)
       song.provide_metadata(data)
+
+      puts Style.bold("[#{data["track_number"]}/#{contents.size}]")
       song.grab_it
 
       organize(song)
@@ -47,6 +58,13 @@ abstract class SpotifyList
   # Will authorize the class associated `SpotifySearcher`
   def provide_client_keys(client_key : String, client_secret : String)
     @spotify_searcher.authorize(client_key, client_secret)
+  end
+
+  private def outputter(key : String, index : Int32)
+    text = @outputs[key][index]
+      .gsub("%l", @list_name)
+      .gsub("%a", @list_author)
+    print text
   end
 
   # Defined in subclasses, will return the appropriate information or call an

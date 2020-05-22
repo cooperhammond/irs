@@ -1,5 +1,6 @@
 require "./logger"
 require "../bottle/config"
+require "../bottle/styles"
 
 module Ripper
   extend self
@@ -54,11 +55,11 @@ module Ripper
           print "\e[1A"
           print "\e[0K\r"
         end
-        puts line.sub("[download]", "  ")
+        puts line.sub("[download]", "   ")
         @dl_status_index += 1
 
         if line.includes? "100%"
-          puts "Converting to mp3 ..."
+          print "  Converting to mp3 ..."
         end
       end
     end

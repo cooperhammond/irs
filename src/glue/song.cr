@@ -4,6 +4,8 @@ require "../search/youtube"
 require "../interact/ripper"
 require "../interact/tagger"
 
+require "../bottle/styles"
+
 class Song
   @spotify_searcher = SpotifySearcher.new
   @client_id = ""
@@ -14,6 +16,33 @@ class Song
   @artist = ""
   @album = ""
 
+  @outputs : Hash(String, Array(String)) = {
+    "intro" => [Style.bold("[%s by %a]\n")],
+    "metadata" => [
+      "  Searching for metadata ...\r",
+      Style.green("  + ") + Style.dim("Metadata found                  \n")
+    ],
+    "url" => [
+      "  Searching for URL ...\r",
+      Style.green("  + ") + Style.dim("URL found                       \n")
+    ],
+    "download" => [
+      "  Downloading video:\n",
+      Style.green("\r  + ") + Style.dim("Converted to mp3              \n")
+    ],
+    "albumart" => [
+      "  Downloading album art ...\r",
+      Style.green("  + ") + Style.dim("Album art downloaded            \n")
+    ],
+    "tagging" => [
+      "  Attaching metadata ...\r",
+      Style.green("  + ") + Style.dim("Metadata attached               \n")
+    ],
+    "finished" => [
+      Style.green("  + ") + "Finished!\n"
+    ]
+  }
+
   def initialize(@song_name : String, @artist_name : String)
   end
 
@@ -23,6 +52,8 @@ class Song
   # Song.new("Bohemian Rhapsody", "Queen").grab_it
   # ```
   def grab_it
+    outputter("intro", 0)
+
     if !@spotify_searcher.authorized? && !@metadata
       if @client_id != "" && @client_secret != ""
         @spotify_searcher.authorize(@client_id, @client_secret)
@@ -33,7 +64,7 @@ class Song
     end
 
     if !@metadata
-      puts "Searching for metadata ..."
+      outputter("metadata", 0)
       @metadata = @spotify_searcher.find_item("track", {
         "name"   => @song_name,
         "artist" => @artist_name,
@@ -44,28 +75,31 @@ class Song
               %("#{@song_name}" by "#{@artist_name}". ) +
               "Check your input and try again.")
       end
+      outputter("metadata", 1)
     end
 
     data = @metadata.as(JSON::Any)
     @filename = data["track_number"].to_s + " - #{data["name"].to_s}.mp3"
 
-    puts "Searching for url ..."
-    # TODO: should this search_term be here?
+    outputter("url", 0)
     url = Youtube.find_url(@song_name, @artist_name, search_terms: "lyrics")
-
     if !url
       raise("There was no url found on youtube for " +
             %("#{@song_name}" by "#{@artist_name}. ) +
             "Check your input and try again.")
     end
+    outputter("url", 1)
 
-    puts "Downloading video:"
+    outputter("download", 0)
     Ripper.download_mp3(url.as(String), @filename)
+    outputter("download", 1)
 
+    outputter("albumart", 0)
     temp_albumart_filename = ".tempalbumart.jpg"
     HTTP::Client.get(data["album"]["images"][0]["url"].to_s) do |response|
       File.write(temp_albumart_filename, response.body_io)
     end
+    outputter("albumart", 0)
 
     # check if song's metadata has been modded in playlist, update artist accordingly
     if data["artists"][-1]["owner"]? 
@@ -85,11 +119,12 @@ class Song
     tagger.add_text_tag("track", data["track_number"].to_s)
     tagger.add_text_tag("disc", data["disc_number"].to_s)
 
-    puts "Tagging metadata ..."
+    outputter("tagging", 0)
     tagger.save
     File.delete(temp_albumart_filename)
+    outputter("tagging", 1)
 
-    puts %("#{data["name"].to_s}" by "#{data["artists"][0]["name"].to_s}" downloaded.)
+    outputter("finished", 0)
   end
 
   # Will organize the song into the user's provided music directory as
@@ -149,5 +184,12 @@ class Song
     @client_id = client_id
     @client_secret = client_secret
     return self
+  end
+
+  private def outputter(key : String, index : Int32)
+    text = @outputs[key][index]
+      .gsub("%s", @song_name)
+      .gsub("%a", @artist_name)
+    print text
   end
 end
