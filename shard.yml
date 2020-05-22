@@ -1,0 +1,15 @@
+name: irs
+version: 1.0.0
+
+authors:
+  - Cooper Hammond <kepoorh@gmail.com>
+
+targets:
+  irs:
+    main: src/irs.cr
+
+license: MIT
+
+dependencies:
+  ydl_binaries:
+    github: cooperhammond/ydl-binaries

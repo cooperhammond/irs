@@ -1,85 +1,177 @@
-# Ironic Redistribution System
+# irs: The Ironic Repositioning System
 
-[![License: GNU](https://img.shields.io/badge/license-gnu-yellow.svg?style=flat-square)](http://www.gnu.org/licenses/gpl.html)
-[![Stars](https://img.shields.io/github/stars/kepoorhampond/irs.svg?style=flat-square)](https://github.com/kepoorhampond/irs/stargazers)
-[![Say Thanks](https://img.shields.io/badge/say-thanks-ff69b4.svg?style=flat-square)](https://saythanks.io/to/kepoorhampond)
-[![PyPI](https://img.shields.io/badge/pypi-irs-blue.svg?style=flat-square)](https://pypi.python.org/pypi/irs)
+[![made-with-crystal](https://img.shields.io/badge/Made%20with-Crystal-1f425f.svg?style=flat-square)](https://crystal-lang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](https://github.com/cooperhammond/irs/blob/master/LICENSE)
+[![Say Thanks](https://img.shields.io/badge/say-thanks-ff69b4.svg?style=flat-square)](https://saythanks.io/to/kepoorh%40gmail.com)
 
-> A music downloader that understands your metadata needs.
+> A music scraper that understands your metadata needs.
 
-A tool to download your music with metadata. It uses [Spotify](https://www.spotify.com/) for finding metadata and [Youtube](https://www.youtube.com/) for the actual audio source. You will need to have some Spotify tokens, the instructions to set them up are [here](https://github.com/kepoorhampond/irs#spotify-tokens).
+`irs` is a command-line application that downloads audio and metadata in order
+to package an mp3 with both. Extensible, the user can download individual 
+songs, entire albums, or playlists from Spotify.
 
-Works with Python 2 and 3.
+<p align="center">
+    <img src="https://i.imgur.com/7QTM6rD.png" height="400" title="#1F816D" />
+</p>
+<p align="center"
 
-## Install and Setup
+[![forthebadge](https://forthebadge.com/images/badges/compatibility-betamax.svg)](https://forthebadge.com)
+[![forthebadge](https://forthebadge.com/images/badges/ages-18.svg)](https://forthebadge.com)
+[![forthebadge](https://forthebadge.com/images/badges/built-by-codebabes.svg)](https://forthebadge.com)
+</p>
+
+---
+
+## Table of Contents
+
+- [Usage](#usage)
+    - [Demo](#demo)
+- [Installation](#installation)
+    - [Pre-built](#pre-built)
+    - [From source](#from-source)
+    - [Set up](#setup)
+- [Config](#config)
+- [How it works](#how-it-works)
+- [Contributing](#contributing)
+
+
+## Usage
+
 ```
-$ sudo pip install irs
-$ irs --setup
+~ $ irs -h
+
+Usage: irs [--help] [--version] [--install]
+           [-s <song> -a <artist>]
+           [-A <album> -a <artist>]
+           [-p <playlist> -a <username>]
+
+Arguments:
+    -h, --help                  Show this help message and exit
+    -v, --version               Show the program version and exit
+    -i, --install               Download binaries to config location
+    -c, --config                Show config file location
+    -a, --artist <artist>       Specify artist name for downloading
+    -s, --song <song>           Specify song name to download
+    -A, --album <album>         Specify the album name to download
+    -p, --playlist <playlist>   Specify the playlist name to download
+
+Examples:
+    $ irs --song "Bohemian Rhapsody" --artist "Queen"
+    # => downloads the song "Bohemian Rhapsody" by "Queen"
+    $ irs --album "Demon Days" --artist "Gorillaz"
+    # => downloads the album "Demon Days" by "Gorillaz"
+    $ irs --playlist "a different drummer" --artist "prakkillian"
+    # => downloads the playlist "a different drummer" by the user prakkillian
 ```
 
-**You will need to have some Spotify tokens, the instructions to set them up are [here](https://github.com/kepoorhampond/irs#spotify-tokens).**
+### Demo
 
+[![asciicast](https://asciinema.org/a/332793.svg)](https://asciinema.org/a/332793)
 
-## Demo and Usages
+## Installation
 
-The usages can be found with the `-h` or `--help` flag:
+### Pre-built 
+
+Just download the latest release for your platform 
+[here](https://github.com/cooperhammond/irs/releases).
+
+### From Source
+
+If you're one of those cool people who compiles from source
+
+1. Install crystal-lang 
+    ([`https://crystal-lang.org/install/`](https://crystal-lang.org/install/))
+1. Clone it (`git clone https://github.com/cooperhammond/irs`)
+1. CD it (`cd irs`)
+1. Build it (`shards build`)
+
+### Setup
+
+1. Create a `.yaml` config file somewhere on your system (usually `~/.irs/`)
+1. Copy the following into it
+    ```yaml
+    binary_directory: ~/.irs/bin
+    music_directory: ~/Music
+    client_key: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    client_secret: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    single_folder_playlist:
+        enabled: true
+        retain_playlist_order: true
+        unify_into_album: false
+    ```
+1. Set the environment variable `IRS_CONFIG_LOCATION` pointing to that file
+1. Go to [`https://developer.spotify.com/dashboard/`](https://developer.spotify.com/dashboard/)
+1. Log in or create an account
+1. Click `CREATE A CLIENT ID`
+1. Enter all necessary info, true or false, continue
+1. Find your client key and client secret
+1. Copy each respectively into the X's in your config file
+1. Run `irs --install` and answer the prompts!
+
+You should be good to go! Run the file from your command line to get more help on
+usage or keep reading!
+
+# Config
+
+You may have noticed that there's a config file with more than a few options. 
+Here's what they do:
+```yaml
+binary_directory: ~/.irs/bin
+music_directory: ~/Music
+client_key: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+client_secret: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+single_folder_playlist:
+    enabled: true
+    retain_playlist_order: true
+    unify_into_album: false
 ```
-usage: irs [-h] [-S] [-a ARTIST] [-s SONG] [-A ALBUM] [-p PLAYLIST]
-           [-u USERNAME] [-o ORGANIZATION]
+ - `binary_directory`: a path specifying where the downloaded binaries should
+    be placed
+ - `music_directory`: a path specifying where downloaded mp3s should be placed.
+    Note that there will be more structure created inside that folder, usually
+    in the format of `music-dir>artist-name>album-name>track`
+ - `client_key`: a client key from your spotify API application
+ - `client_secret`: a client secret key from your spotify API application
+ - `single_folder_playlist/enabled`: if set to true, all mp3s from a downloaded
+    playlist will be placed in the same folder.
+ - `single_folder_playlist/retain_playlist_order`: if set to true, the track 
+    numbers of the mp3s of the playlist will be overwritten to correspond to
+    their place in the playlist
+ - `single_folder_playlist/unify_into_album`: if set to true, will overwrite
+    the album name and album image of the mp3 with the title of your playlist
+    and the image for your playlist respectively
 
-optional arguments:
-  -h, --help            show this help message and exit
-  -S, --setup           Run this by itself to setup config files and folder
-                        for irs and download the ffmpeg binaries
-  -a ARTIST, --artist ARTIST
-                        Specify artist name. Must be used with -s/--song or
-                        -A/--album
-  -s SONG, --song SONG  Specify song name. Must be used with -a/--artist
-  -A ALBUM, --album ALBUM
-                        Specify album name. Can be used by itself.
-  -p PLAYLIST, --playlist PLAYLIST
-                        Specify playlist name. Must be used with -A/--album
-  -u USERNAME, --username USERNAME
-                        Specify user name for playlist. Must be used with
-                        -A/--album
-  -o ORGANIZATION, --organization ORGANIZATION
-                        Specify type of organization for list. Used when
-                        downloading spotify playlist/album
-```
+## How it works
 
-So all of these are valid commands:
-```
-$ irs -a "Brandon Flowers" -s "Lonely Town"
-$ irs -u "spotify" -p "Brain Food"
-$ irs -A "Suicide Squad: The Album"
-```
-But these are not:
-```
-$ irs -s "Bohemian Rhapsody"
-$ irs -p "Best Nirvana"
-```
+**At it's core** `irs` downloads individual songs. It does this by interfacing
+with the Spotify API, grabbing metadata, and then searching Youtube for a video
+containing the song's audio. It will download the video using 
+[`youtube-dl`](https://github.com/ytdl-org/youtube-dl), extract the audio using
+[`ffmpeg`](https://ffmpeg.org/), and then pack the audio and metadata together
+into an MP3.
 
-## Spotify Tokens
+From the core, it has been extended to download the index of albums and 
+playlists through the spotify API, and then iteratively use the method above
+for downloading each song.
 
-To download metadata through spotify, you'll want to head to their Dev Apps page, [here](https://developer.spotify.com/my-applications/). After doing that you'll want to create a new app. Name it whatever you want and then once you've done that, find the `Client ID` and `Client Secret` keys. You'll want to take those keys and paste them into your system's environment variables as `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET`, correspondingly. Voilà! You can now download metadata with IRS!
+It used to be in python, but
+1. I wasn't a fan of python's limited ability to distribute standalone binaries
+1. It was a charlie foxtrot of code that I made when I was little and I wanted
+    to refine it
+1. `crystal-lang` made some promises and I was interested in seeing how well it
+    did (verdict: if you're building high-level tools you want to run quickly 
+    and distribute, it's perfect)
 
-## Metadata
 
-Currently, the program attaches the following metadata to the downloaded files:
- - Title
- - Artist
- - Album
- - Album Art
- - Genre
- - Track Number
- - Disc Number
+## Contributing
 
-## Wishlist
+Any and all contributions are welcome. If you think of a cool feature, send a 
+PR or shoot me an [email](mailto:kepoorh@gmail.com). If you think something 
+could be implemented better, _please_ shoot me an email. If you like what I'm
+doing here, _pretty please_ shoot me an email.
 
- - [x] Full album downloading
- - [x] Album art metadata correctly displayed
- - [x] Spotify playlist downloading
- - [ ] Comment metadata
- - [ ] Compilation metadata
- - [ ] GUI/Console interactive version - *in progress*
- - [ ] Lyric metadata
+1. Fork it (<https://github.com/your-github-user/irs/fork>)
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create a new Pull Request

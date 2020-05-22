@@ -1,0 +1,6 @@
+version: 1.0
+shards:
+  ydl_binaries:
+    github: cooperhammond/ydl-binaries
+    commit: c82e3937fee20fd076b1c73e24b2d0205e2cf0da
+
