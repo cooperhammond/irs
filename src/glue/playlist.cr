@@ -13,7 +13,7 @@ class Playlist < SpotifyList
 
   # Uses the `spotify_searcher` defined in parent `SpotifyList` to find the
   # correct metadata of the list
-  def find_it
+  def find_it : JSON::Any
     @playlist = @spotify_searcher.find_item("playlist", {
       "name"     => @list_name.as(String),
       "username" => @list_author.as(String),

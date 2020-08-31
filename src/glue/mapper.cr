@@ -1,4 +1,5 @@
 require "json"
+require "json_mapping"
 
 class PlaylistExtensionMapper
   JSON.mapping(
