@@ -146,7 +146,8 @@ class Song
       FileUtils.mkdir_p(strpath)
     end
     safe_filename = @filename.gsub(/[\/]/, "").gsub("  ", " ")
-    File.rename("./" + @filename, (path / safe_filename).to_s)
+    FileUtils.cp("./" + @filename, (path / safe_filename).to_s)
+    FileUtils.rm("./" + @filename)
   end
 
   # Provide metadata so that it doesn't have to find it. Useful for overwriting

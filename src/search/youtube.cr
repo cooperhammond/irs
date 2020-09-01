@@ -1,5 +1,7 @@
 require "http"
 require "xml"
+require "json"
+
 
 module Youtube
   extend self
@@ -18,6 +20,8 @@ module Youtube
   GOLDEN_PHRASES = [
     "official video", "official music video",
   ]
+
+  alias NODES_CLASS = Array(Hash(String, String))
 
   # Finds a youtube url based off of the given information.
   # The query to youtube is constructed like this:
@@ -63,7 +67,7 @@ module Youtube
   #   ...
   # ]
   private def rank_videos(song_name : String, artist_name : String,
-                          query : String, nodes : Array(XML::Node)) : Array(Hash(String, Int32))
+                          query : String, nodes : Array(Hash(String, String))) : Array(Hash(String, Int32))
     points = [] of Hash(String, Int32)
     index = 0
 
@@ -149,32 +153,45 @@ module Youtube
 
   # Finds valid video links from a `HTTP::Client.get` request
   # Returns an `Array` of `XML::Node`
-  private def get_video_link_nodes(doc : String) : Array(XML::Node)
-    nodes = XML.parse(doc).xpath_nodes("//a")
-    valid_nodes = [] of XML::Node
+  private def get_video_link_nodes(response_body : String) : NODES_CLASS
+    yt_initial_data : JSON::Any = JSON.parse("{}")
 
-    nodes.each do |node|
-      if video_link_node?(node)
-        valid_nodes.push(node)
+    response_body.each_line do |line|
+      if line.includes?("window[\"ytInitialData\"]")
+        yt_initial_data = JSON.parse(line.split(" = ")[1][0..-2])
       end
     end
 
-    return valid_nodes
-  end
-
-  # Tests if the provided `XML::Node` has a valid link to a video
-  # Returns a `Bool`
-  private def video_link_node?(node : XML::Node) : Bool
-    # If this passes, then the node links to a playlist, not a video
-    if node["href"]?
-      return false if node["href"].includes?("&list=")
+    if yt_initial_data == JSON.parse("{}")
+      puts "Youtube has changed the way it organizes its webpage, submit a bug"
+      puts "on https://github.com/cooperhammond/irs"
+      exit(1)
     end
 
-    VALID_LINK_CLASSES.each do |valid_class|
-      if node["class"]?
-        return true if node["class"].includes?(valid_class)
+    # where the vid metadata lives
+    yt_initial_data = yt_initial_data["contents"]["twoColumnSearchResultsRenderer"]["primaryContents"]["sectionListRenderer"]["contents"]
+
+    video_metadata = [] of Hash(String, String)
+
+    i = 0
+    while true
+      begin
+        # video title
+        raw_metadata = yt_initial_data[0]["itemSectionRenderer"]["contents"][i]["videoRenderer"]
+
+        metadata = {} of String => String
+
+        metadata["title"] = raw_metadata["title"]["runs"][0]["text"].as_s
+        metadata["href"] = raw_metadata["navigationEndpoint"]["commandMetadata"]["webCommandMetadata"]["url"].as_s
+    
+        video_metadata.push(metadata)
+      rescue IndexError
+        break
+      rescue Exception
       end
+      i += 1
     end
-    return false
+
+    return video_metadata
   end
 end
