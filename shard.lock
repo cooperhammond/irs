@@ -1,6 +1,10 @@
-version: 1.0
+version: 2.0
 shards:
+  json_mapping:
+    git: https://github.com/crystal-lang/json_mapping.cr.git
+    version: 0.1.0
+
   ydl_binaries:
-    github: cooperhammond/ydl-binaries
-    commit: c82e3937fee20fd076b1c73e24b2d0205e2cf0da
+    git: https://github.com/cooperhammond/ydl-binaries.git
+    version: 1.1.1+git.commit.c82e3937fee20fd076b1c73e24b2d0205e2cf0da
 

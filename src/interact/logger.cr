@@ -1,3 +1,5 @@
+require "./future"
+
 class Logger
   @done_signal = "---DONE---"
 
