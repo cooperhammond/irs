@@ -23,6 +23,17 @@ module Youtube
 
   alias NODES_CLASS = Array(Hash(String, String))
 
+  # Checks if the given URL is a valid youtube URL
+  #
+  # ```
+  # Youtube.is_valid_url("https://www.youtube.com/watch?v=NOTANACTUALVIDEOID")
+  # => false
+  # ```
+  def is_valid_url(url : String) : Bool
+    response = HTTP::Client.get(url)
+    return !(response.status_code == 404)
+  end
+
   # Finds a youtube url based off of the given information.
   # The query to youtube is constructed like this:
   #   "<song_name> <artist_name> <search terms>"

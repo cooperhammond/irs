@@ -20,6 +20,7 @@ class CLI
     [["-s", "--song"], "song", "string"],
     [["-A", "--album"], "album", "string"],
     [["-p", "--playlist"], "playlist", "string"],
+    [["-u", "--url"], "url", "string"],
   ]
 
   @args : Hash(String, String)
@@ -48,6 +49,7 @@ class CLI
         #{Style.blue "-s, --song <song>"}           Specify song name to download
         #{Style.blue "-A, --album <album>"}         Specify the album name to download
         #{Style.blue "-p, --playlist <playlist>"}   Specify the playlist name to download
+        #{Style.blue "-u, --url <url>"}             Specify the youtube url to download from (for single songs only)
 
     #{Style.bold "Examples:"}
         $ #{Style.green %(irs --song "Bohemian Rhapsody" --artist "Queen")}
@@ -82,7 +84,7 @@ class CLI
     elsif @args["song"]? && @args["artist"]?
       s = Song.new(@args["song"], @args["artist"])
       s.provide_client_keys(Config.client_key, Config.client_secret)
-      s.grab_it
+      s.grab_it(@args["url"]?)
       s.organize_it(Config.music_directory)
       exit
     elsif @args["album"]? && @args["artist"]?

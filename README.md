@@ -54,6 +54,7 @@ Arguments:
     -s, --song <song>           Specify song name to download
     -A, --album <album>         Specify the album name to download
     -p, --playlist <playlist>   Specify the playlist name to download
+    -u, --url <url>             Specify the youtube url to download from
 
 Examples:
     $ irs --song "Bohemian Rhapsody" --artist "Queen"
