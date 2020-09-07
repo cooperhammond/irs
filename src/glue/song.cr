@@ -26,7 +26,8 @@ class Song
       "  Searching for URL ...\r",
       Style.green("  + ") + Style.dim("URL found                       \n"),
       "  Validating URL ...\r",
-      Style.green("  + ") + Style.dim("URL validated                   \n")
+      Style.green("  + ") + Style.dim("URL validated                   \n"),
+      "URL?: "
     ],
     "download" => [
       "  Downloading video:\n",
@@ -54,7 +55,7 @@ class Song
   # ```
   # Song.new("Bohemian Rhapsody", "Queen").grab_it
   # ```
-  def grab_it(url : (String | Nil) = nil)
+  def grab_it(url : (String | Nil) = nil, ask_url : Bool = false)
     outputter("intro", 0)
 
     if !@spotify_searcher.authorized? && !@metadata
@@ -83,6 +84,14 @@ class Song
 
     data = @metadata.as(JSON::Any)
     @filename = data["track_number"].to_s + " - #{data["name"].to_s}.mp3"
+
+    if ask_url
+      outputter("url", 4)
+      url = gets
+      if !url.nil? && url.strip == ""
+        url = nil
+      end
+    end
 
     if !url
       outputter("url", 0)

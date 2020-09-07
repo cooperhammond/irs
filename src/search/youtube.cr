@@ -1,6 +1,7 @@
 require "http"
 require "xml"
 require "json"
+require "uri"
 
 
 module Youtube
@@ -30,8 +31,36 @@ module Youtube
   # => false
   # ```
   def is_valid_url(url : String) : Bool
-    response = HTTP::Client.get(url)
-    return !(response.status_code == 404)
+    uri = URI.parse url
+
+    # is it a video on youtube, with a query
+    query = uri.query
+    if uri.host != "www.youtube.com" || uri.path != "/watch" || !query
+      return false
+    end
+
+
+    queries = query.split('&')
+
+    # find the video ID
+    i = 0
+    while i < queries.size
+      if queries[i].starts_with?("v=")
+        vID = queries[i][2..-1]
+        break
+      end
+      i += 1
+    end
+
+    if !vID
+      return false
+    end
+
+
+    # this is an internal endpoint to validate the video ID
+    response = HTTP::Client.get "https://www.youtube.com/get_video_info?video_id=#{vID}"
+
+    return response.body.includes?("status=ok")
   end
 
   # Finds a youtube url based off of the given information.

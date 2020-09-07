@@ -17,6 +17,9 @@ abstract class SpotifyList
     "searching" => [
       Style.bold("Searching for %l by %a ... \r"),
       Style.green("+ ") + Style.bold("%l by %a                                 \n")
+    ],
+    "url" => [
+      Style.bold("When prompted for a URL, provide a youtube URL or press enter to scrape for one\n")
     ]
   }
 
@@ -24,9 +27,13 @@ abstract class SpotifyList
   end
 
   # Finds the list, and downloads all of the songs using the `Song` class
-  def grab_it
+  def grab_it(ask_url : Bool = false)
     if !@spotify_searcher.authorized?
       raise("Need to call provide_client_keys on Album or Playlist class.")
+    end
+
+    if ask_url
+      outputter("url", 0)
     end
 
     outputter("searching", 0)
@@ -47,7 +54,7 @@ abstract class SpotifyList
       song.provide_metadata(data)
 
       puts Style.bold("[#{data["track_number"]}/#{contents.size}]")
-      song.grab_it
+      song.grab_it ask_url: ask_url
 
       organize(song)
 
