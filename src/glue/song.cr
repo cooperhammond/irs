@@ -24,7 +24,10 @@ class Song
     ],
     "url" => [
       "  Searching for URL ...\r",
-      Style.green("  + ") + Style.dim("URL found                       \n")
+      Style.green("  + ") + Style.dim("URL found                       \n"),
+      "  Validating URL ...\r",
+      Style.green("  + ") + Style.dim("URL validated                   \n"),
+      "URL?: "
     ],
     "download" => [
       "  Downloading video:\n",
@@ -47,11 +50,12 @@ class Song
   end
 
   # Find, downloads, and tags the mp3 song that this class represents.
-  #
+  # Optionally takes a youtube URL to download from
+  # 
   # ```
   # Song.new("Bohemian Rhapsody", "Queen").grab_it
   # ```
-  def grab_it
+  def grab_it(url : (String | Nil) = nil, ask_url : Bool = false)
     outputter("intro", 0)
 
     if !@spotify_searcher.authorized? && !@metadata
@@ -81,14 +85,31 @@ class Song
     data = @metadata.as(JSON::Any)
     @filename = data["track_number"].to_s + " - #{data["name"].to_s}.mp3"
 
-    outputter("url", 0)
-    url = Youtube.find_url(@song_name, @artist_name, search_terms: "lyrics")
-    if !url
-      raise("There was no url found on youtube for " +
-            %("#{@song_name}" by "#{@artist_name}. ) +
-            "Check your input and try again.")
+    if ask_url
+      outputter("url", 4)
+      url = gets
+      if !url.nil? && url.strip == ""
+        url = nil
+      end
     end
-    outputter("url", 1)
+
+    if !url
+      outputter("url", 0)
+      url = Youtube.find_url(@song_name, @artist_name, search_terms: "lyrics")
+      if !url
+        raise("There was no url found on youtube for " +
+              %("#{@song_name}" by "#{@artist_name}. ) +
+              "Check your input and try again.")
+      end
+      outputter("url", 1)
+    else
+      outputter("url", 2)
+      if !Youtube.is_valid_url(url)
+        raise("The url '#{url}' is an invalid youtube URL " +
+              "Check the URL and try again")
+      end
+      outputter("url", 3)
+    end
 
     outputter("download", 0)
     Ripper.download_mp3(url.as(String), @filename)

@@ -20,6 +20,8 @@ class CLI
     [["-s", "--song"], "song", "string"],
     [["-A", "--album"], "album", "string"],
     [["-p", "--playlist"], "playlist", "string"],
+    [["-u", "--url"], "url", "string"],
+    [["-g", "--give-url"], "give-url", "bool"],
   ]
 
   @args : Hash(String, String)
@@ -48,6 +50,8 @@ class CLI
         #{Style.blue "-s, --song <song>"}           Specify song name to download
         #{Style.blue "-A, --album <album>"}         Specify the album name to download
         #{Style.blue "-p, --playlist <playlist>"}   Specify the playlist name to download
+        #{Style.blue "-u, --url <url>"}             Specify the youtube url to download from (for single songs only)
+        #{Style.blue "-g, --give-url"}              Specify the youtube url sources while downloading (for albums or playlists only)
 
     #{Style.bold "Examples:"}
         $ #{Style.green %(irs --song "Bohemian Rhapsody" --artist "Queen")}
@@ -82,17 +86,17 @@ class CLI
     elsif @args["song"]? && @args["artist"]?
       s = Song.new(@args["song"], @args["artist"])
       s.provide_client_keys(Config.client_key, Config.client_secret)
-      s.grab_it
+      s.grab_it(@args["url"]?)
       s.organize_it(Config.music_directory)
       exit
     elsif @args["album"]? && @args["artist"]?
       a = Album.new(@args["album"], @args["artist"])
       a.provide_client_keys(Config.client_key, Config.client_secret)
-      a.grab_it
+      a.grab_it(!!@args["give-url"])
     elsif @args["playlist"]? && @args["artist"]?
       p = Playlist.new(@args["playlist"], @args["artist"])
       p.provide_client_keys(Config.client_key, Config.client_secret)
-      p.grab_it
+      p.grab_it(!!@args["give-url"])
     else
       puts Style.red("Those arguments don't do anything when used that way.")
       puts "Type `irs -h` to see usage."
