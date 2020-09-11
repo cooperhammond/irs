@@ -204,8 +204,14 @@ class SpotifySearcher
   # ```
   # SpotifySearcher.new.authorize(...).find_genre("1dfeR4HaWDbWqFHLkxsg1d")
   # ```
-  def find_genre(id : String) : String
-    genre = get_item("artist", id)["genres"][0].to_s
+  def find_genre(id : String) : String | Nil
+    genre = get_item("artist", id)["genres"]
+
+    if genre.as_a.empty?
+      return nil
+    end
+
+    genre = genre[0].to_s
     genre = genre.split(" ").map { |x| x.capitalize }.join(" ")
 
     return genre

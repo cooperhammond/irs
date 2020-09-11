@@ -134,9 +134,15 @@ class Song
     tagger.add_album_art(temp_albumart_filename)
     tagger.add_text_tag("title", data["name"].to_s)
     tagger.add_text_tag("artist", @artist)
-    tagger.add_text_tag("album", @album)
-    tagger.add_text_tag("genre", 
-      @spotify_searcher.find_genre(data["artists"][0]["id"].to_s))
+
+    if !@album.empty?
+      tagger.add_text_tag("album", @album)
+    end
+
+    if genre = @spotify_searcher.find_genre(data["artists"][0]["id"].to_s)
+      tagger.add_text_tag("genre", genre)
+    end
+
     tagger.add_text_tag("track", data["track_number"].to_s)
     tagger.add_text_tag("disc", data["disc_number"].to_s)
 
