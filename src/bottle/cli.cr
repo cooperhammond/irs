@@ -73,22 +73,17 @@ class CLI
 
     if @args["help"]? || @args.keys.size == 0
       help
-      exit
     elsif @args["version"]?
       version
-      exit
     elsif @args["install"]?
       YdlBinaries.get_both(Config.binary_location)
-      exit
     elsif @args["config"]?
       puts ENV["IRS_CONFIG_LOCATION"]?
-      exit
     elsif @args["song"]? && @args["artist"]?
       s = Song.new(@args["song"], @args["artist"])
       s.provide_client_keys(Config.client_key, Config.client_secret)
       s.grab_it(@args["url"]?)
       s.organize_it(Config.music_directory)
-      exit
     elsif @args["album"]? && @args["artist"]?
       a = Album.new(@args["album"], @args["artist"])
       a.provide_client_keys(Config.client_key, Config.client_secret)
@@ -108,7 +103,6 @@ class CLI
     else
       puts Style.red("Those arguments don't do anything when used that way.")
       puts "Type `irs -h` to see usage."
-      exit 1
     end
   end
 

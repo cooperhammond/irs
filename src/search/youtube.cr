@@ -206,7 +206,7 @@ module Youtube
 
     if yt_initial_data == JSON.parse("{}")
       puts "Youtube has changed the way it organizes its webpage, submit a bug"
-      puts "on https://github.com/cooperhammond/irs"
+      puts "saying it has done so on https://github.com/cooperhammond/irs"
       exit(1)
     end
 
