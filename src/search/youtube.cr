@@ -197,8 +197,10 @@ module Youtube
     yt_initial_data : JSON::Any = JSON.parse("{}")
 
     response_body.each_line do |line|
-      if line.includes?("window[\"ytInitialData\"]")
-        yt_initial_data = JSON.parse(line.split(" = ")[1][0..-2])
+      # timestamp 11/8/2020:
+      # youtube's html page has a line previous to this literally with 'scraper_data_begin' as a comment
+      if line.includes?("var ytInitialData")
+        yt_initial_data = JSON.parse(line.split(" = ")[1].delete(';'))
       end
     end
 
