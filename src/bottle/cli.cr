@@ -92,11 +92,19 @@ class CLI
     elsif @args["album"]? && @args["artist"]?
       a = Album.new(@args["album"], @args["artist"])
       a.provide_client_keys(Config.client_key, Config.client_secret)
-      a.grab_it(!!@args["give-url"])
+      if @args["give-url"]?
+        a.grab_it(true)
+      else
+        a.grab_it(false)
+      end
     elsif @args["playlist"]? && @args["artist"]?
       p = Playlist.new(@args["playlist"], @args["artist"])
       p.provide_client_keys(Config.client_key, Config.client_secret)
-      p.grab_it(!!@args["give-url"])
+      if @args["give-url"]?
+        p.grab_it(true)
+      else
+        p.grab_it(false)
+      end
     else
       puts Style.red("Those arguments don't do anything when used that way.")
       puts "Type `irs -h` to see usage."
