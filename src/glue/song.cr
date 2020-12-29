@@ -4,6 +4,8 @@ require "../search/youtube"
 require "../interact/ripper"
 require "../interact/tagger"
 
+require "../bottle/config"
+require "../bottle/pattern"
 require "../bottle/styles"
 
 class Song
@@ -83,7 +85,7 @@ class Song
     end
 
     data = @metadata.as(JSON::Any)
-    @filename = data["track_number"].to_s + " - #{data["name"].to_s}.mp3"
+    @filename = "#{Pattern.parse(Config.filename_pattern, data)}.mp3"
 
     if ask_url
       outputter("url", 4)
@@ -154,20 +156,24 @@ class Song
     outputter("finished", 0)
   end
 
-  # Will organize the song into the user's provided music directory as
-  # music_directory > artist_name > album_name > song
+  # Will organize the song into the user's provided music directory
+  # in the user's provided structure
   # Must be called AFTER the song has been downloaded.
   #
   # ```
   # s = Song.new("Bohemian Rhapsody", "Queen").grab_it
-  # s.organize_it("/home/cooper/Music")
-  # # Will move the mp3 file to
+  # s.organize_it()
+  # # With
+  # # directory_pattern = "{artist}/{album}"
+  # # filename_pattern = "{track_number} - {title}"
+  # # Mp3 will be moved to
   # # /home/cooper/Music/Queen/A Night At The Opera/1 - Bohemian Rhapsody.mp3
   # ```
-  def organize_it(music_directory : String)
-    path = Path[music_directory].expand(home: true)
-    path = path / @artist_name.gsub(/[\/]/, "").gsub("  ", " ")
-    path = path / @album.gsub(/[\/]/, "").gsub("  ", " ")
+  def organize_it()
+    path = Path[Config.music_directory].expand(home: true)
+    Pattern.parse(Config.directory_pattern, @metadata.as(JSON::Any)).split('/').each do |dir|
+      path = path / dir.gsub(/[\/]/, "").gsub("  ", " ")
+    end
     strpath = path.to_s
     if !File.directory?(strpath)
       FileUtils.mkdir_p(strpath)

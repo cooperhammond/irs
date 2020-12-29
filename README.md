@@ -96,6 +96,8 @@ If you're one of those cool people who compiles from source
     ```yaml
     binary_directory: ~/.irs/bin
     music_directory: ~/Music
+    filename_pattern: "{track_number} - {title}"
+    directory_pattern: "{artist}/{album}"
     client_key: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     client_secret: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     single_folder_playlist:
@@ -122,6 +124,8 @@ Here's what they do:
 ```yaml
 binary_directory: ~/.irs/bin
 music_directory: ~/Music
+filename_pattern: "{track_number} - {title}"
+directory_pattern: "{artist}/{album}"
 client_key: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 client_secret: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 single_folder_playlist:
@@ -132,8 +136,8 @@ single_folder_playlist:
  - `binary_directory`: a path specifying where the downloaded binaries should
     be placed
  - `music_directory`: a path specifying where downloaded mp3s should be placed.
-    Note that there will be more structure created inside that folder, usually
-    in the format of `music-dir>artist-name>album-name>track`
+ - `filename_pattern`: a pattern for the output filename of the mp3
+ - `directory_pattern`: a pattern for the folder structure your mp3s are saved in
  - `client_key`: a client key from your spotify API application
  - `client_secret`: a client secret key from your spotify API application
  - `single_folder_playlist/enabled`: if set to true, all mp3s from a downloaded
@@ -144,6 +148,55 @@ single_folder_playlist:
  - `single_folder_playlist/unify_into_album`: if set to true, will overwrite
     the album name and album image of the mp3 with the title of your playlist
     and the image for your playlist respectively
+
+
+In a pattern following keywords will be replaced:
+
+| Keyword | Replacement | Example |
+| :----: | :----: | :----: |
+| `{artist}` | Artist Name | Queen |
+| `{title}` | Track Title | Bohemian Rhapsody |
+| `{album}` | Album Name | Stone Cold Classics |
+| `{track_number}` | Track Number | 9 |
+| `{total_tracks}` | Total Tracks in Album | 14 |
+| `{disc_number}` | Disc Number | 1 |
+| `{day}` | Release Day | 01 |
+| `{month}` | Release Month | 01 |
+| `{year}` | Release Year | 2006 |
+| `{id}` | Spotify ID | 6l8GvAyoUZwWDgF1e4822w |
+
+Beware OS-restrictions when naming your mp3s.
+
+Pattern Examples:
+```yaml
+music_directory: ~/Music
+filename_pattern: "{track_number} - {title}"
+directory_pattern: "{artist}/{album}"
+```
+Outputs: `~/Music/Queen/Stone Cold Classics/9 - Bohemian Rhapsody.mp3`
+<br><br>
+```yaml
+music_directory: ~/Music
+filename_pattern: "{artist} - {title}"
+directory_pattern: ""
+```
+Outputs: `~/Music/Queen - Bohemian Rhapsody.mp3`
+<br><br>
+```yaml
+music_directory: ~/Music
+filename_pattern: "{track_number} of {total_tracks} - {title}"
+directory_pattern: "{year}/{artist}/{album}"
+```
+Outputs: `~/Music/2006/Queen/Stone Cold Classics/9 of 14 - Bohemian Rhapsody.mp3`
+<br><br>
+```yaml
+music_directory: ~/Music
+filename_pattern: "{track_number}. {title}"
+directory_pattern: "irs/{artist} - {album}"
+```
+Outputs: `~/Music/irs/Queen - Stone Cold Classics/9. Bohemian Rhapsody.mp3`
+<br>
+
 
 ## How it works
 

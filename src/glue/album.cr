@@ -42,6 +42,6 @@ class Album < SpotifyList
   end
 
   private def organize(song : Song)
-    song.organize_it(@home_music_directory)
+    song.organize_it()
   end
 end
