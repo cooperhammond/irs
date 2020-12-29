@@ -200,7 +200,15 @@ module Youtube
       # timestamp 11/8/2020:
       # youtube's html page has a line previous to this literally with 'scraper_data_begin' as a comment
       if line.includes?("var ytInitialData")
-        yt_initial_data = JSON.parse(line.split(" = ")[1].delete(';'))
+        # Extract JSON data from line
+        data = line.split(" = ")[2].delete(';')
+        dataEnd = (data.index("</script>") || 0) - 1
+
+        begin
+          yt_initial_data = JSON.parse(data[0..dataEnd])
+        rescue
+          break
+        end
       end
     end
 
