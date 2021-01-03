@@ -83,7 +83,7 @@ class CLI
       s = Song.new(@args["song"], @args["artist"])
       s.provide_client_keys(Config.client_key, Config.client_secret)
       s.grab_it(@args["url"]?)
-      s.organize_it(Config.music_directory)
+      s.organize_it()
     elsif @args["album"]? && @args["artist"]?
       a = Album.new(@args["album"], @args["artist"])
       a.provide_client_keys(Config.client_key, Config.client_secret)

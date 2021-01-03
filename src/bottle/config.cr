@@ -9,6 +9,8 @@ EXAMPLE_CONFIG = <<-EOP
 #{Style.dim "===="}
 #{Style.blue "binary_directory"}: #{Style.green "~/.irs/bin"}
 #{Style.blue "music_directory"}: #{Style.green "~/Music"}
+#{Style.blue "filename_pattern"}: #{Style.green "\"{track_number} - {title}\""}
+#{Style.blue "directory_pattern"}: #{Style.green "\"{artist}/{album}\""}
 #{Style.blue "client_key"}: #{Style.green "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"}
 #{Style.blue "client_secret"}: #{Style.green "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"}
 #{Style.blue "single_folder_playlist"}: 
@@ -24,6 +26,8 @@ module Config
   @@arguments = [
     "binary_directory",
     "music_directory",
+    "filename_pattern",
+    "directory_pattern",
     "client_key",
     "client_secret",
     "single_folder_playlist: enabled",
@@ -49,6 +53,14 @@ module Config
   def music_directory : String
     path = @@conf["music_directory"].to_s
     return Path[path].expand(home: true).to_s
+  end
+  
+  def filename_pattern : String
+    return @@conf["filename_pattern"].to_s
+  end
+  
+  def directory_pattern : String
+    return @@conf["directory_pattern"].to_s
   end
 
   def client_key : String
