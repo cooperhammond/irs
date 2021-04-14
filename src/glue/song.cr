@@ -85,6 +85,8 @@ class Song
     end
 
     data = @metadata.as(JSON::Any)
+    @song_name = data["name"].as_s
+    @artist_name = data["artists"][0]["name"].as_s
     @filename = "#{Pattern.parse(Config.filename_pattern, data)}.mp3"
 
     if ask_url
@@ -97,7 +99,7 @@ class Song
 
     if !url
       outputter("url", 0)
-      url = Youtube.find_url(@song_name, @artist_name, search_terms: "lyrics")
+      url = Youtube.find_url(data, search_terms: "lyrics")
       if !url
         raise("There was no url found on youtube for " +
               %("#{@song_name}" by "#{@artist_name}. ) +
@@ -119,29 +121,29 @@ class Song
 
     outputter("albumart", 0)
     temp_albumart_filename = ".tempalbumart.jpg"
-    HTTP::Client.get(data["album"]["images"][0]["url"].to_s) do |response|
+    HTTP::Client.get(data["album"]["images"][0]["url"].as_s) do |response|
       File.write(temp_albumart_filename, response.body_io)
     end
     outputter("albumart", 0)
 
     # check if song's metadata has been modded in playlist, update artist accordingly
     if data["artists"][-1]["owner"]? 
-      @artist = data["artists"][-1]["name"].to_s
+      @artist = data["artists"][-1]["name"].as_s
     else
-      @artist = data["artists"][0]["name"].to_s
+      @artist = data["artists"][0]["name"].as_s
     end
-    @album = data["album"]["name"].to_s
+    @album = data["album"]["name"].as_s
 
     tagger = Tags.new(@filename)
     tagger.add_album_art(temp_albumart_filename)
-    tagger.add_text_tag("title", data["name"].to_s)
+    tagger.add_text_tag("title", data["name"].as_s)
     tagger.add_text_tag("artist", @artist)
 
     if !@album.empty?
       tagger.add_text_tag("album", @album)
     end
 
-    if genre = @spotify_searcher.find_genre(data["artists"][0]["id"].to_s)
+    if genre = @spotify_searcher.find_genre(data["artists"][0]["id"].as_s)
       tagger.add_text_tag("genre", genre)
     end
 
