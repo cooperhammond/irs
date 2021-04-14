@@ -67,7 +67,8 @@ class Playlist < SpotifyList
         FileUtils.mkdir_p(strpath)
       end
       safe_filename = song.filename.gsub(/[\/]/, "").gsub("  ", " ")
-      File.rename("./" + song.filename, (path / safe_filename).to_s)
+      FileUtils.cp("./" + song.filename, (path / safe_filename).to_s)
+      FileUtils.rm("./" + song.filename)
     else
       song.organize_it()
     end
