@@ -65,6 +65,7 @@ module Ranker
 
   # SINGULAR COMPONENT OF RANKING ALGORITHM
   private def compare_timestamps(spotify_metadata : JSON::Any, node : VID_METADATA_CLASS) : Int32
+    # puts spotify_metadata.to_pretty_json()
     actual_time = spotify_metadata["duration_ms"].as_i
     vid_time = node["duration_ms"].to_i
 

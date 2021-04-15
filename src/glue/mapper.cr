@@ -46,6 +46,7 @@ class TrackMapper
       type: Int32,
       setter: true
     },
+    duration_ms: Int32,
     type: String,
     uri: String
   )
