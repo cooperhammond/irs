@@ -12,3 +12,4 @@
 ffmpeg
 ffprobe
 youtube-dl
+*.temp

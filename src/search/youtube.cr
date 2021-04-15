@@ -3,6 +3,8 @@ require "xml"
 require "json"
 require "uri"
 
+require "./ranking"
+
 
 module Youtube
   extend self
@@ -12,17 +14,122 @@ module Youtube
     "yt-uix-tile-link yt-ui-ellipsis yt-ui-ellipsis-2 yt-uix-sessionlink      spf-link ",
   ]
 
-  GARBAGE_PHRASES = [
-    "cover", "album", "live", "clean", "version", "full", "full album", "row",
-    "at", "@", "session", "how to", "npr music", "reimagined", "hr version",
-    "trailer",
-  ]
+  # Note that VID_VALUE_CLASS, VID_METADATA_CLASS, and YT_METADATA_CLASS are found in ranking.cr
 
-  GOLDEN_PHRASES = [
-    "official video", "official music video",
-  ]
+  # Finds a youtube url based off of the given information.
+  # The query to youtube is constructed like this:
+  #   "<song_name> <artist_name> <search terms>"
+  # If *download_first* is provided, the first link found will be downloaded.
+  # If *select_link* is provided, a menu of options will be shown for the user to choose their poison
+  #
+  # ```
+  # Youtube.find_url("Bohemian Rhapsody", "Queen")
+  # => "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+  # ```
+  def find_url(spotify_metadata : JSON::Any, search_terms = "",
+               download_first = false, select_link = false) : String?
 
-  alias NODES_CLASS = Array(Hash(String, String))
+    song_name = spotify_metadata["name"].as_s
+    artist_name = spotify_metadata["artists"][0]["name"].as_s
+
+    human_query = song_name + " " + artist_name + " " + search_terms.strip
+    url_query = human_query.gsub(" ", "+")
+
+    url = "https://www.youtube.com/results?search_query=" + url_query
+
+    response = HTTP::Client.get(url)
+
+    yt_metadata = get_yt_search_metadata(response.body)
+
+    if yt_metadata.size == 0
+      puts "There were no results for this query on youtube: \"#{human_query}\""
+      return nil
+    end
+
+    root = "https://youtube.com"
+
+    if download_first
+      return root + yt_metadata[0]["href"] 
+    end
+
+    if select_link
+      # return select_link_menu()
+    end
+
+    ranked = Ranker.rank_videos(spotify_metadata, yt_metadata, human_query)
+
+    begin
+      return root + yt_metadata[ranked[0]["index"]]["href"]
+    rescue IndexError
+      return nil
+    end
+
+    exit 1
+  end
+  
+  #
+  private def select_link_menu() : String
+
+  end
+
+  # Finds valid video links from a `HTTP::Client.get` request 
+  # Returns an `Array` of `NODES_CLASS` containing additional metadata from Youtube
+  private def get_yt_search_metadata(response_body : String) : YT_METADATA_CLASS
+    yt_initial_data : JSON::Any = JSON.parse("{}")
+
+    response_body.each_line do |line|
+      # timestamp 11/8/2020:
+      # youtube's html page has a line previous to this literally with 'scraper_data_begin' as a comment
+      if line.includes?("var ytInitialData")
+        # Extract JSON data from line
+        data = line.split(" = ")[2].delete(';')
+        dataEnd = (data.index("</script>") || 0) - 1
+
+        begin
+          yt_initial_data = JSON.parse(data[0..dataEnd])
+        rescue
+          break
+        end
+      end
+    end
+
+    if yt_initial_data == JSON.parse("{}")
+      puts "Youtube has changed the way it organizes its webpage, submit a bug"
+      puts "saying it has done so on https://github.com/cooperhammond/irs"
+      exit(1)
+    end
+
+    # where the vid metadata lives
+    yt_initial_data = yt_initial_data["contents"]["twoColumnSearchResultsRenderer"]["primaryContents"]["sectionListRenderer"]["contents"]
+
+    video_metadata = [] of VID_METADATA_CLASS
+
+    i = 0
+    while true
+      begin
+        # video title
+        raw_metadata = yt_initial_data[0]["itemSectionRenderer"]["contents"][i]["videoRenderer"]
+
+        metadata = {} of String => VID_VALUE_CLASS
+
+        metadata["title"] = raw_metadata["title"]["runs"][0]["text"].as_s
+        metadata["href"] = raw_metadata["navigationEndpoint"]["commandMetadata"]["webCommandMetadata"]["url"].as_s
+        timestamp = raw_metadata["lengthText"]["simpleText"].as_s
+        metadata["timestamp"] = timestamp
+        metadata["duration_ms"] = ((timestamp.split(":")[0].to_i * 60 +
+                               timestamp.split(":")[1].to_i) * 1000).to_s
+
+
+        video_metadata.push(metadata)
+      rescue IndexError
+        break
+      rescue Exception
+      end
+      i += 1
+    end
+
+    return video_metadata
+  end
 
   # Checks if the given URL is a valid youtube URL
   #
@@ -61,187 +168,5 @@ module Youtube
     response = HTTP::Client.get "https://www.youtube.com/get_video_info?video_id=#{vID}"
 
     return response.body.includes?("status=ok")
-  end
-
-  # Finds a youtube url based off of the given information.
-  # The query to youtube is constructed like this:
-  #   "<song_name> <artist_name> <search terms>"
-  # If *download_first* is provided, the first link found will be downloaded.
-  #
-  # ```
-  # Youtube.find_url("Bohemian Rhapsody", "Queen")
-  # => "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-  # ```
-  def find_url(song_name : String, artist_name : String, search_terms = "",
-               download_first = false) : String?
-    query = (song_name + " " + artist_name + " " + search_terms).strip.gsub(" ", "+")
-
-    url = "https://www.youtube.com/results?search_query=" + query
-
-    response = HTTP::Client.get(url)
-
-    valid_nodes = get_video_link_nodes(response.body)
-
-    if valid_nodes.size == 0
-      puts "There were no results for that query."
-      return nil
-    end
-
-    root = "https://youtube.com"
-
-    return root + valid_nodes[0]["href"] if download_first
-
-    ranked = rank_videos(song_name, artist_name, query, valid_nodes)
-
-    begin
-      return root + valid_nodes[ranked[0]["index"]]["href"]
-    rescue IndexError
-      return nil
-    end
-  end
-
-  # Will rank videos according to their title and the user input
-  # Return:
-  # [
-  #   {"points" => x, "index" => x},
-  #   ...
-  # ]
-  private def rank_videos(song_name : String, artist_name : String,
-                          query : String, nodes : Array(Hash(String, String))) : Array(Hash(String, Int32))
-    points = [] of Hash(String, Int32)
-    index = 0
-
-    nodes.each do |node|
-      pts = 0
-
-      pts += points_compare(song_name, node["title"])
-      pts += points_compare(artist_name, node["title"])
-      pts += count_buzzphrases(query, node["title"])
-
-      points.push({
-        "points" => pts,
-        "index"  => index,
-      })
-      index += 1
-    end
-
-    # Sort first by points and then by original index of the song
-    points.sort! { |a, b|
-      if b["points"] == a["points"]
-        a["index"] <=> b["index"]
-      else
-        b["points"] <=> a["points"]
-      end
-    }
-
-    return points
-  end
-
-  # Returns an `Int` based off the number of points worth assigning to the
-  # matchiness of the string. First the strings are downcased and then all
-  # nonalphanumeric characters are stripped.
-  # If *item1* includes *item2*, return 3 pts.
-  # If after the items have been blanked, *item1* includes *item2*,
-  #   return 1 pts.
-  # Else, return 0 pts.
-  private def points_compare(item1 : String, item2 : String) : Int32
-    if item2.includes?(item1)
-      return 3
-    end
-
-    item1 = item1.downcase.gsub(/[^a-z0-9]/, "")
-    item2 = item2.downcase.gsub(/[^a-z0-9]/, "")
-
-    if item2.includes?(item1)
-      return 1
-    else
-      return 0
-    end
-  end
-
-  # Checks if there are any phrases in the title of the video that would
-  # indicate audio having what we want.
-  # *video_name* is the title of the video, and *query* is what the user the
-  # program searched for. *query* is needed in order to make sure we're not
-  # subtracting points from something that's naturally in the title
-  private def count_buzzphrases(query : String, video_name : String) : Int32
-    good_phrases = 0
-    bad_phrases = 0
-
-    GOLDEN_PHRASES.each do |gold_phrase|
-      gold_phrase = gold_phrase.downcase.gsub(/[^a-z0-9]/, "")
-
-      if query.downcase.gsub(/[^a-z0-9]/, "").includes?(gold_phrase)
-        next
-      elsif video_name.downcase.gsub(/[^a-z0-9]/, "").includes?(gold_phrase)
-        good_phrases += 1
-      end
-    end
-
-    GARBAGE_PHRASES.each do |garbage_phrase|
-      garbage_phrase = garbage_phrase.downcase.gsub(/[^a-z0-9]/, "")
-
-      if query.downcase.gsub(/[^a-z0-9]/, "").includes?(garbage_phrase)
-        next
-      elsif video_name.downcase.gsub(/[^a-z0-9]/, "").includes?(garbage_phrase)
-        bad_phrases += 1
-      end
-    end
-
-    return good_phrases - bad_phrases
-  end
-
-  # Finds valid video links from a `HTTP::Client.get` request
-  # Returns an `Array` of `XML::Node`
-  private def get_video_link_nodes(response_body : String) : NODES_CLASS
-    yt_initial_data : JSON::Any = JSON.parse("{}")
-
-    response_body.each_line do |line|
-      # timestamp 11/8/2020:
-      # youtube's html page has a line previous to this literally with 'scraper_data_begin' as a comment
-      if line.includes?("var ytInitialData")
-        # Extract JSON data from line
-        data = line.split(" = ")[2].delete(';')
-        dataEnd = (data.index("</script>") || 0) - 1
-
-        begin
-          yt_initial_data = JSON.parse(data[0..dataEnd])
-        rescue
-          break
-        end
-      end
-    end
-
-    if yt_initial_data == JSON.parse("{}")
-      puts "Youtube has changed the way it organizes its webpage, submit a bug"
-      puts "saying it has done so on https://github.com/cooperhammond/irs"
-      exit(1)
-    end
-
-    # where the vid metadata lives
-    yt_initial_data = yt_initial_data["contents"]["twoColumnSearchResultsRenderer"]["primaryContents"]["sectionListRenderer"]["contents"]
-
-    video_metadata = [] of Hash(String, String)
-
-    i = 0
-    while true
-      begin
-        # video title
-        raw_metadata = yt_initial_data[0]["itemSectionRenderer"]["contents"][i]["videoRenderer"]
-
-        metadata = {} of String => String
-
-        metadata["title"] = raw_metadata["title"]["runs"][0]["text"].as_s
-        metadata["href"] = raw_metadata["navigationEndpoint"]["commandMetadata"]["webCommandMetadata"]["url"].as_s
-    
-        video_metadata.push(metadata)
-      rescue IndexError
-        break
-      rescue Exception
-      end
-      i += 1
-    end
-
-    return video_metadata
   end
 end
