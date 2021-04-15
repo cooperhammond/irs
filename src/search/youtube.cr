@@ -5,6 +5,9 @@ require "uri"
 
 require "./ranking"
 
+require "../bottle/config"
+require "../bottle/styles"
+
 
 module Youtube
   extend self
@@ -26,8 +29,13 @@ module Youtube
   # Youtube.find_url("Bohemian Rhapsody", "Queen")
   # => "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
   # ```
-  def find_url(spotify_metadata : JSON::Any, search_terms = "",
-               download_first = false, select_link = false) : String?
+  def find_url(spotify_metadata : JSON::Any,
+               flags = {} of String => String) : String?
+
+    search_terms = Config.search_terms
+
+    download_first = flags["dl_first"]?
+    select_link = flags["select"]?
 
     song_name = spotify_metadata["name"].as_s
     artist_name = spotify_metadata["artists"][0]["name"].as_s
@@ -52,11 +60,12 @@ module Youtube
       return root + yt_metadata[0]["href"] 
     end
 
+    ranked = Ranker.rank_videos(spotify_metadata, yt_metadata, human_query)
+
     if select_link
-      # return select_link_menu()
+      return root + select_link_menu(spotify_metadata, yt_metadata)
     end
 
-    ranked = Ranker.rank_videos(spotify_metadata, yt_metadata, human_query)
 
     begin
       return root + yt_metadata[ranked[0]["index"]]["href"]
@@ -67,8 +76,38 @@ module Youtube
     exit 1
   end
   
-  #
-  private def select_link_menu() : String
+  # Presents a menu with song info for the user to choose which url they want to download
+  private def select_link_menu(spotify_metadata : JSON::Any, 
+                               yt_metadata : YT_METADATA_CLASS) : String
+    puts Style.dim("  Spotify info: ") + 
+         Style.bold("\"" + spotify_metadata["name"].to_s) + "\" by \"" + 
+         Style.bold(spotify_metadata["artists"][0]["name"].to_s + "\"") +
+         " @ " + Style.blue((spotify_metadata["duration_ms"].as_i / 1000).to_i.to_s) + "s"
+    puts "  Choose video to download:"
+    index = 1
+    yt_metadata.each do |vid|
+      print "    " + Style.bold(index.to_s + " ")
+      puts "\"" + vid["title"] + "\" @ " + Style.blue((vid["duration_ms"].to_i / 1000).to_i.to_s) + "s"
+      index += 1
+      if index > 5
+        break
+      end
+    end
+
+    input = 0
+    while true # not between 1 and 5
+      begin
+        print Style.bold("  > ")
+        input = gets.not_nil!.chomp.to_i
+        if input < 6 && input > 0
+          break
+        end
+      rescue
+        puts Style.red("  Invalid input, try again.")
+      end
+    end
+
+    return yt_metadata[input]["href"]
 
   end
 

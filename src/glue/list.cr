@@ -27,7 +27,9 @@ abstract class SpotifyList
   end
 
   # Finds the list, and downloads all of the songs using the `Song` class
-  def grab_it(ask_url : Bool = false)
+  def grab_it(flags = {} of String => String)
+    ask_url = flags["url"]?
+  
     if !@spotify_searcher.authorized?
       raise("Need to call provide_client_keys on Album or Playlist class.")
     end
@@ -54,7 +56,7 @@ abstract class SpotifyList
       song.provide_metadata(data)
 
       puts Style.bold("[#{data["track_number"]}/#{contents.size}]")
-      song.grab_it ask_url: ask_url
+      song.grab_it(flags: flags)
 
       organize(song)
 

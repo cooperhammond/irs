@@ -7,6 +7,7 @@ require "../search/spotify"
 EXAMPLE_CONFIG = <<-EOP
 #{Style.dim "exampleconfig.yml"}
 #{Style.dim "===="}
+#{Style.blue "search_terms"}: #{Style.green "\"lyrics\""}
 #{Style.blue "binary_directory"}: #{Style.green "~/.irs/bin"}
 #{Style.blue "music_directory"}: #{Style.green "~/Music"}
 #{Style.blue "filename_pattern"}: #{Style.green "\"{track_number} - {title}\""}
@@ -24,6 +25,7 @@ module Config
   extend self
 
   @@arguments = [
+    "search_terms",
     "binary_directory",
     "music_directory",
     "filename_pattern",
@@ -43,6 +45,10 @@ module Config
     puts EXAMPLE_CONFIG
     puts Style.bold "See https://github.com/cooperhammond/irs for more information on the config file"
     exit 1
+  end
+
+  def search_terms : String
+    return @@conf["search_terms"].to_s
   end
 
   def binary_location : String
