@@ -29,7 +29,7 @@ class Song
       Style.green("  + ") + Style.dim("URL found                       \n"),
       "  Validating URL ...\r",
       Style.green("  + ") + Style.dim("URL validated                   \n"),
-      "URL?: "
+      "  URL?: "
     ],
     "download" => [
       "  Downloading video:\n",
@@ -57,7 +57,10 @@ class Song
   # ```
   # Song.new("Bohemian Rhapsody", "Queen").grab_it
   # ```
-  def grab_it(url : (String | Nil) = nil, ask_url : Bool = false)
+  def grab_it(url : (String | Nil) = nil, flags = {} of String => String)
+    ask_url = flags["url"]?
+    select_link = flags["select"]?
+
     outputter("intro", 0)
 
     if !@spotify_searcher.authorized? && !@metadata
@@ -99,7 +102,7 @@ class Song
 
     if !url
       outputter("url", 0)
-      url = Youtube.find_url(data, search_terms: "lyrics")
+      url = Youtube.find_url(data, flags: flags)
       if !url
         raise("There was no url found on youtube for " +
               %("#{@song_name}" by "#{@artist_name}. ) +

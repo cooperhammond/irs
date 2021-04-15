@@ -21,7 +21,7 @@ class CLI
     [["-A", "--album"], "album", "string"],
     [["-p", "--playlist"], "playlist", "string"],
     [["-u", "--url"], "url", "string"],
-    [["-g", "--give-url"], "give-url", "bool"],
+    [["-S", "--select"], "select", "bool"]
   ]
 
   @args : Hash(String, String)
@@ -50,8 +50,10 @@ class CLI
         #{Style.blue "-s, --song <song>"}           Specify song name to download
         #{Style.blue "-A, --album <album>"}         Specify the album name to download
         #{Style.blue "-p, --playlist <playlist>"}   Specify the playlist name to download
-        #{Style.blue "-u, --url <url>"}             Specify the youtube url to download from (for single songs only)
-        #{Style.blue "-g, --give-url"}              Specify the youtube url sources while downloading (for albums or playlists only)
+        #{Style.blue "-u, --url [<url>]"}           Specify the youtube url to download from 
+        #{Style.blue "                 "}           (for single songs, include as an command-line
+        #{Style.blue "                 "}           argument, for albums or playlists do not)
+        #{Style.blue "-S, --select"}                Use a menu to choose each song's video source
 
     #{Style.bold "Examples:"}
         $ #{Style.green %(irs --song "Bohemian Rhapsody" --artist "Queen")}
@@ -73,33 +75,32 @@ class CLI
 
     if @args["help"]? || @args.keys.size == 0
       help
+
     elsif @args["version"]?
       version
+
     elsif @args["install"]?
       YdlBinaries.get_both(Config.binary_location)
+
     elsif @args["config"]?
       puts ENV["IRS_CONFIG_LOCATION"]?
+
     elsif @args["song"]? && @args["artist"]?
       s = Song.new(@args["song"], @args["artist"])
       s.provide_client_keys(Config.client_key, Config.client_secret)
-      s.grab_it(@args["url"]?)
+      s.grab_it(flags: @args)
       s.organize_it()
+
     elsif @args["album"]? && @args["artist"]?
       a = Album.new(@args["album"], @args["artist"])
       a.provide_client_keys(Config.client_key, Config.client_secret)
-      if @args["give-url"]?
-        a.grab_it(true)
-      else
-        a.grab_it(false)
-      end
+      a.grab_it(flags: @args)
+
     elsif @args["playlist"]? && @args["artist"]?
       p = Playlist.new(@args["playlist"], @args["artist"])
       p.provide_client_keys(Config.client_key, Config.client_secret)
-      if @args["give-url"]?
-        p.grab_it(true)
-      else
-        p.grab_it(false)
-      end
+      p.grab_it(flags: @args)
+
     else
       puts Style.red("Those arguments don't do anything when used that way.")
       puts "Type `irs -h` to see usage."
