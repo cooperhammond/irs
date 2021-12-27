@@ -107,7 +107,7 @@ module Youtube
       end
     end
 
-    return yt_metadata[input]["href"]
+    return yt_metadata[input-1]["href"]
 
   end
 
