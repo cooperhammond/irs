@@ -57,7 +57,7 @@ module Youtube
     root = "https://youtube.com"
 
     if download_first
-      return root + yt_metadata[0]["href"] 
+      return root + yt_metadata[0]["href"]
     end
 
     ranked = Ranker.rank_videos(spotify_metadata, yt_metadata, human_query)
@@ -75,12 +75,12 @@ module Youtube
 
     exit 1
   end
-  
+
   # Presents a menu with song info for the user to choose which url they want to download
-  private def select_link_menu(spotify_metadata : JSON::Any, 
+  private def select_link_menu(spotify_metadata : JSON::Any,
                                yt_metadata : YT_METADATA_CLASS) : String
-    puts Style.dim("  Spotify info: ") + 
-         Style.bold("\"" + spotify_metadata["name"].to_s) + "\" by \"" + 
+    puts Style.dim("  Spotify info: ") +
+         Style.bold("\"" + spotify_metadata["name"].to_s) + "\" by \"" +
          Style.bold(spotify_metadata["artists"][0]["name"].to_s + "\"") +
          " @ " + Style.blue((spotify_metadata["duration_ms"].as_i / 1000).to_i.to_s) + "s"
     puts "  Choose video to download:"
@@ -111,7 +111,7 @@ module Youtube
 
   end
 
-  # Finds valid video links from a `HTTP::Client.get` request 
+  # Finds valid video links from a `HTTP::Client.get` request
   # Returns an `Array` of `NODES_CLASS` containing additional metadata from Youtube
   private def get_yt_search_metadata(response_body : String) : YT_METADATA_CLASS
     yt_initial_data : JSON::Any = JSON.parse("{}")
@@ -181,7 +181,9 @@ module Youtube
 
     # is it a video on youtube, with a query
     query = uri.query
-    if uri.host != "www.youtube.com" || uri.path != "/watch" || !query
+
+    if !uri || !query || !uri.host || uri.path != "/watch" ||
+    !uri.host.not_nil!.ends_with?("youtube.com")
       return false
     end
 
@@ -204,8 +206,9 @@ module Youtube
 
 
     # this is an internal endpoint to validate the video ID
-    response = HTTP::Client.get "https://www.youtube.com/get_video_info?video_id=#{vID}"
 
-    return response.body.includes?("status=ok")
+    response = HTTP::Client.get "https://www.youtube.com/oembed?format=json&url=#{url}"
+
+    return response.success?
   end
 end
