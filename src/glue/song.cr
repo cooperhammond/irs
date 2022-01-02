@@ -115,8 +115,9 @@ class Song
       outputter("url", 1)
     else
       outputter("url", 2)
-      if !Youtube.is_valid_url(url)
-        raise("The url '#{url}' is an invalid youtube URL " +
+      url = Youtube.validate_url(url)
+      if !url
+        raise("The url is an invalid youtube URL " +
               "Check the URL and try again")
       end
       outputter("url", 3)

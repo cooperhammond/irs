@@ -170,45 +170,33 @@ module Youtube
     return video_metadata
   end
 
-  # Checks if the given URL is a valid youtube URL
+  # Returns as a valid URL if possible
   #
   # ```
-  # Youtube.is_valid_url("https://www.youtube.com/watch?v=NOTANACTUALVIDEOID")
-  # => false
+  # Youtube.validate_url("https://www.youtube.com/watch?v=NOTANACTUALVIDEOID")
+  # => nil
   # ```
-  def is_valid_url(url : String) : Bool
+  def validate_url(url : String) : String | Nil
     uri = URI.parse url
+    return nil if !uri
 
-    # is it a video on youtube, with a query
     query = uri.query
-
-    if !uri || !query || !uri.host || uri.path != "/watch" ||
-    !uri.host.not_nil!.ends_with?("youtube.com")
-      return false
-    end
-
-
-    queries = query.split('&')
+    return nil if !query
 
     # find the video ID
-    i = 0
-    while i < queries.size
-      if queries[i].starts_with?("v=")
-        vID = queries[i][2..-1]
-        break
+    vID = nil
+    query.split('&').each do |q|
+      if q.starts_with?("v=")
+        vID = q[2..-1]
       end
-      i += 1
     end
+    return nil if !vID
 
-    if !vID
-      return false
-    end
-
+    url = "https://www.youtube.com/watch?v=#{vID}"
 
     # this is an internal endpoint to validate the video ID
-
     response = HTTP::Client.get "https://www.youtube.com/oembed?format=json&url=#{url}"
 
-    return response.success?
+    return response.success? ? url : nil
   end
 end
