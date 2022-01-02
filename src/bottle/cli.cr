@@ -50,9 +50,9 @@ class CLI
         #{Style.blue "-s, --song <song>"}           Specify song name to download
         #{Style.blue "-A, --album <album>"}         Specify the album name to download
         #{Style.blue "-p, --playlist <playlist>"}   Specify the playlist name to download
-        #{Style.blue "-u, --url [<url>]"}           Specify the youtube url to download from 
-        #{Style.blue "                 "}           (for single songs, include as an command-line
-        #{Style.blue "                 "}           argument, for albums or playlists do not)
+        #{Style.blue "-u, --url <url>"}             Specify the youtube url to download from
+        #{Style.blue "                 "}           (for albums and playlists, the command-line
+        #{Style.blue "                 "}           argument is ignored, and it should be '')
         #{Style.blue "-S, --select"}                Use a menu to choose each song's video source
 
     #{Style.bold "Examples:"}
