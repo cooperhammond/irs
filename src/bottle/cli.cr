@@ -21,7 +21,8 @@ class CLI
     [["-A", "--album"], "album", "string"],
     [["-p", "--playlist"], "playlist", "string"],
     [["-u", "--url"], "url", "string"],
-    [["-S", "--select"], "select", "bool"]
+    [["-S", "--select"], "select", "bool"],
+    [["--ask-skip"], "ask_skip", "bool"]
   ]
 
   @args : Hash(String, String)
@@ -54,6 +55,7 @@ class CLI
         #{Style.blue "                 "}           (for albums and playlists, the command-line
         #{Style.blue "                 "}           argument is ignored, and it should be '')
         #{Style.blue "-S, --select"}                Use a menu to choose each song's video source
+        #{Style.blue "--ask-skip"}                  Before every playlist/album song, ask to skip
 
     #{Style.bold "Examples:"}
         $ #{Style.green %(irs --song "Bohemian Rhapsody" --artist "Queen")}

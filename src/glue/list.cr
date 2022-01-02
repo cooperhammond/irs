@@ -29,6 +29,8 @@ abstract class SpotifyList
   # Finds the list, and downloads all of the songs using the `Song` class
   def grab_it(flags = {} of String => String)
     ask_url = flags["url"]?
+    ask_skip = flags["ask_skip"]?
+    is_playlist = flags["playlist"]?
   
     if !@spotify_searcher.authorized?
       raise("Need to call provide_client_keys on Album or Playlist class.")
@@ -45,28 +47,41 @@ abstract class SpotifyList
 
     i = 0
     contents.each do |datum|
+      i += 1
       if datum["track"]?
         datum = datum["track"]
       end
 
       data = organize_song_metadata(list, datum)
 
-      song = Song.new(data["name"].to_s, data["artists"][0]["name"].to_s)
+      s_name = data["name"].to_s
+      s_artist = data["artists"][0]["name"].to_s
+
+      song = Song.new(s_name, s_artist)
       song.provide_spotify(@spotify_searcher)
       song.provide_metadata(data)
 
-      puts Style.bold("[#{data["track_number"]}/#{contents.size}]")
-      song.grab_it(flags: flags)
+      puts Style.bold("[#{i}/#{contents.size}]")
 
-      organize(song)
-
-      i += 1
+      unless ask_skip && skip?(s_name, s_artist, is_playlist)
+        song.grab_it(flags: flags)
+        organize(song)
+      else
+        puts "Skipping..."
+      end
     end
   end
 
   # Will authorize the class associated `SpotifySearcher`
   def provide_client_keys(client_key : String, client_secret : String)
     @spotify_searcher.authorize(client_key, client_secret)
+  end
+
+  private def skip?(name, artist, is_playlist)
+    print "Skip #{Style.blue name}" +
+      (is_playlist ? " (by #{Style.green artist})": "") + "? "
+    response = gets
+    return response && response.lstrip.downcase.starts_with? "y"
   end
 
   private def outputter(key : String, index : Int32)
