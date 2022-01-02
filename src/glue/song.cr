@@ -58,7 +58,7 @@ class Song
   # Song.new("Bohemian Rhapsody", "Queen").grab_it
   # ```
   def grab_it(url : (String | Nil) = nil, flags = {} of String => String)
-    passed_url : (String | Nil) = flags["url"]
+    passed_url : (String | Nil) = flags["url"]?
     select_link = flags["select"]?
 
     outputter("intro", 0)

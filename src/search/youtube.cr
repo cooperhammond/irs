@@ -34,7 +34,6 @@ module Youtube
 
     search_terms = Config.search_terms
 
-    download_first = flags["dl_first"]?
     select_link = flags["select"]?
 
     song_name = spotify_metadata["name"].as_s
@@ -43,9 +42,9 @@ module Youtube
     human_query = song_name + " " + artist_name + " " + search_terms.strip
     url_query = human_query.gsub(" ", "+")
 
-    url = "https://www.youtube.com/results?search_query=" + url_query
+    search_url = "https://www.youtube.com/results?search_query=" + url_query
 
-    response = HTTP::Client.get(url)
+    response = HTTP::Client.get(search_url)
 
     yt_metadata = get_yt_search_metadata(response.body)
 
@@ -55,19 +54,14 @@ module Youtube
     end
 
     root = "https://youtube.com"
-
-    if download_first
-      return root + yt_metadata[0]["href"]
-    end
-
     ranked = Ranker.rank_videos(spotify_metadata, yt_metadata, human_query)
 
     if select_link
       return root + select_link_menu(spotify_metadata, yt_metadata)
     end
 
-
     begin
+      puts Style.dim("  Video: ") + yt_metadata[ranked[0]["index"]]["title"]
       return root + yt_metadata[ranked[0]["index"]]["href"]
     rescue IndexError
       return nil
@@ -196,7 +190,12 @@ module Youtube
 
     # this is an internal endpoint to validate the video ID
     response = HTTP::Client.get "https://www.youtube.com/oembed?format=json&url=#{url}"
+    return nil unless response.success?
 
-    return response.success? ? url : nil
+    res_json = JSON.parse(response.body)
+    title = res_json["title"].as_s
+    puts Style.dim("  Video: ") + title
+
+    return url
   end
 end
