@@ -39,12 +39,10 @@ module Youtube
     song_name = spotify_metadata["name"].as_s
     artist_name = spotify_metadata["artists"][0]["name"].as_s
 
-    human_query = song_name + " " + artist_name + " " + search_terms.strip
-    url_query = human_query.gsub(" ", "+")
+    human_query = "#{song_name} #{artist_name} #{search_terms.strip}"
+    params = HTTP::Params.encode({"search_query" => human_query})
 
-    search_url = "https://www.youtube.com/results?search_query=" + url_query
-
-    response = HTTP::Client.get(search_url)
+    response = HTTP::Client.get("https://www.youtube.com/results?#{params}")
 
     yt_metadata = get_yt_search_metadata(response.body)
 
@@ -189,7 +187,8 @@ module Youtube
     url = "https://www.youtube.com/watch?v=#{vID}"
 
     # this is an internal endpoint to validate the video ID
-    response = HTTP::Client.get "https://www.youtube.com/oembed?format=json&url=#{url}"
+    params = HTTP::Params.encode({"format" => "json", "url" => url})
+    response = HTTP::Client.get "https://www.youtube.com/oembed?#{params}"
     return nil unless response.success?
 
     res_json = JSON.parse(response.body)
