@@ -34,18 +34,15 @@ module Youtube
 
     search_terms = Config.search_terms
 
-    download_first = flags["dl_first"]?
     select_link = flags["select"]?
 
     song_name = spotify_metadata["name"].as_s
     artist_name = spotify_metadata["artists"][0]["name"].as_s
 
-    human_query = song_name + " " + artist_name + " " + search_terms.strip
-    url_query = human_query.gsub(" ", "+")
+    human_query = "#{song_name} #{artist_name} #{search_terms.strip}"
+    params = HTTP::Params.encode({"search_query" => human_query})
 
-    url = "https://www.youtube.com/results?search_query=" + url_query
-
-    response = HTTP::Client.get(url)
+    response = HTTP::Client.get("https://www.youtube.com/results?#{params}")
 
     yt_metadata = get_yt_search_metadata(response.body)
 
@@ -55,19 +52,14 @@ module Youtube
     end
 
     root = "https://youtube.com"
-
-    if download_first
-      return root + yt_metadata[0]["href"] 
-    end
-
     ranked = Ranker.rank_videos(spotify_metadata, yt_metadata, human_query)
 
     if select_link
       return root + select_link_menu(spotify_metadata, yt_metadata)
     end
 
-
     begin
+      puts Style.dim("  Video: ") + yt_metadata[ranked[0]["index"]]["title"]
       return root + yt_metadata[ranked[0]["index"]]["href"]
     rescue IndexError
       return nil
@@ -75,12 +67,12 @@ module Youtube
 
     exit 1
   end
-  
+
   # Presents a menu with song info for the user to choose which url they want to download
-  private def select_link_menu(spotify_metadata : JSON::Any, 
+  private def select_link_menu(spotify_metadata : JSON::Any,
                                yt_metadata : YT_METADATA_CLASS) : String
-    puts Style.dim("  Spotify info: ") + 
-         Style.bold("\"" + spotify_metadata["name"].to_s) + "\" by \"" + 
+    puts Style.dim("  Spotify info: ") +
+         Style.bold("\"" + spotify_metadata["name"].to_s) + "\" by \"" +
          Style.bold(spotify_metadata["artists"][0]["name"].to_s + "\"") +
          " @ " + Style.blue((spotify_metadata["duration_ms"].as_i / 1000).to_i.to_s) + "s"
     puts "  Choose video to download:"
@@ -107,11 +99,11 @@ module Youtube
       end
     end
 
-    return yt_metadata[input]["href"]
+    return yt_metadata[input-1]["href"]
 
   end
 
-  # Finds valid video links from a `HTTP::Client.get` request 
+  # Finds valid video links from a `HTTP::Client.get` request
   # Returns an `Array` of `NODES_CLASS` containing additional metadata from Youtube
   private def get_yt_search_metadata(response_body : String) : YT_METADATA_CLASS
     yt_initial_data : JSON::Any = JSON.parse("{}")
@@ -170,42 +162,39 @@ module Youtube
     return video_metadata
   end
 
-  # Checks if the given URL is a valid youtube URL
+  # Returns as a valid URL if possible
   #
   # ```
-  # Youtube.is_valid_url("https://www.youtube.com/watch?v=NOTANACTUALVIDEOID")
-  # => false
+  # Youtube.validate_url("https://www.youtube.com/watch?v=NOTANACTUALVIDEOID")
+  # => nil
   # ```
-  def is_valid_url(url : String) : Bool
+  def validate_url(url : String) : String | Nil
     uri = URI.parse url
+    return nil if !uri
 
-    # is it a video on youtube, with a query
     query = uri.query
-    if uri.host != "www.youtube.com" || uri.path != "/watch" || !query
-      return false
-    end
-
-
-    queries = query.split('&')
+    return nil if !query
 
     # find the video ID
-    i = 0
-    while i < queries.size
-      if queries[i].starts_with?("v=")
-        vID = queries[i][2..-1]
-        break
+    vID = nil
+    query.split('&').each do |q|
+      if q.starts_with?("v=")
+        vID = q[2..-1]
       end
-      i += 1
     end
+    return nil if !vID
 
-    if !vID
-      return false
-    end
-
+    url = "https://www.youtube.com/watch?v=#{vID}"
 
     # this is an internal endpoint to validate the video ID
-    response = HTTP::Client.get "https://www.youtube.com/get_video_info?video_id=#{vID}"
+    params = HTTP::Params.encode({"format" => "json", "url" => url})
+    response = HTTP::Client.get "https://www.youtube.com/oembed?#{params}"
+    return nil unless response.success?
 
-    return response.body.includes?("status=ok")
+    res_json = JSON.parse(response.body)
+    title = res_json["title"].as_s
+    puts Style.dim("  Video: ") + title
+
+    return url
   end
 end

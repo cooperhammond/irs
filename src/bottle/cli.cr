@@ -21,7 +21,8 @@ class CLI
     [["-A", "--album"], "album", "string"],
     [["-p", "--playlist"], "playlist", "string"],
     [["-u", "--url"], "url", "string"],
-    [["-S", "--select"], "select", "bool"]
+    [["-S", "--select"], "select", "bool"],
+    [["--ask-skip"], "ask_skip", "bool"]
   ]
 
   @args : Hash(String, String)
@@ -50,10 +51,11 @@ class CLI
         #{Style.blue "-s, --song <song>"}           Specify song name to download
         #{Style.blue "-A, --album <album>"}         Specify the album name to download
         #{Style.blue "-p, --playlist <playlist>"}   Specify the playlist name to download
-        #{Style.blue "-u, --url [<url>]"}           Specify the youtube url to download from 
-        #{Style.blue "                 "}           (for single songs, include as an command-line
-        #{Style.blue "                 "}           argument, for albums or playlists do not)
+        #{Style.blue "-u, --url <url>"}             Specify the youtube url to download from
+        #{Style.blue "                 "}           (for albums and playlists, the command-line
+        #{Style.blue "                 "}           argument is ignored, and it should be '')
         #{Style.blue "-S, --select"}                Use a menu to choose each song's video source
+        #{Style.blue "--ask-skip"}                  Before every playlist/album song, ask to skip
 
     #{Style.bold "Examples:"}
         $ #{Style.green %(irs --song "Bohemian Rhapsody" --artist "Queen")}

@@ -53,12 +53,12 @@ class Song
 
   # Find, downloads, and tags the mp3 song that this class represents.
   # Optionally takes a youtube URL to download from
-  # 
+  #
   # ```
   # Song.new("Bohemian Rhapsody", "Queen").grab_it
   # ```
   def grab_it(url : (String | Nil) = nil, flags = {} of String => String)
-    ask_url = flags["url"]?
+    passed_url : (String | Nil) = flags["url"]?
     select_link = flags["select"]?
 
     outputter("intro", 0)
@@ -92,11 +92,15 @@ class Song
     @artist_name = data["artists"][0]["name"].as_s
     @filename = "#{Pattern.parse(Config.filename_pattern, data)}.mp3"
 
-    if ask_url
-      outputter("url", 4)
-      url = gets
-      if !url.nil? && url.strip == ""
-        url = nil
+    if passed_url
+      if passed_url.strip != ""
+        url = passed_url
+      else
+        outputter("url", 4)
+        url = gets
+        if !url.nil? && url.strip == ""
+          url = nil
+        end
       end
     end
 
@@ -111,8 +115,9 @@ class Song
       outputter("url", 1)
     else
       outputter("url", 2)
-      if !Youtube.is_valid_url(url)
-        raise("The url '#{url}' is an invalid youtube URL " +
+      url = Youtube.validate_url(url)
+      if !url
+        raise("The url is an invalid youtube URL " +
               "Check the URL and try again")
       end
       outputter("url", 3)
@@ -130,7 +135,7 @@ class Song
     outputter("albumart", 0)
 
     # check if song's metadata has been modded in playlist, update artist accordingly
-    if data["artists"][-1]["owner"]? 
+    if data["artists"][-1]["owner"]?
       @artist = data["artists"][-1]["name"].as_s
     else
       @artist = data["artists"][0]["name"].as_s

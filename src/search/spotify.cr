@@ -60,9 +60,10 @@ class SpotifySearcher
   # ```
   def find_item(item_type : String, item_parameters : Hash, offset = 0,
                 limit = 20) : JSON::Any?
-    query = generate_query(item_type, item_parameters, offset, limit)
+    query = generate_query(item_type, item_parameters)
 
-    url = @root_url.join("search?q=#{query}").to_s
+    url = "search?q=#{query}&type=#{item_type}&limit=#{limit}&offset=#{offset}"
+    url = @root_url.join(url).to_s
 
     response = HTTP::Client.get(url, headers: @access_header)
     error_check(response)
@@ -228,8 +229,7 @@ class SpotifySearcher
 
   # Generates url to run a GET request against to the Spotify open API
   # Returns a `String.`
-  private def generate_query(item_type : String, item_parameters : Hash,
-                             offset : Int32, limit : Int32) : String
+  private def generate_query(item_type : String, item_parameters : Hash) : String
     query = ""
 
     # parameter keys to exclude in the api request. These values will be put
@@ -241,9 +241,9 @@ class SpotifySearcher
       if k == "name"
         # will remove the "name:<title>" param from the query
         if item_type == "playlist"
-          query += item_parameters[k].gsub(" ", "+") + "+"
+          query += item_parameters[k] + "+"
         else
-          query += param_encode(item_type, item_parameters[k])
+          query += as_field(item_type, item_parameters[k])
         end
 
         # check if the key is to be excluded
@@ -254,14 +254,21 @@ class SpotifySearcher
         # NOTE: playlist names will be inserted into the query normally, without
         # a parameter.
       else
-        query += param_encode(k, item_parameters[k])
+        query += as_field(k, item_parameters[k])
       end
     end
 
-    # extra api info
-    query += "&type=#{item_type}&limit=#{limit}&offset=#{offset}"
+    return URI.encode(query.rchop("+"))
+  end
 
-    return query
+  # Returns a `String` encoded for the spotify api
+  #
+  # ```
+  # query_encode("album", "A Night At The Opera")
+  # => "album:A Night At The Opera+"
+  # ```
+  private def as_field(key, value) : String
+    return "#{key}:#{value}+"
   end
 
   # Ranks the given items based off of the info from parameters.
@@ -327,15 +334,6 @@ class SpotifySearcher
     end
   end
 
-  # Returns a `String` encoded for the spotify api
-  #
-  # ```
-  # query_encode("album", "A Night At The Opera")
-  # => "album:A+Night+At+The+Opera"
-  # ```
-  private def param_encode(key : String, value : String) : String
-    return key.gsub(" ", "+") + ":" + value.gsub(" ", "+") + "+"
-  end
 end
 
 # puts SpotifySearcher.new()
