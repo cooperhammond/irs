@@ -59,6 +59,7 @@ class Song
   # ```
   def grab_it(url : (String | Nil) = nil, flags = {} of String => String)
     passed_url : (String | Nil) = flags["url"]?
+    passed_file : (String | Nil) = flags["apply_file"]?
     select_link = flags["select"]?
 
     outputter("intro", 0)
@@ -92,40 +93,45 @@ class Song
     @artist_name = data["artists"][0]["name"].as_s
     @filename = "#{Pattern.parse(Config.filename_pattern, data)}.mp3"
 
-    if passed_url
-      if passed_url.strip != ""
-        url = passed_url
-      else
-        outputter("url", 4)
-        url = gets
-        if !url.nil? && url.strip == ""
-          url = nil
+    if passed_file
+      puts Style.green("  +") + Style.dim(" Moving file: ") + passed_file
+      File.rename(passed_file, @filename)
+    else
+      if passed_url
+        if passed_url.strip != ""
+          url = passed_url
+        else
+          outputter("url", 4)
+          url = gets
+          if !url.nil? && url.strip == ""
+            url = nil
+          end
         end
       end
-    end
 
-    if !url
-      outputter("url", 0)
-      url = Youtube.find_url(data, flags: flags)
       if !url
-        raise("There was no url found on youtube for " +
-              %("#{@song_name}" by "#{@artist_name}. ) +
-              "Check your input and try again.")
+        outputter("url", 0)
+        url = Youtube.find_url(data, flags: flags)
+        if !url
+          raise("There was no url found on youtube for " +
+                %("#{@song_name}" by "#{@artist_name}. ) +
+                "Check your input and try again.")
+        end
+        outputter("url", 1)
+      else
+        outputter("url", 2)
+        url = Youtube.validate_url(url)
+        if !url
+          raise("The url is an invalid youtube URL " +
+                "Check the URL and try again")
+        end
+        outputter("url", 3)
       end
-      outputter("url", 1)
-    else
-      outputter("url", 2)
-      url = Youtube.validate_url(url)
-      if !url
-        raise("The url is an invalid youtube URL " +
-              "Check the URL and try again")
-      end
-      outputter("url", 3)
-    end
 
-    outputter("download", 0)
-    Ripper.download_mp3(url.as(String), @filename)
-    outputter("download", 1)
+      outputter("download", 0)
+      Ripper.download_mp3(url.as(String), @filename)
+      outputter("download", 1)
+    end
 
     outputter("albumart", 0)
     temp_albumart_filename = ".tempalbumart.jpg"
