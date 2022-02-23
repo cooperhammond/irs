@@ -124,6 +124,7 @@ Here's what they do:
 ```yaml
 binary_directory: ~/.irs/bin
 music_directory: ~/Music
+search_terms: "lyrics"
 filename_pattern: "{track_number} - {title}"
 directory_pattern: "{artist}/{album}"
 client_key: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -136,6 +137,8 @@ single_folder_playlist:
  - `binary_directory`: a path specifying where the downloaded binaries should
     be placed
  - `music_directory`: a path specifying where downloaded mp3s should be placed.
+ - `search_terms`: additional search terms to plug into youtube, which can be
+    potentially useful for not grabbing erroneous audio.
  - `filename_pattern`: a pattern for the output filename of the mp3
  - `directory_pattern`: a pattern for the folder structure your mp3s are saved in
  - `client_key`: a client key from your spotify API application
